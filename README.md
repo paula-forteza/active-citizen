@@ -9,9 +9,9 @@ Active Citizen is by most parts a Javascript library using Nodejs, Express, Pass
 Web Components, Polymer and Tensorflow (Google's AI library).
 
 ## Current features
-* Activity stream engine based on the W3C Activity Stream standards specification
-* Notification engine with support for grouped notifications (fe. for "likes") and delayed notification (for hourly, daily, weekly or monthly emails)
-* Basic Tensorflow AI integration for classifying post categories
+- Activity stream engine based on the W3C Activity Stream standards specification
+- Notification engine with support for grouped notifications (fe. for "likes") and delayed notification (for hourly, daily, weekly or monthly emails)
+- Basic Tensorflow AI integration for classifying post categories
 
 ## Integration with Your Priorities
 The next version of Your Priorities, our citizen participation app, features integration with Active Citizen and is the primary
