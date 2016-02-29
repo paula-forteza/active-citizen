@@ -14,7 +14,7 @@ Web Components, Polymer and Tensorflow (Google's AI library).
 - Basic Tensorflow AI integration for classifying post categories
 
 ## Integration with Your Priorities
-The next version of Your Priorities, our citizen participation app, features integration with Active Citizen and is the primary
+The next version of Your Priorities, our citizen participation app, features integration with Active Citizen and is currently the primary
 real life example of Active Citizen use. It is also open source and available here now https://github.com/rbjarnason/your-priorities-app
 
 ## Work for next release
