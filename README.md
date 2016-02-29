@@ -4,7 +4,7 @@
 *29.2.2016*
 
 This is the first public developer release of Active Citizen. It is an open source library, API and UI for activity
-streams and notification utilizing machine learning to recommend content to users.
+streams and notifications using machine learning to recommend content to users.
 
 ## Technology Stack
 Active Citizen is by most parts a Javascript library using Nodejs, Express, Passport, Sequelize (Postgres), Redis,
