@@ -1,7 +1,7 @@
 "use strict";
 
 // Currently using Sequelize and Postgresql for fastest possible implementataion.
-// Those model classes could be relatively easily replaces by another database layers
+// Those model classes should be refactored someday to support other database layers
 // Ideally there should be a modular interface for the model layer. All activities are saved to
 // elastic search through the logs. Based on https://www.w3.org/TR/activitystreams-core/
 
