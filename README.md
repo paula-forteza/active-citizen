@@ -1,7 +1,7 @@
 # Active Citizen Developer Release 1
 *29.2.2016*
 
-This is the first public developer release of Active Citizen which is an open source library, API and UI for activity
+This is the first public developer release of Active Citizen. It is an open source library, API and UI for activity
 streams and notification utilizing machine learning to recommend content to users.
 
 ## Technology Stack
