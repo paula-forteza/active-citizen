@@ -34,6 +34,9 @@ We have a milestone for creating documentation, tutorials and examples in July.
 ## Seed funding from EU's CHEST
 Active Citizen is seed funded by EU's FP7 through the CHEST, collective enhanced environment for social tasks. http://www.chest-project.eu/
 
+## Join us!
+This is an open source project and we invite you to participate, if you are interested :)
+
 ## More information
 <a href="https://drive.google.com/file/d/0B4NtXWjwVhOySmpmbFhUU2V3RVk/view" target="_blank">Active Citizen User Centric Notifications Design</a>
 <br>
