@@ -1,3 +1,5 @@
+![Active Citizen Logo](https://s3.amazonaws.com/yrpri-direct-asset/ac_yp_flyer_2.png)
+
 # Active Citizen Developer Release 1
 *29.2.2016*
 
@@ -36,5 +38,7 @@ Active Citizen is seed funded by EU's FP7 through the CHEST, collective enhanced
 <a href="https://drive.google.com/file/d/0B4NtXWjwVhOySmpmbFhUU2V3RVk/view" target="_blank">Active Citizen User Centric Notifications Design</a>
 <br>
 <a href="https://drive.google.com/file/d/0B4NtXWjwVhOyU2IwOE9IQVNNQ1U/view" target="_blank">Active Citizen Development Vision</a>
+<br>
+<a href="http://www.citizens.is/active" target="_blank">Citizens.is website</a>
 
 Contact: robert@citizens.is
