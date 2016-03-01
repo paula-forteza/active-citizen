@@ -136,7 +136,8 @@ async.series([
           categories[newId].push(content);
           async.eachSeries(post.Points, function (point, innerSeriesCallback) {
             if (point.value!=0) {
-              categories[newId].push(clean(point.content));
+              content = '"'+clean(point.content)+'"';
+              categories[newId].push(content);
             }
             innerSeriesCallback();
           }, function () {
