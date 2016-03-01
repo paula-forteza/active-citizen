@@ -29,7 +29,8 @@ var clean = function (string) {
   string = string.replace("    "," ");
   string = string.replace(/<a\b[^>]*>(.*?)<\/a>/i,"");
   string = removeDiacritics(string);
-  string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, ' ');
+  string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, '');
+  string = string.replace(/[^\x00-\x7F]/g, "");
   return string;
 };
 
