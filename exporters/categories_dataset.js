@@ -14,11 +14,12 @@ var shuffleArray = function (array) {
 };
 
 var clean = function (string) {
+  string = string.replace(/(\r\n|\n|\r)/gm," ");
   string = string.replace(',',' ');
   string = string.replace('\n',' ');
   string = string.replace('"',' ');
   string = string.replace("'",' ');
-  string = string.replace(/(\r\n|\n|\r)/gm," ");
+  string = string.replace(/['"]+/g, '');
   return string;
 };
 
@@ -73,7 +74,6 @@ async.series([
           } else {
             content = '"'+clean(post.name)+'"';
           }
-
           categories[post.category_id].push(content);
           seriesCallback();
         } else {
