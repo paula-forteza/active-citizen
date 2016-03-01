@@ -43,6 +43,8 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes
 var categories = {};
 var categoriesIds = [];
 
+MAX_CATEGORY_LENGTH = 500;
+
 var replaceCategoryId = function (id) {
   if ([1,2,19,24,18,16,20,23,17,21,13,25,22].indexOf(id) > -1) {
     return 14;
@@ -101,6 +103,11 @@ async.series([
       }, function () {
         async.eachSeries(categoriesIds, function (category_id, seriesCallback) {
           console.log(category_id);
+          console.log("-----"+category_id+"---------------------------: "+categories[category_id].length);
+          if (categories[category_id].length>MAX_CATEGORY_LENGTH) {
+            categories[category_id] = categories[category_id].splice(0,MAX_CATEGORY_LENGTH);
+            console.log("-----"+category_id+"---------------------------: "+categories[category_id].length);
+          }
           async.eachSeries(categories[category_id], function (post, innerSeriesCallback) {
             categoriesCsvRows.push(category_id+','+post);
             console.log("Key: "+category_id+" value: "+post);
