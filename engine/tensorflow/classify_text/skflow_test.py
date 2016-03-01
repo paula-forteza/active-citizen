@@ -27,10 +27,10 @@ import skflow
 # Unpack: tar -xvf dbpedia_csv.tar.gz
 
 print('Reading files')
-train = pandas.read_csv('dbpedia_csv/train.csv', header=None)
-X_train, y_train = train[2], train[0]
-test = pandas.read_csv('dbpedia_csv/test.csv', header=None)
-X_test, y_test = test[2], test[0]
+train = pandas.read_csv('../../../exporters/datasets/better_reykjavik/categories/train.csv', header=None)
+X_train, y_train = train[1], train[0]
+test = pandas.read_csv('../../../exporters/datasets/better_reykjavik/categories/test.csv', header=None)
+X_test, y_test = test[1], test[0]
 
 ### Process vocabulary
 print('Process vocabulary')
