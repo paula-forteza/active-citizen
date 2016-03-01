@@ -102,7 +102,7 @@ async.series([
         async.eachSeries(categoriesIds, function (category_id, seriesCallback) {
           console.log(category_id);
           async.eachSeries(categories[category_id], function (post, innerSeriesCallback) {
-            categoriesCsvRows.push('"'+category_id+'"'+','+post);
+            categoriesCsvRows.push(category_id+','+post);
             console.log("Key: "+category_id+" value: "+post);
             innerSeriesCallback();
           }, function () {
