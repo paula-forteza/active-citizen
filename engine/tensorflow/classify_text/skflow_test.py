@@ -20,6 +20,8 @@ import tensorflow as tf
 from tensorflow.models.rnn import rnn, rnn_cell
 import skflow
 
+import categories_data_helpers
+
 ### Training data
 
 # Download dbpedia_csv.tar.gz from
