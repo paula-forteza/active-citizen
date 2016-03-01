@@ -43,7 +43,7 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes
 var categories = {};
 var categoriesIds = [];
 
-MAX_CATEGORY_LENGTH = 1000;
+MAX_CATEGORY_LENGTH = 1500;
 
 var replaceCategoryId = function (id) {
   if ([1,2,19,24,18,16,20,23,17,21,13,25,22,14].indexOf(id) > -1) {
@@ -97,6 +97,7 @@ async.series([
     models.Post.findAll(
       {
         include: [
+          models.Point,
           {
             model: models.Group,
             required: true,
@@ -133,7 +134,14 @@ async.series([
             content = '"'+clean(post.name)+'"';
           }
           categories[newId].push(content);
-          seriesCallback();
+          async.eachSeries(post.Points, function (point, innerSeriesCallback) {
+            if (point.value!=0) {
+              categories[newId].push(clean(point.content));
+            }
+            innerSeriesCallback();
+          }, function () {
+            seriesCallback();
+          });
         } else {
           seriesCallback();
         }
