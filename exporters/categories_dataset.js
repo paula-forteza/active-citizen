@@ -123,7 +123,7 @@ async.series([
       console.log('Found '+posts.length+" posts");
       async.eachSeries(posts, function (post, seriesCallback) {
         var newId = replaceCategoryId(post.category_id);
-        if (newId) {
+        if (newId && newId!=11) {
           if (!categories[newId]) {
             categories[newId] = [];
             categoriesIds.push(newId);
@@ -138,7 +138,9 @@ async.series([
           async.eachSeries(post.Points, function (point, innerSeriesCallback) {
             if (point.value!=0) {
               content = '"'+clean(point.content)+'"';
-              categories[newId].push(content);
+              if (content!="" && content.length>17) {
+                categories[newId].push(content);
+              }
             }
             innerSeriesCallback();
           }, function () {
