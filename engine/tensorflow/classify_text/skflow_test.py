@@ -35,7 +35,7 @@ X_test, y_test = test[1], test[0]
 
 ### Process vocabulary
 print('Process vocabulary')
-MAX_DOCUMENT_LENGTH = 10
+MAX_DOCUMENT_LENGTH = 20
 
 vocab_processor = skflow.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
 X_train = np.array(list(vocab_processor.fit_transform(X_train)))
@@ -47,7 +47,7 @@ print(X_train)
 
 ### Models
 
-EMBEDDING_SIZE = 80
+EMBEDDING_SIZE = 50
 
 print('Models')
 
@@ -79,7 +79,7 @@ def rnn_model(X, y):
     # regression over output classes.
     return skflow.models.logistic_regression(encoding, y)
 
-classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=30,
+classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=14,
     steps=1000, optimizer='Adam', learning_rate=0.01, continue_training=True)
 
 # Continously train for 1000 steps & predict on test set.
