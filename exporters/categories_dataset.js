@@ -2,6 +2,7 @@ var models = require('../../models');
 var async = require('async');
 var ip = require('ip');
 var fs = require('fs');
+var removeDiacritics = require('diacritics').remove;
 
 var shuffleArray = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
@@ -17,9 +18,18 @@ var clean = function (string) {
   string = string.replace(/(\r\n|\n|\r)/gm," ");
   string = string.replace(',',' ');
   string = string.replace('\n',' ');
-  string = string.replace('"',' ');
-  string = string.replace("'",' ');
+  string = string.replace(/\'/g,' ');
+  string = string.replace(/\,/g,' ');
+  string = string.replace(/\(/g,' ');
+  string = string.replace(/\)/g,' ');
+  string = string.replace(/\./g,' ');
   string = string.replace(/['"]+/g, '');
+  string = string.replace("  "," ");
+  string = string.replace("   "," ");
+  string = string.replace("    "," ");
+  string = string.replace(/<a\b[^>]*>(.*?)<\/a>/i,"");
+  string = removeDiacritics(string);
+  string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, ' ');
   return string;
 };
 
