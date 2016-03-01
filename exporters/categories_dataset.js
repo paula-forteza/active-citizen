@@ -3,7 +3,7 @@ var async = require('async');
 var ip = require('ip');
 var fs = require('fs');
 
-function shuffleArray(array) {
+var shuffleArray = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var temp = array[i];
@@ -11,7 +11,16 @@ function shuffleArray(array) {
     array[j] = temp;
   }
   return array;
-}
+};
+
+var clean = function (string) {
+  string = string.replace(',',' ');
+  string = string.replace('\n',' ');
+  string = string.replace('"',' ');
+  string = string.replace("'",' ');
+  string = string.replace(/(\r\n|\n|\r)/gm," ");
+  return string;
+};
 
 var trainCategoriesCsv;
 var testCategoriesCsv;
@@ -60,15 +69,11 @@ async.series([
           }
           var content;
           if (post.description) {
-            content = '"'+post.name + ' ' + post.description+'"';
+            content = '"'+clean(post.name) + ' ' + clean(post.description)+'"';
           } else {
-            content = '"'+post.name+'"';
+            content = '"'+clean(post.name)+'"';
           }
-          content = content.replace(',',' ');
-          content = content.replace('\n',' ');
-          content = content.replace('"',' ');
-          content = content.replace("'",' ');
-          content = content.replace(/(\r\n|\n|\r)/gm," ");
+
           categories[post.category_id].push(content);
           seriesCallback();
         } else {
