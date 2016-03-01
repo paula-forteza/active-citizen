@@ -65,6 +65,8 @@ async.series([
             content = '"'+post.name+'"';
           }
           content = content.replace(',',' ');
+          content = content.replace('\n',' ');
+          content = content.replace(/(\r\n|\n|\r)/gm," ");
           categories[post.category_id].push(content);
           seriesCallback();
         } else {
