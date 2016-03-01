@@ -43,7 +43,7 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes
 var categories = {};
 var categoriesIds = [];
 
-MAX_CATEGORY_LENGTH = 500;
+MAX_CATEGORY_LENGTH = 300;
 
 var replaceCategoryId = function (id) {
   if ([1,2,19,24,18,16,20,23,17,21,13,25,22].indexOf(id) > -1) {
