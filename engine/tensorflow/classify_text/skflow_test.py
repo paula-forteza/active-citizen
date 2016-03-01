@@ -20,7 +20,6 @@ import tensorflow as tf
 from tensorflow.models.rnn import rnn, rnn_cell
 import skflow
 
-import categories_data_helpers
 
 ### Training data
 
@@ -44,10 +43,11 @@ X_test = np.array(list(vocab_processor.transform(X_test)))
 
 n_words = len(vocab_processor.vocabulary_)
 print('Total words: %d' % n_words)
+print(X_train)
 
 ### Models
 
-EMBEDDING_SIZE = 50
+EMBEDDING_SIZE = 80
 
 print('Models')
 
@@ -79,12 +79,12 @@ def rnn_model(X, y):
     # regression over output classes.
     return skflow.models.logistic_regression(encoding, y)
 
-classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=15,
+classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=30,
     steps=1000, optimizer='Adam', learning_rate=0.01, continue_training=True)
 
 # Continously train for 1000 steps & predict on test set.
 #while True:
-classifier.fit(X_train, y_train, logdir='/tmp/tf_examples/word_rnn')
+classifier.fit(X_train, y_train, logdir='tf_temp_summaries/word_rnn_test_1')
 score = metrics.accuracy_score(y_test, classifier.predict(X_test))
 print('Accuracy: {0:f}'.format(score))
-classifier.save('/tmp/tf_examples/my_model_1/')
+classifier.save('tf_temp_models/word_rnn_test_1/')
