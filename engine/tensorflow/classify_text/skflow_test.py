@@ -26,13 +26,14 @@ import skflow
 # https://drive.google.com/folderview?id=0Bz8a_Dbh9Qhbfll6bVpmNUtUcFdjYmF2SEpmZUZUcVNiMUw1TWN6RDV3a0JHT3kxLVhVR2M
 # Unpack: tar -xvf dbpedia_csv.tar.gz
 
+print('Reading files')
 train = pandas.read_csv('dbpedia_csv/train.csv', header=None)
 X_train, y_train = train[2], train[0]
 test = pandas.read_csv('dbpedia_csv/test.csv', header=None)
 X_test, y_test = test[2], test[0]
 
 ### Process vocabulary
-
+print('Process vocabulary')
 MAX_DOCUMENT_LENGTH = 10
 
 vocab_processor = skflow.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
@@ -45,6 +46,8 @@ print('Total words: %d' % n_words)
 ### Models
 
 EMBEDDING_SIZE = 50
+
+print('Models')
 
 def average_model(X, y):
     word_vectors = skflow.ops.categorical_variable(X, n_classes=n_words,
@@ -78,8 +81,8 @@ classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=15,
     steps=1000, optimizer='Adam', learning_rate=0.01, continue_training=True)
 
 # Continously train for 1000 steps & predict on test set.
-while True:
-    classifier.fit(X_train, y_train, logdir='/tmp/tf_examples/word_rnn')
-    score = metrics.accuracy_score(y_test, classifier.predict(X_test))
-    print('Accuracy: {0:f}'.format(score))
-
+#while True:
+classifier.fit(X_train, y_train, logdir='/tmp/tf_examples/word_rnn')
+score = metrics.accuracy_score(y_test, classifier.predict(X_test))
+print('Accuracy: {0:f}'.format(score))
+classifier.save('/tmp/tf_examples/my_model_1/')
