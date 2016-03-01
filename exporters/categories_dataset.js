@@ -43,6 +43,14 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes
 var categories = {};
 var categoriesIds = [];
 
+var replaceCategoryId = function (id) {
+  if ([1,2,19,24,18,16,20,23,17,21,13,25,22].indexOf(id) > -1) {
+    return 14;
+  } else {
+    return id;
+  }
+};
+
 async.series([
   function(callback) {
     var categoriesCsvRows = [];
@@ -73,10 +81,11 @@ async.series([
       }).then(function (posts) {
       console.log('Found '+posts.length+" posts");
       async.eachSeries(posts, function (post, seriesCallback) {
-        if (post.category_id) {
-          if (!categories[post.category_id]) {
-            categories[post.category_id] = [];
-            categoriesIds.push(post.category_id);
+        var newId = replaceCategoryId(post.category_id);
+        if (newId) {
+          if (!categories[newId]) {
+            categories[newId] = [];
+            categoriesIds.push(newId);
           }
           var content;
           if (post.description) {
@@ -84,7 +93,7 @@ async.series([
           } else {
             content = '"'+clean(post.name)+'"';
           }
-          categories[post.category_id].push(content);
+          categories[newId].push(content);
           seriesCallback();
         } else {
           seriesCallback();
