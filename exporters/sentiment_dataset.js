@@ -7,14 +7,20 @@ var trainCategoriesCsv;
 var testCategoriesCsv;
 var classesCategoriesCsv;
 
-var trainCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/train.csv';
-var testCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/test.csv';
-var classesCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/classes.csv';
+var trainCsvFilename = 'datasets/better_reykjavik/sentiment/train.csv';
+var testTrainCsvFilename = 'datasets/better_reykjavik/sentiment/test.csv';
+var classesTrainCsvFilename = 'datasets/better_reykjavik/sentiment/classes.csv';
+
+var classesTrainPositiveCsvFilename = 'datasets/better_reykjavik/sentiment/positive.polarity';
+var classesTrainNegativeCsvFilename = 'datasets/better_reykjavik/sentiment/negative.polarity';
+
+var positive = [];
+var negative = [];
 
 var categories = { 0: [], 1: []};
 var categoriesIds = [ 0, 1 ];
 
-MAX_CATEGORY_LENGTH = 700;
+MAX_SENTIMENT_LENGTH = 700;
 
 var clean = require('./dataset_tools').clean;
 var shuffleArray = require('./dataset_tools').shuffleArray;
@@ -72,8 +78,10 @@ async.series([
                 content.indexOf('Point against Point') == -1) {
                 if (point.value > 0) {
                   categories['0'].push(content);
+                  positive.push(clean(point.content));
                 } else if (point.value < 0) {
                   categories['1'].push(content);
+                  negative.push(clean(point.content));
                 }
               }
             }
@@ -86,8 +94,8 @@ async.series([
         async.eachSeries(categoriesIds, function (category_id, seriesCallback) {
           console.log(category_id);
           console.log("-----"+category_id+"---------------------------: "+categories[category_id].length);
-          if (categories[category_id].length>MAX_CATEGORY_LENGTH) {
-            categories[category_id] = categories[category_id].splice(0,MAX_CATEGORY_LENGTH);
+          if (categories[category_id].length>MAX_SENTIMENT_LENGTH) {
+            categories[category_id] = categories[category_id].splice(0,MAX_SENTIMENT_LENGTH);
             console.log("-----"+category_id+"---------------------------: "+categories[category_id].length);
           }
           async.eachSeries(categories[category_id], function (post, innerSeriesCallback) {
@@ -108,7 +116,7 @@ async.series([
     }) ;
   },
   function(callback) {
-    fs.writeFile(trainCategoriesCsvFilename, trainCategoriesCsv.join('\n'), function(err) {
+    fs.writeFile(trainCsvFilename, trainCategoriesCsv.join('\n'), function(err) {
       if(err) {
          console.log(err);
       }
@@ -116,7 +124,25 @@ async.series([
     });
   },
   function(callback) {
-    fs.writeFile(testCategoriesCsvFilename, testCategoriesCsv.join('\n'), function(err) {
+    fs.writeFile(testTrainCsvFilename, testCategoriesCsv.join('\n'), function(err) {
+      if(err) {
+        console.log(err);
+      }
+      callback();
+    });
+  },
+  function(callback) {
+    negative = positive.splice(0, MAX_SENTIMENT_LENGTH);
+    fs.writeFile(classesTrainPositiveCsvFilename, positive.join('\n'), function(err) {
+      if(err) {
+        console.log(err);
+      }
+      callback();
+    });
+  },
+  function(callback) {
+    negative = negative.splice(0, MAX_SENTIMENT_LENGTH);
+    fs.writeFile(classesTrainNegativeCsvFilename, negative.join('\n'), function(err) {
       if(err) {
         console.log(err);
       }
@@ -128,7 +154,7 @@ async.series([
     callback();
   },
   function(callback) {
-    fs.writeFile(classesCategoriesCsvFilename, classesCategoriesCsv.join('\n'), function(err) {
+    fs.writeFile(classesTrainCsvFilename, classesCategoriesCsv.join('\n'), function(err) {
       if(err) {
         console.log(err);
       }
