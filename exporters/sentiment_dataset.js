@@ -7,11 +7,12 @@ var trainCategoriesCsv;
 var testCategoriesCsv;
 var classesCategoriesCsv;
 
-var trainCategoriesCsvFilename = 'datasets/better_reykjavik/categories/train.csv';
-var testCategoriesCsvFilename = 'datasets/better_reykjavik/categories/test.csv';
-var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes.csv';
-var categories = {};
-var categoriesIds = [];
+var trainCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/train.csv';
+var testCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/test.csv';
+var classesCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/classes.csv';
+
+var categories = { 0: [], 1: []};
+var categoriesIds = [0, 1];
 
 MAX_CATEGORY_LENGTH = 1700;
 
@@ -58,39 +59,25 @@ async.series([
       }).then(function (posts) {
       console.log('Found '+posts.length+" posts");
       async.eachSeries(posts, function (post, seriesCallback) {
-        var newId = replaceBetterReykjavikCategoryId(post.category_id);
-        if (newId && newId!=11) {
-          if (!categories[newId]) {
-            categories[newId] = [];
-            categoriesIds.push(newId);
-          }
-          var content;
-          if (post.description) {
-            content = '"'+clean(post.name) + ' ' + clean(post.description)+'"';
-          } else {
-            content = '"'+clean(post.name)+'"';
-          }
-          if (content.indexOf('Lorem Ipsum har') == -1) {
-            categories[newId].push(content);
-          }
-          async.eachSeries(post.Points, function (point, innerSeriesCallback) {
-            console.log(point.status);
-            if (point.value!=0) {
-              content = '"'+clean(point.content)+'"';
-              if (content!="" && content.length>17) {
-                if (content.indexOf('Mypoint my point') == -1 &&
-                    content.indexOf('Point against Point') == -1) {
-                  categories[newId].push(content);
+        async.eachSeries(post.Points, function (point, innerSeriesCallback) {
+          if (point.value != 0) {
+            content = '"'+clean(point.content)+'"';
+            if (content!="" && content.length>17) {
+              if (content.indexOf('Mypoint my point') == -1 &&
+                content.indexOf('Point against Point') == -1) {
+                console.log(point.value);
+                if (point.value > 0) {
+                  categories['0'].push(content);
+                } else if (point.value < 0) {
+                  categories['1'].push(content);
                 }
               }
             }
-            innerSeriesCallback();
-          }, function () {
-            seriesCallback();
-          });
-        } else {
+          }
+          innerSeriesCallback();
+        }, function () {
           seriesCallback();
-        }
+        });
       }, function () {
         async.eachSeries(categoriesIds, function (category_id, seriesCallback) {
           console.log(category_id);
@@ -133,17 +120,8 @@ async.series([
     });
   },
   function(callback) {
-    classesCategoriesCsv = [];
-    async.eachSeries(categoriesIds, function (category_id, seriesCallback) {
-      models.Category.find({
-        where: {id: category_id}
-      }).then(function (category) {
-        classesCategoriesCsv.push(category.id + ',' + category.name);
-        seriesCallback();
-      });
-    }, function () {
-      callback();
-    });
+    classesCategoriesCsv = ["0,Positive","1,Negative"];
+    callback();
   },
   function(callback) {
     fs.writeFile(classesCategoriesCsvFilename, classesCategoriesCsv.join('\n'), function(err) {
