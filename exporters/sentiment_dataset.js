@@ -12,9 +12,9 @@ var testCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/test.csv';
 var classesCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/classes.csv';
 
 var categories = { 0: [], 1: []};
-var categoriesIds = [0, 1];
+var categoriesIds = [ 0, 1 ];
 
-MAX_CATEGORY_LENGTH = 1700;
+MAX_CATEGORY_LENGTH = 500;
 
 var clean = require('./dataset_tools').clean;
 var shuffleArray = require('./dataset_tools').shuffleArray;
