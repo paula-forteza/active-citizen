@@ -62,7 +62,6 @@ var filterNotificationForDelivery = function (notification, user, notification_s
   }
 };
 
-
 module.exports = {
   filterNotificationForDelivery: filterNotificationForDelivery
 };
