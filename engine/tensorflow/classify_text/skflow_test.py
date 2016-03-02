@@ -35,7 +35,7 @@ X_test, y_test = test[1], test[0]
 
 ### Process vocabulary
 print('Process vocabulary')
-MAX_DOCUMENT_LENGTH = 20
+MAX_DOCUMENT_LENGTH = 100 
 
 vocab_processor = skflow.preprocessing.VocabularyProcessor(MAX_DOCUMENT_LENGTH)
 X_train = np.array(list(vocab_processor.fit_transform(X_train)))
