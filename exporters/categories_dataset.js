@@ -21,12 +21,12 @@ var clean = function (string) {
   string = string.replace(/\'/g,' ');
   string = string.replace(/\,/g,' ');
   string = string.replace(/\(/g,' ');
+  string = string.replace(/\=/g,' ');
   string = string.replace(/\)/g,' ');
+  string = string.replace(/\-/g,' ');
   string = string.replace(/\./g,' ');
   string = string.replace(/['"]+/g, '');
-  string = string.replace("  "," ");
-  string = string.replace("   "," ");
-  string = string.replace("    "," ");
+  string = string.replace(/\s+/g,' ').trim();
   string = string.replace(/<a\b[^>]*>(.*?)<\/a>/i,"");
   string = removeDiacritics(string);
   string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, '');
@@ -44,7 +44,7 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/categories/classes
 var categories = {};
 var categoriesIds = [];
 
-MAX_CATEGORY_LENGTH = 1500;
+MAX_CATEGORY_LENGTH = 1700;
 
 var replaceCategoryId = function (id) {
   if ([1,2,19,24,18,16,20,23,17,21,13,25,22,14].indexOf(id) > -1) {
@@ -97,8 +97,16 @@ async.series([
 
     models.Post.findAll(
       {
+        where: {
+          status: 'published'
+        },
         include: [
-          models.Point,
+          {
+            model: models.Point,
+            where: {
+              status: 'published'
+            }
+          },
           {
             model: models.Group,
             required: true,
@@ -134,12 +142,18 @@ async.series([
           } else {
             content = '"'+clean(post.name)+'"';
           }
-          categories[newId].push(content);
+          if (content.indexOf('Lorem Ipsum har') == -1) {
+            categories[newId].push(content);
+          }
           async.eachSeries(post.Points, function (point, innerSeriesCallback) {
+            console.log(point.status);
             if (point.value!=0) {
               content = '"'+clean(point.content)+'"';
               if (content!="" && content.length>17) {
-                categories[newId].push(content);
+                if (content.indexOf('Mypoint my point') == -1 &&
+                    content.indexOf('Point against Point') == -1) {
+                  categories[newId].push(content);
+                }
               }
             }
             innerSeriesCallback();
