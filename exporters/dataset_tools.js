@@ -22,11 +22,11 @@ var clean = function (string) {
   string = string.replace(/\-/g,' ');
   string = string.replace(/\./g,' ');
   string = string.replace(/['"]+/g, '');
-  string = string.replace(/\s+/g,' ').trim();
-  string = string.replace(/<a\b[^>]*>(.*?)<\/a>/i,"");
+  string = string.replace(/<a\b[^>]*>(.*?)<\/a>/i," ");
   string = removeDiacritics(string);
-  string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, '');
-  string = string.replace(/[^\x00-\x7F]/g, "");
+  string = string.replace(/[^A-Za-z0-9(),!?\'\`]/, ' ');
+  string = string.replace(/[^\x00-\x7F]/g, " ");
+  string = string.replace(/\s+/g,' ').trim();
   return string;
 };
 

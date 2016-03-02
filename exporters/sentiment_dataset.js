@@ -14,11 +14,10 @@ var classesCategoriesCsvFilename = 'datasets/better_reykjavik/sentiment/classes.
 var categories = { 0: [], 1: []};
 var categoriesIds = [ 0, 1 ];
 
-MAX_CATEGORY_LENGTH = 500;
+MAX_CATEGORY_LENGTH = 700;
 
 var clean = require('./dataset_tools').clean;
 var shuffleArray = require('./dataset_tools').shuffleArray;
-var replaceBetterReykjavikCategoryId = require('./dataset_tools').replaceBetterReykjavikCategoryId;
 
 async.series([
   function(callback) {
@@ -39,16 +38,22 @@ async.series([
           {
             model: models.Group,
             required: true,
+            where: {
+              access: models.Group.ACCESS_PUBLIC
+            },
             include: [
               {
                 model: models.Community,
                 required: true,
+                where: {
+                  access: models.Community.ACCESS_PUBLIC
+                },
                 include: [
                   {
                     model: models.Domain,
                     required: true,
                     where: {
-                      id: 1
+                      id: { $in: [1,2] }
                     }
                   }
                 ]
@@ -65,7 +70,6 @@ async.series([
             if (content!="" && content.length>17) {
               if (content.indexOf('Mypoint my point') == -1 &&
                 content.indexOf('Point against Point') == -1) {
-                console.log(point.value);
                 if (point.value > 0) {
                   categories['0'].push(content);
                 } else if (point.value < 0) {
