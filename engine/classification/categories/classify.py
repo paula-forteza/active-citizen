@@ -80,11 +80,11 @@ def rnn_model(X, y):
     return skflow.models.logistic_regression(encoding, y)
 
 classifier = skflow.TensorFlowEstimator(model_fn=rnn_model, n_classes=14,
-    steps=1000, optimizer='Adam', learning_rate=0.01, continue_training=True)
+    steps=1200, optimizer='Adam', learning_rate=0.01, continue_training=True)
 
 # Continously train for 1000 steps & predict on test set.
-#while True:
-classifier.fit(X_train, y_train, logdir='tf_temp_summaries/word_rnn_test_1')
-score = metrics.accuracy_score(y_test, classifier.predict(X_test))
-print('Accuracy: {0:f}'.format(score))
-classifier.save('tf_temp_models/word_rnn_test_1/')
+while True:
+    classifier.fit(X_train, y_train, logdir='tf_temp_summaries/word_rnn_test_1')
+    score = metrics.accuracy_score(y_test, classifier.predict(X_test))
+    print('Accuracy: {0:f}'.format(score))
+    classifier.save('tf_temp_models/word_rnn_test_1/')
