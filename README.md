@@ -8,7 +8,7 @@ streams and notifications using machine learning to recommend content to users.
 
 ## Technology Stack
 Active Citizen is by most parts a Javascript library using 
-<a href="https://github.com/nodejs/node" target="_blank">Nodejs</a>, <a href="https://github.com/expressjs/express" target="_blank">Express</a>, <a href="https://github.com/jaredhanson/passport" target="_blank">Passport</a>, <a href="https://github.com/sequelize/sequelize" target="_blank">Sequelize</a>, <a href="https://github.com/Polymer/polymer" target="_blank">Polymer (Web Components)</a>, <a href="https://github.com/Automattic/kue" target="_blank">Kue</a>, <a href="https://github.com/antirez/redis" target="_blank">Redis</a>, <a href="https://github.com/tensorflow/tensorflow" target="_blank">Tensorflow</a> and <a href="https://github.com/PredictionIO/PredictionIO" target="_blank">PredictionIO</a>
+<a href="https://github.com/nodejs/node" target="_blank">Nodejs</a>, <a href="https://github.com/caolan/async" target="_blank">Async</a>, <a href="https://github.com/expressjs/express" target="_blank">Express</a>, <a href="https://github.com/jaredhanson/passport" target="_blank">Passport</a>, <a href="https://github.com/sequelize/sequelize" target="_blank">Sequelize</a>, <a href="https://github.com/Polymer/polymer" target="_blank">Polymer (Web Components)</a>, <a href="https://github.com/Automattic/kue" target="_blank">Kue</a>, <a href="https://github.com/antirez/redis" target="_blank">Redis</a>, <a href="https://github.com/tensorflow/tensorflow" target="_blank">Tensorflow</a> and <a href="https://github.com/PredictionIO/PredictionIO" target="_blank">PredictionIO</a>
 
 ## Current features
 - Activity stream engine based on the W3C Activity Stream standards specification
