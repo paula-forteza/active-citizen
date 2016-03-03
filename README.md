@@ -8,7 +8,7 @@ streams and notifications using machine learning to recommend content to users.
 
 ## Technology Stack
 Active Citizen is by most parts a Javascript library using Nodejs, Express, Passport, Sequelize (Postgres), Redis,
-Web Components, Polymer and Tensorflow (Google's AI library).
+Web Components, Polymer and Tensorflow (Google's AI library) and PredictionIO.
 
 ## Current features
 - Activity stream engine based on the W3C Activity Stream standards specification
@@ -22,8 +22,9 @@ real life example of Active Citizen use. It is also open source and available he
 ## Work for next release
 *end of May 2016*
 
-- Integrate Tensorflow for recommending posts to users
-- Integrate Tensorflow for recommending groups to users
+- Integrate PredictionIO for recommending posts to users
+- Integrate PredictionIO for recommending groups to users
+- Integrate Tensorflow for classifying categories and point sentiment
 - Add more notification types
 
 ## Documentation
