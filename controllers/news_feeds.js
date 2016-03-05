@@ -11,3 +11,4 @@ var toJson = require('../utils/to_json');
 // Get promotions to add to the news feed
 // Create high priority job to insert recommendation and promotions to postgres
 // Send data back to user
+
