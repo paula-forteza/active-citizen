@@ -3,9 +3,10 @@
 // Notify user about this object
 
 module.exports = function(sequelize, DataTypes) {
+
   var AcNewsFeedItem = sequelize.define("AcNewsFeedItem", {
     priority: { type: DataTypes.INTEGER, allowNull: false },
-    type: { type: DataTypes.INTEGER, allowNull: false },
+    type: { type: DataTypes.STRING, allowNull: false },
     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {

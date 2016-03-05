@@ -5,12 +5,12 @@ var log = require('../utils/logger');
 var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
-var postNotificationFilter = require('../engine/filters/post_notifications.js');
-var pointNotificationFilter = require('../engine/filters/point_notifications.js');
+var postNotificationDeliveryFilter = require('../engine/filters/post_delivery.js');
+var pointNotificationDeliveryFilter = require('../engine/filters/point_delivery.js');
 
-var NotificationWorker = function () {};
+var NotificationDeliveryWorker = function () {};
 
-NotificationWorker.prototype.process = function (notificationJson, callback) {
+NotificationDeliveryWorker.prototype.process = function (notificationJson, callback) {
   try {
     var user;
     var notification;
@@ -85,10 +85,10 @@ NotificationWorker.prototype.process = function (notificationJson, callback) {
     ],
     function(error) {
       if (error) {
-        log.error("NotificationWorker Error", {err: error});
+        log.error("NotificationDeliveryWorker Error", {err: error});
         callback();
       } else {
-        log.info('Processing Notification Started', { type: notification.type, user: user });
+        log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user });
         switch(notification.type) {
           case "notification.password.recovery":
             queue.create('send-one-email', {
@@ -116,14 +116,14 @@ NotificationWorker.prototype.process = function (notificationJson, callback) {
             break;
           case "notification.post.new":
           case "notification.post.endorsement":
-            postNotificationFilter(notification, user, function () {
+            postNotificationDeliveryFilter(notification, user, function () {
               log.info('Processing notification.post.* Completed', { type: notification.type, user: user });
               callback();
             });
             break;
           case "notification.point.new":
           case "notification.point.quality":
-            pointNotificationFilter(notification, user, function () {
+            pointNotificationDeliveryFilter(notification, user, function () {
               log.info('Processing notification.point.* Completed', { type: notification.type, user: user });
               callback();
             });
@@ -139,4 +139,4 @@ NotificationWorker.prototype.process = function (notificationJson, callback) {
   }
 };
 
-module.exports = new NotificationWorker();
+module.exports = new NotificationDeliveryWorker();

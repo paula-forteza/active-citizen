@@ -94,10 +94,19 @@ module.exports = function(sequelize, DataTypes) {
         AcNotification.belongsTo(models.User);
       },
 
-      processNotification: function (notification, activity) {
+      processNotification: function (notification, user, activity) {
         var notificationJson = notification.toJSON();
         notificationJson['activity'] = activity;
-        queue.create('process-notification', notificationJson).priority('critical').removeOnComplete(true).save();
+
+        var queuePriority;
+        if ((new Date().getDate()-5)<user.last_login_at-getDate() ) {
+          queuePriority = 'high';
+        } else {
+          queuePriority = 'medium';
+        }
+
+        queue.create('process-notification-delivery', notificationJson).priority(queuePriority).removeOnComplete(true).save();
+        queue.create('process-notification-news-feed', notificationJson).priority(queuePriority).removeOnComplete(true).save();
       },
 
       createNotificationFromActivity: function(user, activity, type, priority, callback) {
@@ -105,6 +114,8 @@ module.exports = function(sequelize, DataTypes) {
 
         var domain = activity.object.domain;
         var community = activity.object.community;
+
+       //TODO: Check AcMute and mute if needed
 
        sequelize.models.AcNotification.build({
          type: type,
