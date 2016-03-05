@@ -46,8 +46,8 @@ var addNotificationsForUsers = function (activity, users, notification_type, uni
     callback(error);
   });
 };
-// type: 'notification.post.endorsement';
 
+// type: 'notification.post.endorsement';
 var addOrPossiblyGroupNotification = function (model, type, activity, user, priority, callback) {
   models.AcNotification.find({
     where: {

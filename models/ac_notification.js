@@ -9,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
   var AcNotification = sequelize.define("AcNotification", {
     priority: { type: DataTypes.INTEGER, allowNull: false },
     type: { type: DataTypes.STRING, allowNull: false },
-    status: { type: DataTypes.STRING, allowNull: false },
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
     sent_email: { type: DataTypes.INTEGER, default: false },
     sent_push: { type: DataTypes.INTEGER, default: false },
     processed_at: DataTypes.DATE,

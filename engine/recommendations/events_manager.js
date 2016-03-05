@@ -16,7 +16,8 @@ var getPost = function (postId, callback) {
   models.Post.find(
     {
       where: {
-        id: postId
+        id: postId,
+        status: 'published'
       },
       include: [
         {
