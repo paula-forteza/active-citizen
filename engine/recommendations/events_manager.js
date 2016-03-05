@@ -2,9 +2,14 @@ var predictionio = require('./predictionio-driver');
 var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
+var log = require('../../utils/logger');
 
 var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
+};
+
+var convertToString = function(integer) {
+  return integer.toString();
 };
 
 var getPost = function (postId, callback) {
@@ -57,29 +62,34 @@ var createItem = function (postId, callback) {
       var properties = {};
 
       if (post.category_id) {
-        properties = _merge(properties,
+        properties = _.merge(properties,
           {
-            category: [post.category_id]
+            category: [ convertToString(post.category_id) ]
           });
       }
-      properties = _merge(properties,
+      properties = _.merge(properties,
         {
-          domain: [post.Group.Community.Domain.id],
-          community: [post.Group.Community.id],
-          group: [post.Group.id]
+          domain: [ convertToString(post.Group.Community.Domain.id) ],
+          community: [ convertToString(post.Group.Community.id) ],
+          group: [ convertToString(post.Group.id) ],
+          groupAccess: [ convertToString(post.Group.access) ],
+          communityAccess: [ convertToString(post.Group.access) ],
+          status: [ post.status ],
+          official_status: [ convertToString(post.official_status) ]
         });
 
-      properties = _merge(properties,
+      properties = _.merge(properties,
         {
           availableDate: post.created_at.toISOString(),
           date: post.created_at.toISOString(),
-          expireDate: new Date("April 1, 3016 04:20:00")
+          expireDate: new Date("April 1, 3016 04:20:00").toISOString()
         }
       );
 
       client.createItem({
         entityId: post.id,
-        properties: properties
+        properties: properties,
+        eventDate: post.created_at.toISOString()
       }).then(function (result) {
         console.log(result);
         callback();
@@ -103,7 +113,8 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         event: action,
         uid: userId,
         targetEntityId: targetEntityId,
-        date: object.created_at.toISOString()
+        date: object.created_at.toISOString(),
+        eventDate: object.created_at.toISOString()
       }).then(function (result) {
         console.log(result);
         callback();
@@ -118,12 +129,13 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
   });
 };
 
-var createUser = function (userId, callback) {
+var createUser = function (user, callback) {
   client = getClient(1);
 
   client.createUser( {
     appId: 1,
-    uid: userId
+    uid: user.id,
+    eventDate: user.created_at.toISOString()
   }).then(function(result) {
     console.log(result);
     callback();
@@ -136,10 +148,10 @@ var createUser = function (userId, callback) {
 var generateRecommendationEvent = function (activity, callback) {
   switch (activity.type) {
     case "activity.user.new":
-      createAction(activity.user_id, callback);
+      createUser(activity.User, callback);
       break;
     case "activity.post.new":
-      createAction(activity.Post.id, callback);
+      createItem(activity.Post.id, callback);
       break;
     case "activity.post.endorsement.new":
       createAction(activity.Post.id, activity.user_id, activity.created_at.toISOString(), 'endorse', callback);

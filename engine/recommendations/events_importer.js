@@ -2,28 +2,49 @@ var predictionio = require('./predictionio-driver');
 var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
+var log = require('../../../utils/logger');
 
 var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
 };
 
+var lineCrCounter = 0;
+
+var convertToString = function(integer) {
+  return integer.toString();
+};
+
+var processDots = function() {
+  if (lineCrCounter>242) {
+    process.stdout.write("\n");
+    lineCrCounter = 1;
+  } else {
+    process.stdout.write(".");
+    lineCrCounter += 1;
+  }
+};
+
 var importAllUsers = function (done) {
   var client = getClient(1);
 
+  log.info('AcImportAllUsers', {});
+  lineCrCounter = 0;
   models.User.findAll().then(function (users) {
     async.eachSeries(users, function (user, callback) {
       client.createUser( {
         appId: 1,
-        uid: user.id
+        uid: user.id,
+        eventTime: user.created_at.toISOString()
       }).then(function(result) {
-        console.log(result);
+        processDots();
+        //console.log(result);
         callback();
       }).catch(function(error) {
         console.error(error);
         callback();
       });
     }, function () {
-      console.log("FIN");
+      console.log("\n FIN");
       done();
     });
   });
@@ -31,6 +52,7 @@ var importAllUsers = function (done) {
 
 var importAllPosts = function (done) {
   var client = getClient(1);
+  log.info('AcImportAllPosts', {});
 
   models.Post.findAll(
     {
@@ -73,43 +95,50 @@ var importAllPosts = function (done) {
         }
       ]
     }).then(function (posts) {
+    lineCrCounter = 0;
     async.eachSeries(posts, function (post, callback) {
 
       var properties = {};
 
       if (post.category_id) {
-        properties = _merge(properties,
+        properties = _.merge(properties,
           {
-            category: [ post.category_id ]
+            category: [ convertToString(post.category_id) ]
           });
       }
-      properties = _merge(properties,
+      properties = _.merge(properties,
         {
-          domain: [ post.Group.Community.Domain.id ],
-          community: [ post.Group.Community.id ],
-          group: [ post.Group.id ]
+          domain: [ convertToString(post.Group.Community.Domain.id) ],
+          community: [ convertToString(post.Group.Community.id) ],
+          group: [ convertToString(post.Group.id) ],
+          groupAccess: [ convertToString(post.Group.access) ],
+          communityAccess: [ convertToString(post.Group.access) ],
+          status: [ post.status ],
+          official_status: [ convertToString(post.official_status) ]
         });
 
-      properties = _merge(properties,
+      properties = _.merge(properties,
         {
           availableDate: post.created_at.toISOString(),
           date: post.created_at.toISOString(),
-          expireDate: new Date("April 1, 3016 04:20:00")
+          expireDate: new Date("April 1, 3016 04:20:00").toISOString()
         }
       );
 
       client.createItem({
         entityId: post.id,
-        properties: properties
+        properties: properties,
+        eventTime: post.created_at.toISOString()
       }).then(function(result) {
-        console.log(result);
+        processDots();
+        //  console.log(result);
         callback();
       }).catch(function(error) {
         console.error(error);
         callback();
       });
     }, function () {
-      console.log("FIN");
+      console.log("\n FIN");
       done();
     });
   });
@@ -117,6 +146,7 @@ var importAllPosts = function (done) {
 
 var importAllActionsFor = function (model, where, include, action, done) {
   var client = getClient(1);
+  log.info('AcImportAllActionsFor', {action:action, model: model, where: where, include: include});
 
   model.findAll(
     {
@@ -124,6 +154,7 @@ var importAllActionsFor = function (model, where, include, action, done) {
       include: include
     }
   ).then(function (objects) {
+    lineCrCounter = 0;
     async.eachSeries(objects, function (object, callback) {
       var targetEntityId;
       if (action.indexOf('help') > -1) {
@@ -133,23 +164,30 @@ var importAllActionsFor = function (model, where, include, action, done) {
       } else {
         targetEntityId = object.Post.id;
       }
-      console.log(targetEntityId);
-      client.createAction({
-        event: action,
-        uid: object.user_id,
-        targetEntityId: targetEntityId,
-        date: object.created_at.toISOString()
-      }).then(function(result) {
-        console.log(result);
+
+      if (targetEntityId) {
+        client.createAction({
+          event: action,
+          uid: object.user_id,
+          targetEntityId: targetEntityId,
+          date: object.created_at.toISOString(),
+          eventTime: object.created_at.toISOString()
+        }).then(function(result) {
+          processDots();
+          //       console.log(result);
+          callback();
+        }).
+        catch(function(error) {
+          console.error(error);
+          callback();
+        });
+      } else {
+        console.error("Can't find id for object: " + object);
         callback();
-      }).
-      catch(function(error) {
-        console.error(error);
-        callback();
-      });
+      }
     }, function (error) {
       console.log(error);
-      console.log("FIN");
+      console.log("\n FIN");
       done();
     });
   });
@@ -168,7 +206,6 @@ var importAll = function(done) {
       });
     },
     function(callback){
-
       importAllActionsFor(models.Endorsement, { value: { $gt: 0 } }, [ models.Post ], 'endorse', function () {
         callback();
       });
@@ -189,23 +226,23 @@ var importAll = function(done) {
       });
     },
     function(callback){
-      importAllActionsFor(models.Point, [ models.Post ], { value: 0 }, 'new_point_comment', function () {
+      importAllActionsFor(models.Point, { value: 0 },  [ models.Post ], 'new_point_comment', function () {
         callback();
       });
     },
     function(callback){
-      importAllActionsFor(models.PointQuality,  [{
+      importAllActionsFor(models.PointQuality, { value: { $gt: 0 } }, [{
           model: models.Point,
           include: [ models.Post ]
-        }], { value: { $gt: 0 } }, 'point_helpful', function () {
+        }], 'point_helpful', function () {
         callback();
       });
     },
     function(callback){
-      importAllActionsFor(models.PointQuality,  [{
+      importAllActionsFor(models.PointQuality, { value: { $lt: 0 } }, [{
         model: models.Point,
         include: [ models.Post ]
-      }], { value: { $lt: 0 } }, 'point_unhelpful', function () {
+      }], 'point_unhelpful', function () {
         callback();
       });
     }
@@ -217,15 +254,10 @@ var importAll = function(done) {
 
 getClient(1).status().then(function(status) {
   console.log("status");
-  console.log(status); // Prints "{status: 'alive'}"
-  /*importAllUsers(function () {
-    console.log("DONE");
-  });
-  importAllPosts(function () {
-   console.log("DONE");
-   });*/
-  importAllActionsFor(models.Endorsement, { value: { $gt: 0 } }, [ models.Post ], 'endorse', function () {
-    callback();
+  console.log(status);
+  log.info('AcImportStarting', {});
+  importAll(function () {
+    console.log("DONE!");
   });
 }).catch(function (error) {
   console.log("error");
