@@ -10,20 +10,24 @@ var getClient = function (appId) {
 
 models.User.find({ where: {email:'robert.bjarnason@gmail.com'}}).then(function (user) {
   engine.sendQuery({
-    uid: user.id,
     user: user.id,
-    n: 1,
     fields: [
-    {
-      name: "domain",
-      values: [1],
-      bias: -1
-    }]/*,
+      {
+        name: "domain",
+        values: [1],
+        bias: -1
+      },
+      {
+        name: "status",
+        values: ["published"],
+        bias: -1
+      }
+    ],
     dateRange: {
-      name: "availabledate",
-      before: "2012-08-15T11:28:45.114-07:00",
-      after: "2010-08-20T11:28:45.114-07:00"
-    }*/
+      name: "date",
+      before: "2016-02-15T23:04:45.000Z",
+      after: "2012-02-15T23:04:45.000Z"
+    }
   }).
   then(function (results) {
     console.log(results);
@@ -31,11 +35,16 @@ models.User.find({ where: {email:'robert.bjarnason@gmail.com'}}).then(function (
     async.eachSeries(results.itemScores, function (item, callback) {
       console.log("ITEM");
       console.log(item.item);
-      models.Post.find({where:{ id: item.item }}).then(function(post) {
-        console.log(post.name);
-        console.log(post.status);
+      if (item && item.item) {
+        models.Post.find({where:{ id: item.item }}).then(function(post) {
+          console.log(post.name);
+          console.log(post.status);
+          console.log(post.created_at);
+          callback();
+        });
+      } else {
         callback();
-      });
+      }
     }, function () {
       getClient(1).getEvents({itemId: '2160'}).then(function(events) {
         console.log(events);

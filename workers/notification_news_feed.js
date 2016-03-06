@@ -5,6 +5,7 @@ var log = require('../utils/logger');
 var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
+
 var NewsFeedNotificationsFilter = require('../engine/filters/news_feed_notifications.js');
 
 var NotificationNewsFeedWorker = function () {};
@@ -20,12 +21,19 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
       function(callback){
         models.AcNotification.find({
           where: { id: notificationJson.id },
+          order: [
+            [ { model: models.AcActivity } ,'updated_at', 'asc' ]
+          ],
           include: [
             {
               model: models.AcActivity,
               as: 'AcActivities',
               required: true,
               include: [
+                {
+                  model: models.User,
+                  required: true
+                },
                 {
                   model: models.Domain,
                   required: false
@@ -94,7 +102,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
           case "notification.point.new":
           case "notification.point.quality":
             NewsFeedNotificationsFilter(notification, user, function () {
-              log.info('Processing notification.point.* Completed', { type: notification.type, user: user });
+              log.info('Processing notification.* Completed', { type: notification.type, user: user });
               callback();
             });
             break;

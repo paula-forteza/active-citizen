@@ -7,7 +7,7 @@
     "params" : {
       "name": "ac-data",
       "appName": "active-citizen",
-      "eventNames": ["endorse", "oppose","new_post","new_point","new_point_comment","point_helpful","point_unhelpful"]
+      "eventNames": ["endorse", "oppose","new-post","new-point","new-point-comment","point-helpful","point-unhelpful","user-following","category-preference"]
     }
   },
   "sparkConf": {
@@ -27,8 +27,9 @@
         "appName": "active-citizen",
         "indexName": "urindex",
         "typeName": "items",
+        "dateName": "date",
         "comment": "",
-        "eventNames": ["endorse", "oppose","new_point","new_point","new_point_comment","point_helpful","point_unhelpful"]
+        "eventNames": ["endorse", "oppose","new-post","new-point","new-point-comment","point-helpful","point-unhelpful","user-following","category-preference"]
       }
     }
   ]

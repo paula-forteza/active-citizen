@@ -3,6 +3,7 @@ var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
 var log = require('../../utils/logger');
+var engine = new predictionio.Engine();
 
 var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
@@ -74,6 +75,7 @@ var createItem = function (postId, callback) {
           community: [ convertToString(post.Group.Community.id) ],
           group: [ convertToString(post.Group.id) ],
           groupAccess: [ convertToString(post.Group.access) ],
+          groupStatus: [ convertToString(post.Group.status) ],
           communityAccess: [ convertToString(post.Group.access) ],
           status: [ post.status ],
           official_status: [ convertToString(post.official_status) ]
@@ -81,9 +83,7 @@ var createItem = function (postId, callback) {
 
       properties = _.merge(properties,
         {
-          availableDate: post.created_at.toISOString(),
-          date: post.created_at.toISOString(),
-          expireDate: new Date("April 1, 3016 04:20:00").toISOString()
+          date: post.created_at.toISOString()
         }
       );
 
@@ -162,22 +162,80 @@ var generateRecommendationEvent = function (activity, callback) {
       break;
     case "activity.point.new":
       if (activity.Point.value==0) {
-        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point_comment_new', callback);
+        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-comment-new', callback);
       } else {
-        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point_new', callback);
+        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-new', callback);
       }
       break;
     case "activity.point.helpful.new":
-      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point_helpful', callback);
+      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-helpful', callback);
       break;
     case "activity.point.unhelpful.new":
-      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point_unhelpful', callback);
+      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-unhelpful', callback);
       break;
     default:
       callback();
   }
 };
 
+var getRecommendationFor = function (user, dateRange, options, callback) {
+  var fields = [];
+
+  fields.push({
+    name: 'status',
+    domain: ['published'],
+    bias: -1
+  });
+
+  if (options.domain_id) {
+    fields.push({
+      name: 'domain',
+      values: [ options.domain_id ],
+      bias: -1
+    });
+  }
+
+  if (options.community_id) {
+    fields.push({
+      name: 'community',
+      values: [ options.community_id ],
+      bias: -1
+    });
+  }
+
+  if (options.group_id) {
+    fields.push({
+      name: 'group',
+      values: [ options.group_id ],
+      bias: -1
+    });
+  }
+
+  engine.sendQuery({
+    user: user.id,
+    num: options.limit || 10,
+    fields: fields,
+    dateRange: dateRange
+  }).then(function (results) {
+    callback(null, _.map(results, function(item) { return item.item; }));
+  }).catch(function (error) {
+    callback(error);
+  });
+};
+
+isItemRecommended = function (itemId, user, dateRange, options, callback) {
+  getRecommendationFor(user, dateRange, options, function (error, items) {
+    if (error) {
+      log.error("Recommendation Events Manager Error", { err: error });
+      callback(false);
+    } else {
+      callback(_.includes(items, itemId));
+    }
+  });
+};
+
 module.exports = {
-  generateRecommendationEvent: generateRecommendationEvent
+  generateRecommendationEvent: generateRecommendationEvent,
+  getRecommendationFor: getRecommendationFor,
+  isItemRecommended: isItemRecommended
 };

@@ -50,6 +50,34 @@ var importAllUsers = function (done) {
   });
 };
 
+
+var importFollowings = function (done) {
+  var client = getClient(1);
+
+  log.info('AcImportFollowings', {});
+  lineCrCounter = 0;
+  models.AcFollowing.findAll().then(function (followings) {
+    async.eachSeries(followings, function (following, callback) {
+      client.createAction({
+        event: 'user-following',
+        entityId: following.user_id,
+        targetEntityId: following.other_user_id,
+        date: following.created_at.toISOString(),
+        eventTime: following.created_at.toISOString()
+      }).then(function(result) {
+        processDots();
+        callback();
+      }).catch(function(error) {
+        console.error(error);
+        callback();
+      });
+    }, function () {
+      console.log("\n FIN");
+      done();
+    });
+  });
+};
+
 var importAllPosts = function (done) {
   var client = getClient(1);
   log.info('AcImportAllPosts', {});
@@ -113,26 +141,39 @@ var importAllPosts = function (done) {
           group: [ convertToString(post.Group.id) ],
           groupAccess: [ convertToString(post.Group.access) ],
           communityAccess: [ convertToString(post.Group.access) ],
+          groupStatus: [ convertToString(post.Group.status) ],
           status: [ post.status ],
           official_status: [ convertToString(post.official_status) ]
         });
 
       properties = _.merge(properties,
         {
-          availableDate: post.created_at.toISOString(),
-          date: post.created_at.toISOString(),
-          expireDate: new Date("April 1, 3016 04:20:00").toISOString()
+          date: post.created_at.toISOString()
         }
       );
 
       client.createItem({
         entityId: post.id,
         properties: properties,
+        date: post.created_at.toISOString(),
         eventTime: post.created_at.toISOString()
       }).then(function(result) {
-        processDots();
         //  console.log(result);
-        callback();
+        if (post.category_id) {
+          client.createAction({
+            event: 'category-preference',
+            entityId: post.user_id,
+            targetEntityId:post.category_id,
+            date: post.created_at.toISOString(),
+            eventTime: post.created_at.toISOString()
+          }).then(function(result) {
+            processDots();
+            callback();
+          });
+        } else {
+          processDots();
+          callback();
+        }
       }).catch(function(error) {
         console.error(error);
         callback();
@@ -206,6 +247,11 @@ var importAll = function(done) {
       });
     },
     function(callback){
+      importFollowings(function () {
+        callback();
+      });
+    },
+    function(callback){
       importAllActionsFor(models.Endorsement, { value: { $gt: 0 } }, [ models.Post ], 'endorse', function () {
         callback();
       });
@@ -216,17 +262,17 @@ var importAll = function(done) {
       });
     },
     function(callback){
-      importAllActionsFor(models.Post, {}, [], 'new_post', function () {
+      importAllActionsFor(models.Post, {}, [], 'new-post', function () {
         callback();
       });
     },
     function(callback){
-      importAllActionsFor(models.Point, { value: { $ne: 0 }}, [ models.Post ], 'new_point', function () {
+      importAllActionsFor(models.Point, { value: { $ne: 0 }}, [ models.Post ], 'new-point', function () {
         callback();
       });
     },
     function(callback){
-      importAllActionsFor(models.Point, { value: 0 },  [ models.Post ], 'new_point_comment', function () {
+      importAllActionsFor(models.Point, { value: 0 },  [ models.Post ], 'new-point-comment', function () {
         callback();
       });
     },
@@ -234,7 +280,7 @@ var importAll = function(done) {
       importAllActionsFor(models.PointQuality, { value: { $gt: 0 } }, [{
           model: models.Point,
           include: [ models.Post ]
-        }], 'point_helpful', function () {
+        }], 'point-helpful', function () {
         callback();
       });
     },
@@ -242,7 +288,7 @@ var importAll = function(done) {
       importAllActionsFor(models.PointQuality, { value: { $lt: 0 } }, [{
         model: models.Point,
         include: [ models.Post ]
-      }], 'point_unhelpful', function () {
+      }], 'point-unhelpful', function () {
         callback();
       });
     }

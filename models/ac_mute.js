@@ -1,6 +1,6 @@
 "use strict";
 
-// Notify user about this object
+// Mute anything
 
 module.exports = function(sequelize, DataTypes) {
   var AcMute = sequelize.define("AcMute", {
@@ -25,7 +25,7 @@ module.exports = function(sequelize, DataTypes) {
         AcMute.belongsTo(models.Group);
         AcMute.belongsTo(models.Post);
         AcMute.belongsTo(models.Point);
-        AcMute.belongsTo(models.User, { as: 'UserToMute' });
+        AcMute.belongsTo(models.User, { as: 'OtherUser' });
         AcMute.belongsTo(models.User);
       }
     }

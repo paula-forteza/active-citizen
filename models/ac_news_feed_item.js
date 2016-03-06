@@ -13,33 +13,59 @@ module.exports = function(sequelize, DataTypes) {
 
     defaultScope: {
       where: {
+        status: 'active',
         deleted: false
       }
     },
 
     indexes: [
       {
+        fields: ['type','user_id'],
+        where: {
+          status: 'active',
+          deleted: false
+        }
+      },
+      {
         fields: ['post_id','user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         fields: ['group_id','user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         fields: ['community_id','user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         fields: ['domain_id','user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
+        }
+      },
+      {
+        fields: ['ac_notification_id'],
+        where: {
+          status: 'active',
+          deleted: false
+        }
+      },
+      {
+        fields: ['ac_activity_id'],
+        where: {
+          status: 'active',
+          deleted: false
         }
       }
     ],
@@ -58,10 +84,11 @@ module.exports = function(sequelize, DataTypes) {
         AcNewsFeedItem.belongsTo(models.Point);
         AcNewsFeedItem.belongsTo(models.Promotion);
         AcNewsFeedItem.belongsTo(models.AcNotification);
+        AcNewsFeedItem.belongsTo(models.AcActivity);
         AcNewsFeedItem.belongsTo(models.User);
       }
     }
   });
 
-  return AcNewsFeed;
+  return AcNewsFeedItem;
 };

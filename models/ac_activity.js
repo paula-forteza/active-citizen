@@ -75,14 +75,16 @@ module.exports = function(sequelize, DataTypes) {
         fields: ['type'],
         where: {
           access: 0,
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_type',
         fields: ['type'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
@@ -90,14 +92,16 @@ module.exports = function(sequelize, DataTypes) {
         fields: ['domain_id'],
         where: {
           access: 0,
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_domain_id',
         fields: ['domain_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
@@ -105,14 +109,16 @@ module.exports = function(sequelize, DataTypes) {
         fields: ['community_id'],
         where: {
           access: 0,
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_community_id',
         fields: ['community_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
@@ -120,14 +126,16 @@ module.exports = function(sequelize, DataTypes) {
         fields: ['group_id'],
         where: {
           access: 0,
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_group_id',
         fields: ['group_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
@@ -135,28 +143,32 @@ module.exports = function(sequelize, DataTypes) {
         fields: ['post_id'],
         where: {
           access: 0,
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_post_id',
         fields: ['post_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_type_and_user_id',
         fields: ['type','user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
         name: 'activity_active_by_user_id',
         fields: ['user_id'],
         where: {
-          status: 'active'
+          status: 'active',
+          deleted: false
         }
       },
       {
