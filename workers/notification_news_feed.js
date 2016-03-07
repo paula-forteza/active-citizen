@@ -7,7 +7,6 @@ var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
 
 var NewsFeedNotificationsFilter = require('../engine/filters/news_feed_notifications.js');
-
 var NotificationNewsFeedWorker = function () {};
 
 NotificationNewsFeedWorker.prototype.process = function (notificationJson, callback) {
