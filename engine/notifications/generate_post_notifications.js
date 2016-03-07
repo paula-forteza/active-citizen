@@ -60,9 +60,10 @@ var generateNotificationsForEndorsements = function (activity, callback) {
     if (post) {
       addOrPossiblyGroupNotification(post, 'notification.post.endorsement', activity, post.User, 50, callback);
     } else {
-      callback('Not found or muted');
+      log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+      callback();
     }
-  }).catch(error, function() {
+  }).catch(function(error) {
     callback(error);
   });
 

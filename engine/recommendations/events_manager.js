@@ -90,8 +90,10 @@ var createItem = function (postId, callback) {
       client.createItem({
         entityId: post.id,
         properties: properties,
+        date: post.created_at.toISOString(),
         eventDate: post.created_at.toISOString()
       }).then(function (result) {
+        log.info('Events Manager createItem', {postId: post.id, result: result});
         console.log(result);
         callback();
       }).catch(function (error) {
@@ -114,9 +116,10 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         event: action,
         uid: userId,
         targetEntityId: targetEntityId,
-        date: object.created_at.toISOString(),
-        eventDate: object.created_at.toISOString()
+        date: date,
+        eventDate: date
       }).then(function (result) {
+        log.info('Events Manager createAction', {postId: targetEntityId, userId: userId, result: result});
         console.log(result);
         callback();
       }).catch(function (error) {
@@ -132,7 +135,6 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
 
 var createUser = function (user, callback) {
   client = getClient(1);
-
   client.createUser( {
     appId: 1,
     uid: user.id,
@@ -147,6 +149,7 @@ var createUser = function (user, callback) {
 };
 
 var generateRecommendationEvent = function (activity, callback) {
+  log.info('Events Manager generateRecommendationEvent', {type: activity.type, userId: activity.user_id });
   switch (activity.type) {
     case "activity.user.new":
       createUser(activity.User, callback);

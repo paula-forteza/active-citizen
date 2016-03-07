@@ -101,6 +101,7 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
     if (point) {
       addOrPossiblyGroupNotification(point, 'notification.point.quality', activity, point.User, 50, callback);
     } else {
+      log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
       callback();
     }
   }).catch(error, function() {

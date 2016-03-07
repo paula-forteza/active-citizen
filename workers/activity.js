@@ -21,11 +21,11 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
         include: [
           {
             model: models.User,
-            required: true
+            required: false
           },
           {
             model: models.Domain,
-            required: true
+            required: false
           },
           {
             model: models.Community,
@@ -43,7 +43,10 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
             model: models.Point,
             required: false,
             include: [
-              models.Post
+              {
+                model: models.Post,
+                required: false
+              }
             ]
           }
         ]
@@ -93,8 +96,8 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           default:
             seriesCallback();
         }
-      } catch (err) {
-        log.error("Processing Activity Error", {err: err});
+      } catch (error) {
+        log.error("Processing Activity Error", {err: error});
         seriesCallback();
       }
     },
@@ -102,6 +105,9 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
       generateRecommendationEvent(activity, seriesCallback);
     }
   ], function (error) {
+    if (error) {
+      log.error("Processing Activity Error", {err: error});
+    }
     callback(error);
   });
 };
