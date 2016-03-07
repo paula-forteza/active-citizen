@@ -81,7 +81,11 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.post.opposition.new":
           case "activity.post.endorsement.new":
             generatePostNotification(activity, activity.User, function (error) {
-              log.info('Processing activity.post.* Completed', {type: activity.type, err: error});
+              if (error) {
+                log.error('Processing activity.post.* Completed', {type: activity.type, err: error});
+              } else {
+                log.info('Processing activity.post.* Completed', {type: activity.type});
+              }
               seriesCallback();
             });
             break;
@@ -89,7 +93,11 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.point.helpful.new":
           case "activity.point.unhelpful.new":
             generatePointNotification(activity, activity.User, function (error) {
-              log.info('Processing activity.point.* Completed', {type: activity.type, err: error});
+              if (error) {
+                log.error('Processing activity.point.* Completed', {type: activity.type, err: error});
+              } else {
+                log.info('Processing activity.point.* Completed', {type: activity.type});
+              }
               seriesCallback();
             });
             break;

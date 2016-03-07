@@ -57,8 +57,11 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         getModelAndUsersByType(models.Community, 'CommunityUsers', activity.Community.id, "all_community", function(error, community) {
           if (error) {
             seriesCallback(error);
-          } else {
+          } else if (community) {
             addNotificationsForUsers(activity, community.CommunityUsers, "notification.point.new", uniqueUserIds, seriesCallback);
+          } else {
+            log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+            seriesCallback();
           }
         });
       } else {
@@ -70,8 +73,11 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
       getModelAndUsersByType(models.Group, 'GroupUsers', activity.Group.id, "all_group", function(error, group) {
         if (error) {
           seriesCallback(error);
-        } else {
+        } else if (group) {
           addNotificationsForUsers(activity, group.GroupUsers, "notification.point.new", uniqueUserIds, seriesCallback);
+        } else {
+          log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+          seriesCallback();
         }
       });
     }
@@ -104,7 +110,7 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
       log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
       callback();
     }
-  }).catch(error, function() {
+  }).catch(function(error) {
     callback(error);
   });
 
@@ -118,7 +124,7 @@ module.exports = function (activity, user, callback) {
 
   if (activity.type=='activity.point.new') {
     generateNotificationsForNewPoint(activity, uniqueUserIds, callback);
-  } else if (activity.type=='activity.point.helpful.new' || activity.type=='activity.post.unhelpful.new') {
+  } else if (activity.type=='activity.point.helpful.new' || activity.type=='activity.point.unhelpful.new') {
     generateNotificationsForHelpfulness(activity, callback)
   }
 };

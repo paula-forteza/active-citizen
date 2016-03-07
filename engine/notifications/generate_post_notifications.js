@@ -15,8 +15,11 @@ var generateNotificationsForNewPost = function (activity, uniqueUserIds, callbac
         getModelAndUsersByType(models.Community, 'CommunityUsers', activity.Community.id, "all_community", function(error, community) {
           if (error) {
             seriesCallback(error);
-          } else {
+          } else if (community) {
             addNotificationsForUsers(activity, community.CommunityUsers, "notification.post.new", uniqueUserIds, seriesCallback);
+          } else {
+            log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+            seriesCallback();
           }
         });
       } else {
@@ -28,8 +31,11 @@ var generateNotificationsForNewPost = function (activity, uniqueUserIds, callbac
       getModelAndUsersByType(models.Group, 'GroupUsers', activity.Group.id, "all_group", function(error, group) {
         if (error) {
           seriesCallback(error);
-        } else {
+        } else if (group) {
           addNotificationsForUsers(activity, group.GroupUsers, "notification.post.new", uniqueUserIds, seriesCallback);
+        } else {
+          log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+          seriesCallback();
         }
       });
     }

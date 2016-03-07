@@ -94,14 +94,13 @@ var createItem = function (postId, callback) {
         eventDate: post.created_at.toISOString()
       }).then(function (result) {
         log.info('Events Manager createItem', {postId: post.id, result: result});
-        console.log(result);
         callback();
       }).catch(function (error) {
-        console.error(error);
+        log.error('Events Manager createItem Error', {postId: post.id, err: error });
         callback();
       });
     } else {
-      console.log("Could not find post");
+      log.error('Events Manager createItem Error', {postId: post.id, err: "Could not find post" });
       callback();
     }
   })
@@ -120,14 +119,13 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         eventDate: date
       }).then(function (result) {
         log.info('Events Manager createAction', {postId: targetEntityId, userId: userId, result: result});
-        console.log(result);
         callback();
       }).catch(function (error) {
-        console.error(error);
+        log.error('Events Manager createAction Error', {postId: targetEntityId, userId: userId, err: error});
         callback(error);
       });
     } else {
-      console.log("Could not find post");
+      log.error('Events Manager createAction Error', { postId: targetEntityId, userId: userId, err: "Could not find post" });
       callback();
     }
   });
@@ -140,10 +138,10 @@ var createUser = function (user, callback) {
     uid: user.id,
     eventDate: user.created_at.toISOString()
   }).then(function(result) {
-    console.log(result);
+    log.log('Events Manager createUser', { userId: user.id, result: result});
     callback();
   }).catch(function(error) {
-    console.error(error);
+    log.error('Events Manager createUser Error', { userId: user.id, err: error});
     callback(error);
   });
 };
