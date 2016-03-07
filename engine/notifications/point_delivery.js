@@ -1,7 +1,7 @@
 var queue = require('../../workers/queue');
 var models = require("../../../models");
 var i18n = require('../../utils/i18n');
-var filterNotificationForDelivery = require('./notifications_utils').filterNotificationForDelivery;
+var filterNotificationForDelivery = require('./emails_utils').filterNotificationForDelivery;
 
 module.exports = function (notification, user, callback) {
   if (notification.type=='notification.point.new') {

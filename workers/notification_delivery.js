@@ -5,8 +5,8 @@ var log = require('../utils/logger');
 var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
-var postNotificationDeliveryFilter = require('../engine/filters/post_delivery.js');
-var pointNotificationDeliveryFilter = require('../engine/filters/point_delivery.js');
+var deliverPostNotification = require('../engine/notifications/post_delivery.js');
+var deliverPointNotification = require('../engine/notifications/point_delivery.js');
 
 var NotificationDeliveryWorker = function () {};
 
@@ -116,14 +116,14 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.post.new":
           case "notification.post.endorsement":
-            postNotificationDeliveryFilter(notification, user, function () {
+            deliverPostNotification(notification, user, function () {
               log.info('Processing notification.post.* Completed', { type: notification.type, user: user });
               callback();
             });
             break;
           case "notification.point.new":
           case "notification.point.quality":
-            pointNotificationDeliveryFilter(notification, user, function () {
+            deliverPointNotification(notification, user, function () {
               log.info('Processing notification.point.* Completed', { type: notification.type, user: user });
               callback();
             });

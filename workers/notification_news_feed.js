@@ -6,7 +6,7 @@ var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
 
-var NewsFeedNotificationsFilter = require('../engine/filters/news_feed_notifications.js');
+var GenerateNewsFeedFromNotifications = require('../engine/news_feeds/generate_from_notifications.js');
 var NotificationNewsFeedWorker = function () {};
 
 NotificationNewsFeedWorker.prototype.process = function (notificationJson, callback) {
@@ -100,7 +100,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
           case "notification.post.endorsement":
           case "notification.point.new":
           case "notification.point.quality":
-            NewsFeedNotificationsFilter(notification, user, function () {
+            GenerateNewsFeedFromNotifications(notification, user, function () {
               log.info('Processing notification.* Completed', { type: notification.type, user: user });
               callback();
             });

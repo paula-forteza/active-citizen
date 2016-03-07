@@ -2,7 +2,7 @@ var queue = require('../../workers/queue');
 var models = require("../../../models");
 var i18n = require('../../utils/i18n');
 var async = require('async');
-var log = require('../utils/logger');
+var log = require('../../utils/logger');
 var _ = require('lodash');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
@@ -176,7 +176,7 @@ module.exports = function (notification, user, callback) {
           news_feed_item.changed('updated_at', true);
           news_feed_item.update().then(function (updateResults) {
             if (updateResults) {
-              log.error("Filtering News Feed Notifications Error", {err: "Could not update timestamp"});
+              log.error("Filtering News Feed Notifications Error", { err: "Could not update timestamp" });
             }
             seriesCallback();
           });
@@ -196,7 +196,8 @@ module.exports = function (notification, user, callback) {
     }
   ], function (error) {
     if (error) {
-      log.error("Filtering News Feed Notifications Error", {err: error});
+      log.error("Filtering News Feed Notifications Error", { err: error });
     }
+    callback(error);
   });
 };

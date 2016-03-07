@@ -38,6 +38,7 @@ var generateNotificationsForNewPost = function (activity, uniqueUserIds, callbac
   });
 
   // TODO: Add AcWatching community and group users
+  // TODO: Add AcFollowing
 };
 
 var generateNotificationsForEndorsements = function (activity, callback) {

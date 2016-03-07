@@ -5,8 +5,8 @@ var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var async = require('async');
 
-var postNotificationGenerator = require('../engine/generators/post_notifications.js');
-var pointNotificationGenerator = require('../engine/generators/point_notifications.js');
+var generatePostNotification = require('../engine/notifications/generate_post_notifications.js');
+var generatePointNotification = require('../engine/notifications/generate_point_notifications.js');
 var generateRecommendationEvent = require('../engine/recommendations/events_manager').generateRecommendationEvent;
 
 var ActivityWorker = function () {};
@@ -77,7 +77,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.post.new":
           case "activity.post.opposition.new":
           case "activity.post.endorsement.new":
-            postNotificationGenerator(activity, activity.User, function (error) {
+            generatePostNotification(activity, activity.User, function (error) {
               log.info('Processing activity.post.* Completed', {type: activity.type, err: error});
               seriesCallback();
             });
@@ -85,7 +85,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.point.new":
           case "activity.point.helpful.new":
           case "activity.point.unhelpful.new":
-            pointNotificationGenerator(activity, activity.User, function (error) {
+            generatePointNotification(activity, activity.User, function (error) {
               log.info('Processing activity.point.* Completed', {type: activity.type, err: error});
               seriesCallback();
             });
