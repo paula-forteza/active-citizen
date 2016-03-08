@@ -105,7 +105,7 @@ module.exports = function(sequelize, DataTypes) {
           queuePriority = 'medium';
         }
 
-        //queue.create('process-notification-delivery', notificationJson).priority(queuePriority).removeOnComplete(true).save();
+        queue.create('process-notification-delivery', notificationJson).priority(queuePriority).removeOnComplete(true).save();
         queue.create('process-notification-news-feed', notificationJson).priority(queuePriority).removeOnComplete(true).save();
       },
 

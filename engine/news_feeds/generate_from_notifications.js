@@ -7,8 +7,9 @@ var _ = require('lodash');
 var toJson = require('../../utils/to_json');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
+var getLastRecommendedNewsFeedDate = require('./news_feeds_utils').getLastRecommendedNewsFeedDate;
 
-var createItem = function (notification, options, callback) {
+var createItemFromNotification = function (notification, options, callback) {
   var detail = {};
   detail.ac_notification_id = notification.id;
   detail.ac_activity_id = _.last(notification.AcActivities).id;
@@ -25,51 +26,6 @@ var createItem = function (notification, options, callback) {
   }).catch(function (error) {
     callback(error);
   })
-};
-
-var getLastRecommendedNewsFeedDate = function(options, callback) {
-  var where = {
-    type: 'newsFeed.from.notification.recommendation'
-  };
-
-  if (options.domain_id) {
-    where = _.merge(where, {
-      domain_id: options.domain_id
-    })
-  }
-
-  if (options.community_id) {
-    where = _.merge(where, {
-      community_id: options.community_id
-    })
-  }
-
-  if (options.group_id) {
-    where = _.merge(where, {
-      group_id: options.group_id
-    })
-  }
-
-  if (options.post_id) {
-    where = _.merge(where, {
-      post_id: options.post_id
-    })
-  }
-
-  models.AcNewsFeedItem.find({
-    where: where,
-    order: [
-      [ 'updated_at', 'desc' ]
-    ]
-  }).then(function (item) {
-    if (item) {
-      callback(null, item.updated_at);
-    } else {
-      callback();
-    }
-  }).catch(function (error) {
-    callback(error);
-  });
 };
 
 var buildNewsFeedItems = function (notification, callback) {
@@ -123,7 +79,7 @@ var buildNewsFeedItems = function (notification, callback) {
     function (seriesCallback) {
       // Create newsFeed item if needed
       if (shouldInclude) {
-        createItem(notification, {
+        createItemFromNotification(notification, {
           type: 'newsFeed.from.notification.should',
           domain_id: activity.domain_id,
           group_id: activity.group_id,
@@ -136,7 +92,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Domain news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getLastRecommendedNewsFeedDate({domain_id: activity.domain_id}, function(error, itemUpdatedAt) {
+            getLastRecommendedNewsFeedDate({domain_id: activity.domain_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -149,7 +105,7 @@ var buildNewsFeedItems = function (notification, callback) {
               domain_id: activity.domain_id
             }, function (isRecommended) {
               if (isRecommended) {
-                createItem(notification, {
+                createItemFromNotification(notification, {
                   type: 'newsFeed.from.notification.recommendation',
                   domain_id: activity.domain_id
                 }, function (error) {
@@ -163,7 +119,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Community news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getLastRecommendedNewsFeedDate({community_id: activity.community_id}, function(error, itemUpdatedAt) {
+            getLastRecommendedNewsFeedDate({community_id: activity.community_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -175,7 +131,7 @@ var buildNewsFeedItems = function (notification, callback) {
               community_id: activity.community_id
             }, function (isRecommended) {
               if (isRecommended) {
-                createItem(notification, {
+                createItemFromNotification(notification, {
                   type: 'newsFeed.from.notification.recommendation',
                   community_id: activity.community_id
                 }, function (error) {
@@ -189,7 +145,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Group news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getLastRecommendedNewsFeedDate({group_id: activity.group_id}, function(error, itemUpdatedAt) {
+            getLastRecommendedNewsFeedDate({group_id: activity.group_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -201,7 +157,7 @@ var buildNewsFeedItems = function (notification, callback) {
               group_id: activity.group_id
             }, function (isRecommended) {
               if (isRecommended) {
-                createItem(notification, {
+                createItemFromNotification(notification, {
                   type: 'newsFeed.from.notification.recommendation',
                   group_id: activity.group_id
                 }, function (error) {
@@ -215,7 +171,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Post news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getLastRecommendedNewsFeedDate({post_id: activity.post_id}, function(error, itemUpdatedAt) {
+            getLastRecommendedNewsFeedDate({post_id: activity.post_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -227,7 +183,7 @@ var buildNewsFeedItems = function (notification, callback) {
               post_id: activity.post_id
             }, function (isRecommended) {
               if (isRecommended) {
-                createItem(notification, {
+                createItemFromNotification(notification, {
                   type: 'newsFeed.from.notification.recommendation',
                   post_id: activity.post_id
                 }, function (error) {

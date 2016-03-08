@@ -26,7 +26,7 @@ models.User.find({ where: {email:'robert.bjarnason@gmail.com'}}).then(function (
     dateRange: {
       name: "date",
       before: "2017-12-30T23:04:45.000Z",
-      after: "2015-02-15T23:04:45.000Z"
+      after: "2010-02-15T23:04:45.000Z"
     }
   }).
   then(function (results) {

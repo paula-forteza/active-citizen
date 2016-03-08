@@ -213,6 +213,7 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
       bias: -1
     });
   }
+
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange});
 
   engine.sendQuery({
