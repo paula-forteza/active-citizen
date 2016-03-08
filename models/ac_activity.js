@@ -262,32 +262,82 @@ module.exports = function(sequelize, DataTypes) {
         if (options.pointId)
           object['pointId'] = options.pointId;
 
-        sequelize.models.AcActivity.build({
-          type: options.type,
-          status: 'active',
-          sub_type: options.subType,
-          actor: actor,
-          object: object,
-          context: context,
-          user_id: options.userId,
-          domain_id: options.domainId,
-          community_id: options.communityId,
-          group_id: options.groupId,
-          post_id: options.postId,
-          point_id: options.pointId,
-          access: options.access ? options.access : sequelize.models.AcActivity.ACCESS_PRIVATE
-        }).save().then(function(activity) {
-          if (activity) {
-            queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
-            log.info('Activity Created', { activity: toJson(activity), userId: options.userId});
-            callback();
-          } else {
-            callback('Activity Not Found');
+        async.series([
+          // Checking for missing values for community or group if its a post related event
+          function (seriesCallback) {
+            if (!options.postId || (options.groupId && options.communityId)) {
+              seriesCallback();
+            } else if (options.groupId) {
+              sequelize.models.Group.find({where: { id: options.groupId },
+              include: [
+                sequelize.models.Community
+              ]}).then(function(group) {
+                if (group) {
+                  options.communityId = group.Community.id;
+                  seriesCallback();
+                } else {
+                  seriesCallback("Can't find group");
+                }
+              }).catch(function(error) {
+                seriesCallback(error);
+              });
+            } else if (options.postId) {
+              sequelize.models.Post.find({where: { id: options.postId },
+                include: [
+                  {
+                    model: sequelize.models.Group,
+                    include: [
+                      sequelize.models.Community
+                    ]
+                  }
+                ]}).then(function(post) {
+                if (post) {
+                  options.groupId = post.Group.id;
+                  options.communityId = post.Group.Community.id;
+                  seriesCallback();
+                } else {
+                  seriesCallback("Can't find post");
+                }
+              }).catch(function(error) {
+                seriesCallback(error);
+              });
+            } else {
+              seriesCallback("Strange state of create ac activity looking up community id");
+            }
           }
-        }).catch(function(error) {
-          log.error('Activity Created Error', { err: error });
-          callback(error);
+        ], function (error) {
+          if (error) {
+            callback(error);
+          } else {
+            sequelize.models.AcActivity.build({
+              type: options.type,
+              status: 'active',
+              sub_type: options.subType,
+              actor: actor,
+              object: object,
+              context: context,
+              user_id: options.userId,
+              domain_id: options.domainId,
+              community_id: options.communityId,
+              group_id: options.groupId,
+              post_id: options.postId,
+              point_id: options.pointId,
+              access: options.access ? options.access : sequelize.models.AcActivity.ACCESS_PRIVATE
+            }).save().then(function(activity) {
+              if (activity) {
+                queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
+                log.info('Activity Created', { activity: toJson(activity), userId: options.userId});
+                callback();
+              } else {
+                callback('Activity Not Found');
+              }
+            }).catch(function(error) {
+              log.error('Activity Created Error', { err: error });
+              callback(error);
+            });
+          }
         });
+
       },
 
       createPasswordRecovery: function(user, domain, community, token, done) {

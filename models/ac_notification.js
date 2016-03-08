@@ -96,16 +96,16 @@ module.exports = function(sequelize, DataTypes) {
 
       processNotification: function (notification, user, activity) {
         var notificationJson = notification.toJSON();
-        notificationJson['activity'] = activity;
+        notificationJson['activity'] = activity.toJSON();
 
         var queuePriority;
-        if ((new Date().getDate()-5)<user.last_login_at-getDate() ) {
+        if (user.last_login_at && ((new Date().getDate()-5)<user.last_login_at)) {
           queuePriority = 'high';
         } else {
           queuePriority = 'medium';
         }
 
-        queue.create('process-notification-delivery', notificationJson).priority(queuePriority).removeOnComplete(true).save();
+        //queue.create('process-notification-delivery', notificationJson).priority(queuePriority).removeOnComplete(true).save();
         queue.create('process-notification-news-feed', notificationJson).priority(queuePriority).removeOnComplete(true).save();
       },
 
@@ -127,19 +127,19 @@ module.exports = function(sequelize, DataTypes) {
           if (notification) {
             notification.addAcActivities(activity).then(function (results) {
               if (results) {
-                sequelize.models.AcNotification.processNotification(notification, activity);
-                log.info('Notification Created', { notification: toJson(notification), user: user });
+                sequelize.models.AcNotification.processNotification(notification, user, activity);
+                log.info('Notification Created', { notification: toJson(notification), user: user.simple() });
                 callback();
               } else {
                 callback("Notification Error Can't add activity");
               }
             });
           } else {
-            log.error('Notification Creation Error', { err: "No notification", user: user });
+            log.error('Notification Creation Error', { err: "No notification", user: user.simple() });
             callback();
           }
         }).catch(function (error) {
-         log.error('Notification Creation Error', { err: error, user: user });
+         log.error('Notification Creation Error', { err: error, user: user.simple() });
        });
       }
     }

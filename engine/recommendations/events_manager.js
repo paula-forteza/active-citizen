@@ -3,7 +3,7 @@ var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
 var log = require('../../utils/logger');
-var engine = new predictionio.Engine();
+var engine = new predictionio.Engine({url: process.env.PIOEngineUrl });
 
 var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
@@ -118,14 +118,14 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         date: date,
         eventDate: date
       }).then(function (result) {
-        log.info('Events Manager createAction', {postId: targetEntityId, userId: userId, result: result});
+        log.info('Events Manager createAction', {action: action, postId: targetEntityId, userId: userId, result: result});
         callback();
       }).catch(function (error) {
-        log.error('Events Manager createAction Error', {postId: targetEntityId, userId: userId, err: error});
+        log.error('Events Manager createAction Error', {action: action, postId: targetEntityId, userId: userId, err: error});
         callback(error);
       });
     } else {
-      log.error('Events Manager createAction Error', { postId: targetEntityId, userId: userId, err: "Could not find post" });
+      log.error('Events Manager createAction Error', { action: action, postId: targetEntityId, userId: userId, err: "Could not find post" });
       callback();
     }
   });
@@ -138,7 +138,7 @@ var createUser = function (user, callback) {
     uid: user.id,
     eventDate: user.created_at.toISOString()
   }).then(function(result) {
-    log.log('Events Manager createUser', { userId: user.id, result: result});
+    log.info('Events Manager createUser', { userId: user.id, result: result});
     callback();
   }).catch(function(error) {
     log.error('Events Manager createUser Error', { userId: user.id, err: error});
@@ -184,7 +184,7 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
 
   fields.push({
     name: 'status',
-    domain: ['published'],
+    values: ['published'],
     bias: -1
   });
 
@@ -211,6 +211,7 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
       bias: -1
     });
   }
+  log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange});
 
   engine.sendQuery({
     user: user.id,
@@ -218,7 +219,9 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
     fields: fields,
     dateRange: dateRange
   }).then(function (results) {
-    callback(null, _.map(results, function(item) { return item.item; }));
+    log.info('Events Manager getRecommendationFor', { userId: user.id, results: results});
+    var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
+    callback(null,resultMap);
   }).catch(function (error) {
     callback(error);
   });
@@ -227,10 +230,11 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
 isItemRecommended = function (itemId, user, dateRange, options, callback) {
   getRecommendationFor(user, dateRange, options, function (error, items) {
     if (error) {
-      log.error("Recommendation Events Manager Error", { err: error });
+      log.error("Recommendation Events Manager Error", { itemId: itemId, userId: user.id, err: error });
       callback(false);
     } else {
-      callback(_.includes(items, itemId));
+      log.info('Events Manager isItemRecommended', { itemId: itemId, userId: user.id, items: items});
+      callback(_.includes(items, itemId.toString()));
     }
   });
 };

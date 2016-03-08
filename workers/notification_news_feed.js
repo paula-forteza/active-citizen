@@ -21,9 +21,10 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
         models.AcNotification.find({
           where: { id: notificationJson.id },
           order: [
-            [ { model: models.AcActivity } ,'updated_at', 'asc' ]
+            [ { model: models.AcActivity, as: 'AcActivities' } ,'updated_at', 'asc' ]
           ],
           include: [
+            models.User,
             {
               model: models.AcActivity,
               as: 'AcActivities',
@@ -94,14 +95,14 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
         log.error("NotificationNewsFeedWorker Error", {err: error});
         callback();
       } else {
-        log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user });
+        log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user.simple() });
         switch(notification.type) {
           case "notification.post.new":
           case "notification.post.endorsement":
           case "notification.point.new":
           case "notification.point.quality":
             GenerateNewsFeedFromNotifications(notification, user, function () {
-              log.info('Processing notification.* Completed', { type: notification.type, user: user });
+              log.info('Processing GenerateNewsFeedFromNotifications Completed', { type: notification.type, user: user.simple() });
               callback();
             });
             break;

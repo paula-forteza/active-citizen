@@ -2,6 +2,7 @@ var models = require("../../../models");
 var log = require('../../utils/logger');
 var toJson = require('../../utils/to_json');
 var async = require('async');
+var _ = require('lodash');
 
 var getModelAndUsersByType = function (model, userType, id, notification_type, callback) {
   var userWhere = {};
@@ -34,11 +35,11 @@ var getModelAndUsersByType = function (model, userType, id, notification_type, c
 
 var addNotificationsForUsers = function (activity, users, notification_type, uniqueUserIds, callback) {
   async.eachSeries(users, function (user, seriesCallback) {
-    if (false && uniqueUserIds[user.id]) { // TODO: Fix this double protection
+    if (_.includes(uniqueUserIds.users, user.id)) {
       seriesCallback();
     } else {
       models.AcNotification.createNotificationFromActivity(user, activity, notification_type, 50, function (error) {
-        uniqueUserIds[user.id] = true;
+        uniqueUserIds.users.push(user.id);
         seriesCallback(error);
       });
     }
@@ -86,7 +87,7 @@ var addOrPossiblyGroupNotification = function (model, type, activity, user, prio
         } else {
           notification.addAcActivities(activity).then(function (results) {
             if (results) {
-              models.AcNotification.processNotification(notification, activity);
+              models.AcNotification.processNotification(notification, user, activity);
               callback();
             } else {
               callback("Notification Error Can't add activity");

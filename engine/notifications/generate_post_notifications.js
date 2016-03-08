@@ -79,7 +79,7 @@ var generateNotificationsForEndorsements = function (activity, callback) {
 module.exports = function (activity, user, callback) {
 
   // Make sure not to create duplicate notifications to the same user
-  var uniqueUserIds = {};
+  var uniqueUserIds = { users: [] };
 
   if (activity.type=='activity.post.new') {
     generateNotificationsForNewPost(activity, uniqueUserIds, callback);

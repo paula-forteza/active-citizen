@@ -4,17 +4,20 @@ var i18n = require('../../utils/i18n');
 var async = require('async');
 var log = require('../../utils/logger');
 var _ = require('lodash');
+var toJson = require('../../utils/to_json');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
 
 var createItem = function (notification, options, callback) {
   var detail = {};
-  detail.notification_id = notification.id;
-  detail.activity_id = notification.activity_id;
+  detail.ac_notification_id = notification.id;
+  detail.ac_activity_id = _.last(notification.AcActivities).id;
   detail.user_id = notification.user_id;
+  detail.priority = 100;
 
   models.AcNewsFeedItem.create(_.merge(detail, options)).then(function (item) {
     if (item) {
+      log.info("Generate News Feed Notifications Created item", { item: toJson(item) });
       callback();
     } else {
       callback('Could not created item');
@@ -24,14 +27,62 @@ var createItem = function (notification, options, callback) {
   })
 };
 
+var getLastRecommendedNewsFeedDate = function(options, callback) {
+  var where = {
+    type: 'newsFeed.from.notification.recommendation'
+  };
+
+  if (options.domain_id) {
+    where = _.merge(where, {
+      domain_id: options.domain_id
+    })
+  }
+
+  if (options.community_id) {
+    where = _.merge(where, {
+      community_id: options.community_id
+    })
+  }
+
+  if (options.group_id) {
+    where = _.merge(where, {
+      group_id: options.group_id
+    })
+  }
+
+  if (options.post_id) {
+    where = _.merge(where, {
+      post_id: options.post_id
+    })
+  }
+
+  models.AcNewsFeedItem.find({
+    where: where,
+    order: [
+      [ 'updated_at', 'desc' ]
+    ]
+  }).then(function (item) {
+    if (item) {
+      callback(null, item.updated_at);
+    } else {
+      callback();
+    }
+  }).catch(function (error) {
+    callback(error);
+  });
+};
+
 var buildNewsFeedItems = function (notification, callback) {
   var shouldInclude = false;
   var activity = _.last(notification.AcActivities);
   var lastNewsItem;
 
   async.series([
+    // If my activity, new post, my post or some of my followings mark it as should include
     function (seriesCallback) {
-      if (notification.user_id == activity.user_id) {
+      if (notification.user_id == activity.user_id ||
+          activity.type == 'activity.post.new' ||
+          (activity.Post && activity.Post.user_id == notification.user_id) ) {
         shouldInclude = true;
         seriesCallback();
       } else {
@@ -51,42 +102,36 @@ var buildNewsFeedItems = function (notification, callback) {
       }
     },
     function (seriesCallback) {
-      models.AcNewsFeedItem.find({
-        order: [
-          [ { model: models.AcNewsFeedItem }, 'updated_at', 'desc' ]
-        ]
-      }).then(function (item) {
-        if (item) {
-          lastNewsItem = item;
-        }
-        seriesCallback();
-      }).catch(function (error) {
-        seriesCallback(error);
-      });
-    },
-    function (seriesCallback) {
+      // Create newsFeed item if needed
       if (shouldInclude) {
         createItem(notification, {
-          type: 'news_feed.from.notification.should',
+          type: 'newsFeed.from.notification.should',
           domain_id: activity.domain_id,
           group_id: activity.group_id,
           post_id: activity.post_id,
-          community_id: activity.community_id }, function (error) {
-          seriesCallback(error)
-        });
+          community_id: activity.community_id },
+          seriesCallback);
       } else {
-        async.parallel([
-          // Domain news feed
+        var lastNewsItemUpdatedAt;
+        async.series([
+          // Domain news feed from recommendations
+          function (innerSeriesCallback) {
+            lastNewsItemUpdatedAt = null;
+            getLastRecommendedNewsFeedDate({domain_id: activity.domain_id}, function(error, itemUpdatedAt) {
+              lastNewsItemUpdatedAt = itemUpdatedAt;
+              innerSeriesCallback(error);
+            });
+          },
           function (innerSeriesCallback) {
             isItemRecommended(activity.post_id, notification.User, {
               limit: 15,
-              after: lastNewsItem ? lastNewsItem.updated_at.toISOString() : null
+              after: lastNewsItemUpdatedAt ? lastNewsItemUpdatedAt.toISOString() : null
             }, {
               domain_id: activity.domain_id
             }, function (isRecommended) {
               if (isRecommended) {
                 createItem(notification, {
-                  type: 'news_feed.from.notification.recommendation',
+                  type: 'newsFeed.from.notification.recommendation',
                   domain_id: activity.domain_id
                 }, function (error) {
                   innerSeriesCallback(error)
@@ -96,16 +141,23 @@ var buildNewsFeedItems = function (notification, callback) {
               }
             });
           },
-          // Community news feed
+          // Community news feed from recommendations
+          function (innerSeriesCallback) {
+            lastNewsItemUpdatedAt = null;
+            getLastRecommendedNewsFeedDate({community_id: activity.community_id}, function(error, itemUpdatedAt) {
+              lastNewsItemUpdatedAt = itemUpdatedAt;
+              innerSeriesCallback(error);
+            });
+          },
           function (innerSeriesCallback) {
             isItemRecommended(activity.post_id, notification.User, {
-              after: lastNewsItem ? lastNewsItem.updated_at.toISOString() : null
+              after: lastNewsItemUpdatedAt ? lastNewsItemUpdatedAt.toISOString() : null
             }, {
               community_id: activity.community_id
             }, function (isRecommended) {
               if (isRecommended) {
                 createItem(notification, {
-                  type: 'news_feed.from.notification.recommendation',
+                  type: 'newsFeed.from.notification.recommendation',
                   community_id: activity.community_id
                 }, function (error) {
                   innerSeriesCallback(error)
@@ -115,16 +167,23 @@ var buildNewsFeedItems = function (notification, callback) {
               }
             });
           },
-          // Group news feed
+          // Group news feed from recommendations
+          function (innerSeriesCallback) {
+            lastNewsItemUpdatedAt = null;
+            getLastRecommendedNewsFeedDate({group_id: activity.group_id}, function(error, itemUpdatedAt) {
+              lastNewsItemUpdatedAt = itemUpdatedAt;
+              innerSeriesCallback(error);
+            });
+          },
           function (innerSeriesCallback) {
             isItemRecommended(activity.post_id, notification.User, {
-              after: lastNewsItem ? lastNewsItem.updated_at.toISOString() : null
+              after: lastNewsItemUpdatedAt ? lastNewsItemUpdatedAt.toISOString() : null
             }, {
               group_id: activity.group_id
             }, function (isRecommended) {
               if (isRecommended) {
                 createItem(notification, {
-                  type: 'news_feed.from.notification.recommendation',
+                  type: 'newsFeed.from.notification.recommendation',
                   group_id: activity.group_id
                 }, function (error) {
                   innerSeriesCallback(error)
@@ -134,16 +193,23 @@ var buildNewsFeedItems = function (notification, callback) {
               }
             });
           },
-          // Post news feed
+          // Post news feed from recommendations
+          function (innerSeriesCallback) {
+            lastNewsItemUpdatedAt = null;
+            getLastRecommendedNewsFeedDate({post_id: activity.post_id}, function(error, itemUpdatedAt) {
+              lastNewsItemUpdatedAt = itemUpdatedAt;
+              innerSeriesCallback(error);
+            });
+          },
           function (innerSeriesCallback) {
             isItemRecommended(activity.post_id, notification.User, {
-              after: lastNewsItem ? lastNewsItem.updated_at.toISOString() : null
+              after: lastNewsItemUpdatedAt ? lastNewsItemUpdatedAt.toISOString() : null
             }, {
               post_id: activity.post_id
             }, function (isRecommended) {
               if (isRecommended) {
                 createItem(notification, {
-                  type: 'news_feed.from.notification.recommendation',
+                  type: 'newsFeed.from.notification.recommendation',
                   post_id: activity.post_id
                 }, function (error) {
                   innerSeriesCallback(error)
@@ -168,10 +234,11 @@ module.exports = function (notification, user, callback) {
     function (seriesCallback) {
       models.AcNewsFeedItem.find({
         where: {
-          notification_id: notification.id
+          ac_notification_id: notification.id
         }
       }).then(function (oldNewsFeedItem) {
         if (oldNewsFeedItem) {
+          log.info("Generate News Feed Notifications found old item and updating timestamp", { oldNewsFeedItemId: oldNewsFeedItem.id });
           news_feed_item = oldNewsFeedItem;
           news_feed_item.changed('updated_at', true);
           news_feed_item.update().then(function (updateResults) {
@@ -191,12 +258,12 @@ module.exports = function (notification, user, callback) {
       if (news_feed_item) {
         seriesCallback();
       } else {
-        buildNewsFeedItem(notification, seriesCallback);
+        buildNewsFeedItems(notification, seriesCallback);
       }
     }
   ], function (error) {
     if (error) {
-      log.error("Filtering News Feed Notifications Error", { err: error });
+      log.error("Generate News Feed Notifications Error", { err: error });
     }
     callback(error);
   });

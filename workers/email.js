@@ -36,7 +36,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
 
     template.render(emailLocals, function (error, results) {
       if (error) {
-        log.errors('EmailWorker', { err: error, user: emailLocals.user });
+        log.errors('EmailWorker', { err: error, user: emailLocals.user.simple() });
         done();
       } else {
         if (process.env.SENDGRID_USERNAME && (emailLocals.user.email=='robert@citizens.is' || emailLocals.user.email=='gunnar@citizens.is')) {
@@ -52,12 +52,12 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
               log.error('EmailWorker', { err: error, user: emailLocals.user });
               done(error);
             } else {
-              log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, user: emailLocals.user });
+              log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, user: emailLocals.user.simple() });
               done();
             }
           })
         } else {
-          log.warn('EmailWorker no SMTP server', { emailLocals: emailLocals, resultsHtml: results.html , resultsText: results.text });
+          log.warn('EmailWorker no SMTP server', { subject: emailLocals.subject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
           done();
         }
       }

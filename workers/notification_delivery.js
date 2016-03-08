@@ -22,6 +22,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         models.AcNotification.find({
           where: { id: notificationJson.id },
           include: [
+            models.User,
             {
               model: models.AcActivity,
               as: 'AcActivities',
@@ -88,7 +89,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         log.error("NotificationDeliveryWorker Error", {err: error});
         callback();
       } else {
-        log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user });
+        log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user.simple() });
         switch(notification.type) {
           case "notification.password.recovery":
             queue.create('send-one-email', {
@@ -99,7 +100,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               community: community,
               token: notification.AcActivites[0].object.token
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user });
+            log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
           case "notification.password.changed":
@@ -111,20 +112,20 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               community: community,
               token: notification.activity.object.token
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user });
+            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
           case "notification.post.new":
           case "notification.post.endorsement":
             deliverPostNotification(notification, user, function () {
-              log.info('Processing notification.post.* Completed', { type: notification.type, user: user });
+              log.info('Processing notification.post.* Completed', { type: notification.type, user: user.simple() });
               callback();
             });
             break;
           case "notification.point.new":
           case "notification.point.quality":
             deliverPointNotification(notification, user, function () {
-              log.info('Processing notification.point.* Completed', { type: notification.type, user: user });
+              log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
               callback();
             });
             break;

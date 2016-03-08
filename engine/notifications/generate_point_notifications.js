@@ -38,9 +38,9 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         if (post) {
           var users = [];
           async.eachSeries(post.Points, function(point, innerSeriesCallback) {
-            if (!uniqueUserIds[point.User.id]) {
+            if (!_.includes(uniqueUserIds.users, point.User.id)) {
               users.push(point.User);
-              uniqueUserIds[point.User.id] = true;
+              uniqueUserIds.users.push(point.User.id);
             }
             innerSeriesCallback();
           }, function (error) {
@@ -120,7 +120,7 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
 module.exports = function (activity, user, callback) {
 
   // Make sure not to create duplicate notifications to the same user
-  var uniqueUserIds = {};
+  var uniqueUserIds = { users: [] };
 
   if (activity.type=='activity.point.new') {
     generateNotificationsForNewPoint(activity, uniqueUserIds, callback);
