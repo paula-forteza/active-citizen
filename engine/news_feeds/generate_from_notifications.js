@@ -57,7 +57,7 @@ var getLastRecommendedNewsFeedDate = function(options, callback) {
   }
 
   models.AcNewsFeedItem.find({
-    where: where,
+    where: {},
     order: [
       [ 'updated_at', 'desc' ]
     ]

@@ -57,7 +57,7 @@ var getPost = function (postId, callback) {
   });
 };
 
-var createItem = function (postId, callback) {
+var createOrUpdateItem = function (postId, date, callback) {
   client = getClient(1);
   getPost(postId, function (post) {
     if (post) {
@@ -83,24 +83,26 @@ var createItem = function (postId, callback) {
 
       properties = _.merge(properties,
         {
-          date: post.created_at.toISOString()
+          date: date,
+          createdAt: post.created_at.toISOString()
         }
       );
 
       client.createItem({
         entityId: post.id,
         properties: properties,
-        date: post.created_at.toISOString(),
+        date: date,
+        createdAt: post.created_at.toISOString(),
         eventDate: post.created_at.toISOString()
       }).then(function (result) {
-        log.info('Events Manager createItem', {postId: post.id, result: result});
+        log.info('Events Manager createOrUpdateItem', {postId: post.id, result: result});
         callback();
       }).catch(function (error) {
-        log.error('Events Manager createItem Error', {postId: post.id, err: error });
+        log.error('Events Manager createOrUpdateItem Error', {postId: post.id, err: error });
         callback();
       });
     } else {
-      log.error('Events Manager createItem Error', {postId: post.id, err: "Could not find post" });
+      log.error('Events Manager createOrUpdateItem Error', {postId: post.id, err: "Could not find post" });
       callback();
     }
   })
@@ -119,7 +121,7 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         eventDate: date
       }).then(function (result) {
         log.info('Events Manager createAction', {action: action, postId: targetEntityId, userId: userId, result: result});
-        callback();
+        createOrUpdateItem(targetEntityId, date, callback);
       }).catch(function (error) {
         log.error('Events Manager createAction Error', {action: action, postId: targetEntityId, userId: userId, err: error});
         callback(error);
@@ -153,7 +155,7 @@ var generateRecommendationEvent = function (activity, callback) {
       createUser(activity.User, callback);
       break;
     case "activity.post.new":
-      createItem(activity.Post.id, callback);
+      createOrUpdateItem(activity.Post.id, activity.Post.created_at.toISOString(), callback);
       break;
     case "activity.post.endorsement.new":
       createAction(activity.Post.id, activity.user_id, activity.created_at.toISOString(), 'endorse', callback);
