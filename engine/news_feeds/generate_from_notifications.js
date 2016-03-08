@@ -57,7 +57,7 @@ var getLastRecommendedNewsFeedDate = function(options, callback) {
   }
 
   models.AcNewsFeedItem.find({
-    where: {},
+    where: where,
     order: [
       [ 'updated_at', 'desc' ]
     ]
@@ -93,6 +93,25 @@ var buildNewsFeedItems = function (notification, callback) {
           }
         }).then(function (following) {
           if (following) {
+            shouldInclude = true;
+          }
+          seriesCallback();
+        }).catch(function (error) {
+          seriesCallback(error)
+        });
+      }
+    },
+    function (seriesCallback) {
+      if (shouldInclude || !activity.Post) {
+        seriesCallback()
+      } else {
+        models.Endorsement.find({
+          where: {
+            user_id: notification.user_id,
+            post_id: activity.Post.id
+          }
+        }).then(function (endorsement) {
+          if (endorsement) {
             shouldInclude = true;
           }
           seriesCallback();
