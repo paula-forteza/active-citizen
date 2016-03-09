@@ -64,20 +64,20 @@ var whereFromOptions = function (options) {
 
     if (options.firstDynamicItemModifiedAt && options.lastDynamicItemModifiedAt) {
       modifiedBase = {
-        modified_at: {
+        updated_at: {
           $gt: options.lastDynamicItemModifiedAt,
           $lt: options.firstDynamicItemModifiedAt
         }
       };
     } else if (options.firstDynamicItemModifiedAt) {
       modifiedBase = {
-        modified_at: {
+        updated_at: {
           $lt: options.firstDynamicItemModifiedAt
         }
       };
     } else if (options.lastDynamicItemModifiedAt) {
       modifiedBase = {
-        modified_at: {
+        updated_at: {
           $gt: options.lastDynamicItemModifiedAt
         }
       };
@@ -89,7 +89,7 @@ var whereFromOptions = function (options) {
       _.merge(where, {
         $and: [
           {
-            modified_at: { $lt: options.before }
+            updated_at: { $lt: options.before }
           },
           modifiedBase
         ]
@@ -98,7 +98,7 @@ var whereFromOptions = function (options) {
       _.merge(where, {
         $and: [
           {
-            modified_at: { $gt: options.after }
+            updated_at: { $gt: options.after }
           },
           modifiedBase
         ]
@@ -107,12 +107,12 @@ var whereFromOptions = function (options) {
   } else {
     if (options.before) {
       _.merge(where, {
-        modified_at: { $lt: options.before }
+        updated_at: { $lt: options.before }
       });
     } else if (options.after) {
       _.merge(where,
         {
-          modified_at: { $gt: options.after }
+          updated_at: { $gt: options.after }
         });
     }
   }
@@ -128,6 +128,7 @@ var whereFromOptions = function (options) {
       community_id: options.community_id
     })
   }
+
   if (options.group_id) {
     _.merge(where, {
       group_id: options.group_id
@@ -149,12 +150,11 @@ var whereFromOptions = function (options) {
   return where;
 };
 
-var getNewsFeed = function(userId, options, callback) {
-  options.user_id = userId;
+var getNewsFeed = function(options, callback) {
   models.AcNewsFeedItem.findAll({
     where: whereFromOptions(options),
     order: [
-      ["modified_at", "desc"]
+      ["updated_at", "desc"]
     ],
     limit: options.limit || GENERAL_NEWS_FEED_LIMIT,
     include: [
@@ -247,7 +247,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
               // Randomize the remaining not recommended activities
               notRecommendedActivityIds = _.shuffle(notRecommendedActivityIds);
               // Merge the recommended activities using the not recommended ones
-              finalActivityIds = _.merge(recommendedActivityIds, _.dropRight(notRecommendedActivityIds, notRecommendedActivityIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedActivityIds.length)));
+              finalActivityIds = _.concat(recommendedActivityIds, _.dropRight(notRecommendedActivityIds, notRecommendedActivityIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedActivityIds.length)));
             } else {
               finalActivityIds = recommendedActivityIds;
             }
@@ -260,7 +260,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
       }
     },
     // Make sure there are no doubles
-    function () {
+    function (seriesCallback) {
       var currentActivityIds = _.map(allActivities, function (item) { return item.id; });
       models.AcNewsFeedItem.findAll({
         where: {
@@ -297,7 +297,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
     // Combine older and new dynamically recommended activities
     function (seriesCallback) {
       var olderActivities  = _.map(allActivities, function (item) { return item.AcActivity });
-      finalActivities = _.merge(allActivities, olderActivities);
+      finalActivities = _.concat(allActivities, olderActivities);
       // Sort the combined activities
       finalActivities = _.orderBy(finalActivities, ['updated_at'], ['desc']);
       seriesCallback();

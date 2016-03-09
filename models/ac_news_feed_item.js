@@ -1,5 +1,8 @@
 "use strict";
 
+var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/index_definitions').commonIndexForActivitiesAndNewsFeeds;
+var _ = require('lodash');
+
 // Notify user about this object
 
 module.exports = function(sequelize, DataTypes) {
@@ -18,42 +21,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    indexes: [
-      {
-        fields: ['type','user_id'],
-        where: {
-          status: 'active',
-          deleted: false
-        }
-      },
-      {
-        fields: ['post_id','user_id'],
-        where: {
-          status: 'active',
-          deleted: false
-        }
-      },
-      {
-        fields: ['group_id','user_id'],
-        where: {
-          status: 'active',
-          deleted: false
-        }
-      },
-      {
-        fields: ['community_id','user_id'],
-        where: {
-          status: 'active',
-          deleted: false
-        }
-      },
-      {
-        fields: ['domain_id','user_id'],
-        where: {
-          status: 'active',
-          deleted: false
-        }
-      },
+    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds, [
       {
         fields: ['ac_notification_id'],
         where: {
@@ -68,7 +36,7 @@ module.exports = function(sequelize, DataTypes) {
           deleted: false
         }
       }
-    ],
+    ]),
 
     underscored: true,
 

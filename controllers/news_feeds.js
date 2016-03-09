@@ -12,6 +12,7 @@ var getNewsFeed = require('../engine/news_feeds/generate_dynamically').getNewsFe
 
 router.get('/:id/domain', auth.can('view domain'), function(req, res) {
   var options = {
+    user_id: req.user.id,
     domain_id: req.params.id,
     after: req.params.after,
     before: req.params.before

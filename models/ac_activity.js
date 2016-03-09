@@ -9,6 +9,8 @@ var async = require("async");
 var log = require('../utils/logger');
 var queue = require('../workers/queue');
 var toJson = require('../utils/to_json');
+var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/index_definitions').commonIndexForActivitiesAndNewsFeeds;
+var _ = require('lodash');
 
 var setupDefaultAssociations = function (activity, user, domain, community, group, done) {
   async.parallel([
@@ -69,7 +71,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    indexes: [
+    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds, [
       {
         name: 'activity_public_and_active_by_type',
         fields: ['type'],
@@ -200,7 +202,7 @@ module.exports = function(sequelize, DataTypes) {
         using: 'gin',
         operator: 'jsonb_path_ops'
       }
-    ],
+    ]),
 
     underscored: true,
 
