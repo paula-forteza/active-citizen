@@ -1,4 +1,4 @@
-var getLastRecommendedNewsFeedDate = function(options, type, callback) {
+var getRecommendedNewsFeedDate = function(options, type, callback) {
   var where = {
     type: type
   };
@@ -29,8 +29,9 @@ var getLastRecommendedNewsFeedDate = function(options, type, callback) {
 
   models.AcNewsFeedItem.find({
     where: where,
+    attributes: ['updated_at'],
     order: [
-      [ 'updated_at', 'desc' ]
+      [ 'updated_at', options.firstItem ? 'desc' : 'asc' ]
     ]
   }).then(function (item) {
     if (item) {
@@ -43,6 +44,34 @@ var getLastRecommendedNewsFeedDate = function(options, type, callback) {
   });
 };
 
+var activitiesDefaultIncludes = [
+  {
+    model: models.User,
+    required: true
+  },
+  {
+    model: models.Domain,
+    required: false
+  },
+  {
+    model: models.Community,
+    required: false
+  },
+  {
+    model: models.Group,
+    required: false
+  },
+  {
+    model: models.Post,
+    required: false
+  },
+  {
+    model: models.Point,
+    required: false
+  }
+];
+
 module.exports = {
-  getLastRecommendedNewsFeedDate: getLastRecommendedNewsFeedDate
+  getRecommendedNewsFeedDate: getRecommendedNewsFeedDate,
+  activitiesDefaultIncludes: activitiesDefaultIncludes
 };
