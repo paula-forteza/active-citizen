@@ -23,6 +23,12 @@ module.exports = function(sequelize, DataTypes) {
 
     indexes: _.concat(commonIndexForActivitiesAndNewsFeeds, [
       {
+        fields: ['id'],
+        where: {
+          deleted: false
+        }
+      },
+      {
         fields: ['ac_notification_id'],
         where: {
           status: 'active',

@@ -8,7 +8,7 @@ var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
 };
 
-models.User.find({ where: {email:'robert.bjarnason@gmail.com'}}).then(function (user) {
+models.User.find({ where: {email:'robert@citizens.is'}}).then(function (user) {
   engine.sendQuery({
     user: user.id,
     fields: [

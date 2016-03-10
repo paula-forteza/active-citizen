@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var newsFeedFilter = ("../engine/newsfeed_filter");
-var models = require("../models");
+var models = require("../../models");
 var auth = require('../authorization');
 var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
@@ -10,7 +10,7 @@ var _ = require('lodash');
 var addRecommendedActivities = require('../engine/news_feeds/generate_dynamically').addRecommendedActivities;
 var getNewsFeed = require('../engine/news_feeds/generate_dynamically').getNewsFeed;
 
-router.get('/:id/domain', auth.can('view domain'), function(req, res) {
+router.get('/domains/:id', auth.can('view domain'), function(req, res) {
   var options = {
     user_id: req.user.id,
     domain_id: req.params.id,
@@ -18,7 +18,7 @@ router.get('/:id/domain', auth.can('view domain'), function(req, res) {
     before: req.params.before
   };
 
-  getNewsFeed(req.user.id, options,
+  getNewsFeed(options,
     function (error, items) {
       if (error) {
         log.error("News Feed Error Domain", { domainId: req.params.id, user: toJson(req.user.simple()), errorStatus:  500 });
@@ -35,6 +35,5 @@ router.get('/:id/domain', auth.can('view domain'), function(req, res) {
       }
   });
 });
-
 
 module.exports = router;
