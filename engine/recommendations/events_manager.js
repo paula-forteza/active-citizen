@@ -218,7 +218,7 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
 
   engine.sendQuery({
     user: user.id,
-    num: options.limit || 25,
+    num: options.limit || 200,
     fields: fields,
     dateRange: dateRange
   }).then(function (results) {

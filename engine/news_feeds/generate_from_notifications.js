@@ -14,7 +14,7 @@ var createItemFromNotification = function (notification, options, callback) {
   detail.ac_notification_id = notification.id;
   detail.ac_activity_id = _.last(notification.AcActivities).id;
   detail.user_id = notification.user_id;
-  detail.priority = 100;
+  detail.latest_ac_activity_created_at = _.last(notification.AcActivities).created_at;
 
   models.AcNewsFeedItem.create(_.merge(detail, options)).then(function (item) {
     if (item) {
@@ -84,7 +84,8 @@ var buildNewsFeedItems = function (notification, callback) {
           domain_id: activity.domain_id,
           group_id: activity.group_id,
           post_id: activity.post_id,
-          community_id: activity.community_id },
+          community_id: activity.community_id,
+          latest_ac_activity_created_at: activity.created_at },
           seriesCallback);
       } else {
         var lastNewsItemUpdatedAt;
@@ -203,6 +204,7 @@ var buildNewsFeedItems = function (notification, callback) {
 module.exports = function (notification, user, callback) {
 
   var news_feed_item;
+  var activity = _.last(notification.AcActivities);
 
   async.series([
     // See if news item for same notification exists and set updated time if needed
@@ -215,7 +217,7 @@ module.exports = function (notification, user, callback) {
         if (oldNewsFeedItem) {
           log.info("Generate News Feed Notifications found old item and updating timestamp", { oldNewsFeedItemId: oldNewsFeedItem.id });
           news_feed_item = oldNewsFeedItem;
-          news_feed_item.changed('updated_at', true);
+          news_feed_item.latest_ac_activity_created_at = activity.created_at;
           news_feed_item.update().then(function (updateResults) {
             if (updateResults) {
               log.error("Filtering News Feed Notifications Error", { err: "Could not update timestamp" });

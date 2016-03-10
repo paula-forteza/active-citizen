@@ -7,7 +7,7 @@ var _ = require('lodash');
 var toJson = require('../../utils/to_json');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
-var getRecommendationFor = require('./news_feeds_utils').getRecommendationFor;
+var getRecommendationFor = require('../recommendations/events_manager').getRecommendationFor;
 
 var getRecommendedNewsFeedDate = require('./news_feeds_utils').getRecommendedNewsFeedDate;
 var activitiesDefaultIncludes = require('./news_feeds_utils').activitiesDefaultIncludes;
@@ -84,17 +84,26 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
       where = _.merge(where, {
         type: {
           $in: defaultKeyActivities
-        },
-        id: {
-          $notIn: activitiesCurrentlyInFeedIds
         }
       });
+      if (activitiesCurrentlyInFeedIds.length>0) {
+        where = _.merge(where, {
+          id: {
+            $notIn: activitiesCurrentlyInFeedIds
+          }
+        });
+      }
+      delete where.user_id;
       models.AcActivity.findAll({
         where: where,
-        limit: GENERAL_NEWS_FEED_LIMIT
+        limit: GENERAL_NEWS_FEED_LIMIT,
+        order: [
+          [ "updated_at", "desc"]
+        ]
       }).then(function(activities) {
         log.info("Generate News Feed Dynamically Got defaultKeyActivities", { activitiesLength: activities.length });
         allActivities = activities;
+        seriesCallback();
       }).catch(function(error) {
         seriesCallback(error);
       });
@@ -105,7 +114,10 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
         log.info("Generate News Feed Dynamically Breached Recommendation Filter Threshold", {
           allActivitiesLength: allActivities.length, threshold: RECOMMENDATION_FILTER_THRESHOLD
         });
-        var currentActivityIds = _.map(allActivities, function (item) { return item.id.toString(); });
+        var currentPostIds = _.map(allActivities, function (item) { return item.post_id ? item.post_id.toString() : null; });
+        // There can be more than one instance of a post_id from a group of activities
+        currentPostIds =_.uniq(currentPostIds);
+        currentPostIds = _.without(currentPostIds, null);
         var dateRange = {};
         if (options.after && options.before) {
           dateRange = { after: options.after, before: options.before }
@@ -118,22 +130,22 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
           if (error) {
             seriesCallback(error);
           } else {
-            var recommendedActivityIds = _.filter(currentActivityIds, function (activity) { return _.includes(activity, recommendedItemIds)});
-            var notRecommendedActivityIds = _.filter(currentActivityIds, function (activity) { return !_.includes(activity, recommendedItemIds)});
+            var recommendedPostIds = _.filter(currentPostIds, function (activity) { return _.includes(recommendedItemIds, activity) });
+            var notRecommendedPostIds = _.filter(currentPostIds, function (activity) { return !_.includes(recommendedItemIds, activity)});
             log.info("Generate News Feed Dynamically Recommendation status", {
-              recommendedActivityIdsLength: recommendedActivityIds.length, notRecommendedActivityIdsLength: notRecommendedActivityIds.length
+              recommendedPostIdsLength: recommendedPostIds.length, notRecommendedPostIdsLength: notRecommendedPostIds.length
             });
-            var finalActivityIds;
-            if (recommendedActivityIds.length<RECOMMENDATION_FILTER_THRESHOLD) {
+            var finalPostIds;
+            if (recommendedPostIds.length<RECOMMENDATION_FILTER_THRESHOLD) {
               // Randomize the remaining not recommended activities
-              notRecommendedActivityIds = _.shuffle(notRecommendedActivityIds);
+              notRecommendedPostIds = _.shuffle(notRecommendedPostIds);
               // Merge the recommended activities using the not recommended ones
-              finalActivityIds = _.concat(recommendedActivityIds, _.dropRight(notRecommendedActivityIds,
-                                          notRecommendedActivityIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedActivityIds.length)));
+              finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds,
+                                          notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
             } else {
-              finalActivityIds = recommendedActivityIds;
+              finalPostIds = recommendedPostIds;
             }
-            allActivities = _.filter(allActivities, function (activity) { return _.includes(activity.id.toString(), finalActivityIds)});
+            allActivities = _.filter(allActivities, function (activity) { return (activity.post_id && _.includes(finalPostIds, activity.post_id.toString()))});
             seriesCallback();
           }
         });
@@ -149,7 +161,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
       var currentActivityIds = _.map(allActivities, function (item) { return item.id; });
       models.AcNewsFeedItem.findAll({
         where: {
-          id: {
+          ac_activity_id: {
             $in: currentActivityIds
           }
         }
@@ -159,19 +171,20 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
         });
         var alreadySavedActivitiesIds = _.map(alreadySavedActivities, function (item) { return item.id; });
         // Filter out activities already in this newsfeed
-        allActivities = _.filter(allActivities, function (activity) { return !_.includes(activity.id, alreadySavedActivities)});
+        allActivities = _.filter(allActivities, function (activity) { return !_.includes(alreadySavedActivities, activity.id)});
+        seriesCallback();
       }).catch(function(error) {
         seriesCallback(error);
       });
     },
     // Save all left in a transaction
     function (seriesCallback) {
-      log.info("Generate News Feed Dynamically Saving new news items", { alreadySavedLength: alreadySavedActivities.length });
+      log.info("Generate News Feed Dynamically Saving new news items", { allActivitiesLength: allActivities.length });
 
-      sequelize.transaction(function (t1) {
+      models.sequelize.transaction(function (t1) {
         allInserts = [];
         _.forEach(allActivities, function (activity) {
-          allInserts.push(models.AcNewsFeedItem.create({ ac_activity_id: activity.id,
+          allInserts.push(models.AcNewsFeedItem.create({ ac_activity_id: activity.id, latest_ac_activity_updated_at: activity.created_at,
                                                          type: 'newsFeed.dynamic.recommendation', user_id: user.id,
                                                          domain_id: options.domain_id, community_id: options.community_id,
                                                          group_id: options.group_id, post_id: options.post_id }, { transaction: t1 }));
@@ -187,7 +200,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
     },
     // Combine older and new dynamically recommended activities
     function (seriesCallback) {
-      var olderActivities  = _.map(allActivities, function (item) { return item.AcActivity });
+      var olderActivities  = _.map(currentInFeedItems, function (item) { return item.AcActivity });
       finalActivities = _.concat(allActivities, olderActivities);
       // Sort the combined activities
       finalActivities = _.orderBy(finalActivities, ['updated_at'], ['desc']);

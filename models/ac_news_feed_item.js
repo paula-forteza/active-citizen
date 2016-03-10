@@ -8,8 +8,8 @@ var _ = require('lodash');
 module.exports = function(sequelize, DataTypes) {
 
   var AcNewsFeedItem = sequelize.define("AcNewsFeedItem", {
-    priority: { type: DataTypes.INTEGER, allowNull: false },
     type: { type: DataTypes.STRING, allowNull: false },
+    latest_ac_activity_created_at: { type: DateTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {
@@ -21,10 +21,17 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds, [
+    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds('latest_ac_activity_created_at'), [
       {
         fields: ['id'],
         where: {
+          deleted: false
+        }
+      },
+      {
+        fields: ['ac_notification_id'],
+        where: {
+          status: 'active',
           deleted: false
         }
       },

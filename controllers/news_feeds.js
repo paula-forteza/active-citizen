@@ -26,7 +26,7 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
       } else {
         addRecommendedActivities(req.user, items, options, function(error, finalItems) {
           if (error) {
-            log.error("News Feed Error Domain", { domainId: req.params.id, user: toJson(req.user.simple()), error: error, errorStatus:  500 });
+            log.error("News Feed Error Domain", { domainId: req.params.id, userId: req.user.id, error: error, errorStatus:  500 });
             res.sendStatus(500);
           } else {
             res.send(finalItems);
