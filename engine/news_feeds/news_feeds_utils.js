@@ -3,7 +3,8 @@ var _ = require('lodash');
 
 var getRecommendedNewsFeedDate = function(options, type, callback) {
   var where = {
-    type: type
+    type: type,
+    user_id: options.user_id
   };
 
   if (options.domain_id) {
@@ -30,15 +31,22 @@ var getRecommendedNewsFeedDate = function(options, type, callback) {
     })
   }
 
+  var order;
+  if (options.firstItem) {
+    order = [['latest_activity_at','DESC']]
+  } else {
+    order = [['latest_activity_at','ASC']]
+  }
+
   models.AcNewsFeedItem.find({
     where: where,
     attributes: ['latest_activity_at'],
     order: [
-      [ 'latest_activity_at', options.firstItem ? 'desc' : 'asc' ]
+      [ 'latest_activity_at', options.latest ? 'desc' : 'asc' ]
     ]
   }).then(function (item) {
     if (item) {
-      callback(null, item.updated_at);
+      callback(null, item.latest_activity_at);
     } else {
       callback();
     }
@@ -78,11 +86,18 @@ var whereFromOptions = function (options) {
 
   // Example query 1
   //  Get latest
+    // If newer activities than latest_processed_range
+      // Generate items from activities
+      // Load latest notification news feed items with created_at $gt oldest_processed_activity
+      // Create processed_range
+
+  // If I request older items by scrolling down
+
   //  AcNewsFeed Options
   //    Limit 30
   //  AcActivities
-  //    modified_at $gt last_dynamically_generated_processed_news_feed_ac_activity_modified_at
-  //    modified_at $lt first_dynamically_generated_processed_news_feed_ac_activity_modified_at
+  //    modified_at $gt latest_dynamically_generated_processed_news_feed_ac_activity_modified_at
+  //    modified_at $lt oldest_dynamically_generated_processed_news_feed_ac_activity_modified_at
 
   // Example query 2
   //  Get latest since last
@@ -115,23 +130,25 @@ var whereFromOptions = function (options) {
   if (options.isAcActivity) {
     var updatedAtBase = {};
 
-    if (options.firstDynamicItemModifiedAt && options.lastDynamicItemModifiedAt) {
+    if (options.latestDynamicItemModifiedAt && options.oldestDynamicItemModifiedAt) {
       updatedAtBase = {
-        updated_at: {
-          $gt: options.lastDynamicItemModifiedAt,
-          $lt: options.firstDynamicItemModifiedAt
+        created_at: {
+          $or: {
+            $gt: options.latestDynamicItemModifiedAt,  //  >  15.01.2001
+            $lt: options.oldestDynamicItemModifiedAt   //  <  05.01.2001
+          }
         }
       };
-    } else if (options.firstDynamicItemModifiedAt) {
+    } else if (options.latestDynamicItemModifiedAt) {
       updatedAtBase = {
-        updated_at: {
-          $lt: options.firstDynamicItemModifiedAt
+        created_at: {
+          $gt: options.latestDynamicItemModifiedAt
         }
       };
-    } else if (options.lastDynamicItemModifiedAt) {
+    } else if (options.oldestDynamicItemModifiedAt) {
       updatedAtBase = {
-        updated_at: {
-          $gt: options.lastDynamicItemModifiedAt
+        created_at: {
+          $lt: options.oldestDynamicItemModifiedAt
         }
       };
     }
@@ -142,7 +159,7 @@ var whereFromOptions = function (options) {
       _.merge(where, {
         $and: [
           {
-            updated_at: { $lt: options.before }
+            created_at: { $lt: options.before }
           },
           updatedAtBase
         ]
@@ -151,7 +168,7 @@ var whereFromOptions = function (options) {
       _.merge(where, {
         $and: [
           {
-            updated_at: { $gt: options.after }
+            created_at: { $gt: options.after }
           },
           updatedAtBase
         ]
@@ -160,12 +177,12 @@ var whereFromOptions = function (options) {
   } else {
     if (options.before) {
       _.merge(where, {
-        updated_at: { $lt: options.before }
+        created_at: { $lt: options.before }
       });
     } else if (options.after) {
       _.merge(where,
         {
-          updated_at: { $gt: options.after }
+          created_at: { $gt: options.after }
         });
     }
   }
