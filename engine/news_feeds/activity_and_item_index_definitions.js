@@ -78,7 +78,7 @@ var commonIndexForActivitiesAndNewsFeeds = function(createdAtField) {
       }
     },
     {
-      fields: ['post_id','user_id',createdAtField],
+      fields: ['post_id','user_id', createdAtField],
       where: {
         status: 'active',
         deleted: false

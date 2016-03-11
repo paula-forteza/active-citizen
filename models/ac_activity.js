@@ -9,7 +9,7 @@ var async = require("async");
 var log = require('../utils/logger');
 var queue = require('../workers/queue');
 var toJson = require('../utils/to_json');
-var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/index_definitions').commonIndexForActivitiesAndNewsFeeds;
+var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/activity_and_item_index_definitions').commonIndexForActivitiesAndNewsFeeds;
 var _ = require('lodash');
 
 var setupDefaultAssociations = function (activity, user, domain, community, group, done) {

@@ -32,9 +32,9 @@ var getRecommendedNewsFeedDate = function(options, type, callback) {
 
   models.AcNewsFeedItem.find({
     where: where,
-    attributes: ['latest_ac_activity_created_at'],
+    attributes: ['latest_activity_at'],
     order: [
-      [ 'latest_ac_activity_created_at', options.firstItem ? 'desc' : 'asc' ]
+      [ 'latest_activity_at', options.firstItem ? 'desc' : 'asc' ]
     ]
   }).then(function (item) {
     if (item) {

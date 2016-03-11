@@ -1,6 +1,7 @@
 "use strict";
 
-var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/index_definitions').commonIndexForActivitiesAndNewsFeeds;
+var commonIndexForActivitiesAndNewsFeeds = require('../engine/news_feeds/activity_and_item_index_definitions').commonIndexForActivitiesAndNewsFeeds;
+
 var _ = require('lodash');
 
 // Notify user about this object
@@ -9,7 +10,7 @@ module.exports = function(sequelize, DataTypes) {
 
   var AcNewsFeedItem = sequelize.define("AcNewsFeedItem", {
     type: { type: DataTypes.STRING, allowNull: false },
-    latest_ac_activity_created_at: { type: DateTypes.DATE, allowNull: false },
+    latest_activity_at: { type: DataTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {
@@ -21,17 +22,10 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds('latest_ac_activity_created_at'), [
+    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds('latest_activity_at'), [
       {
         fields: ['id'],
         where: {
-          deleted: false
-        }
-      },
-      {
-        fields: ['ac_notification_id'],
-        where: {
-          status: 'active',
           deleted: false
         }
       },
