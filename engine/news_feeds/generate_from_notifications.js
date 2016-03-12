@@ -16,15 +16,22 @@ var createItemFromNotification = function (notification, options, callback) {
   detail.user_id = notification.user_id;
   detail.latest_activity_at = _.last(notification.AcActivities).created_at;
 
-  models.AcNewsFeedItem.create(_.merge(detail, options)).then(function (item) {
-    if (item) {
-      log.info("Generate News Feed Notifications Created item", { item: toJson(item) });
-      callback();
+  models.AcNewsFeedItem.find({where: { ac_activity_id: detail.ac_activity_id }}).then(function(results){
+    if (!results) {
+      models.AcNewsFeedItem.create(_.merge(detail, options)).then(function (item) {
+        if (item) {
+          log.info("Generate News Feed Notifications Created item", { item: toJson(item) });
+          callback();
+        } else {
+          callback('Could not created item');
+        }
+      }).catch(function (error) {
+        callback(error);
+      })
     } else {
-      callback('Could not created item');
+      log.warn("Not creating news feed item for activitity that is already there", {acActivityId: detail.ac_activity_id, userId: detail.user_id });
+      callback();
     }
-  }).catch(function (error) {
-    callback(error);
   })
 };
 

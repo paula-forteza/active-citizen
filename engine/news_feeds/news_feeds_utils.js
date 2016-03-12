@@ -87,9 +87,25 @@ var whereFromOptions = function (options) {
   // Example query 1
   //  Get latest
     // If newer activities than latest_processed_range
-      // Generate items from activities
-      // Load latest notification news feed items with created_at $gt oldest_processed_activity
+      // Generate items from activities newer than latest_processed_range_start or Max 30
+      // Load latest notification news feed items with created_at $gt oldest_activity being processed
       // Create processed_range
+  // Get more
+    // If activities older than last viewed and newer than last_processed_at (older than last viewed also)
+      // Generate Items
+      // Load latest notification news feed items with created_at $gt oldest_activity being processed
+      // Create processed_range
+    // Else load all items in the time range next processed range (older than last viewed)
+  //  Get new updated
+    // If newer activities than latest_processed_range and newer than last viewed
+      // Generate items from activities newer than latest_processed_range_start and newer than the last viewed or Max 30
+      // Load latest notification news feed items with created_at $gt oldest_activity being processed
+      // Create processed_range
+  // Else if processed_range newer than last viewed
+    // load all items in the time range
+  // Else if notification generated items newer than the last viewed
+    // Deliver items
+
 
   // If I request older items by scrolling down
 
