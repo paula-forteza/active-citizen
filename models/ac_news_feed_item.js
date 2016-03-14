@@ -42,6 +42,12 @@ module.exports = function(sequelize, DataTypes) {
           status: 'active',
           deleted: false
         }
+      },
+      {
+        fields: ['ac_activity_id'],
+        where: {
+          deleted: false
+        }
       }
     ]),
 

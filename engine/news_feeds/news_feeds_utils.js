@@ -1,11 +1,81 @@
 var models = require("../../../models");
 var _ = require('lodash');
 
-var getRecommendedNewsFeedDate = function(options, type, callback) {
+var getCommonWhereDateOptions = function(options) {
+  where = {};
+  if (options.isAcActivity) {
+    var updatedAtBase = {};
+
+    if (options.latestItemAt && options.oldestItemAt) {
+      updatedAtBase = {
+        created_at: {
+          $or: {
+            $gt: options.latestItemAt,  //  >  15.01.2001
+            $lt: options.oldestItemAt   //  <  05.01.2001
+          }
+        }
+      };
+    } else if (options.latestItemAt) {
+      updatedAtBase = {
+        created_at: {
+          $gt: options.latestItemAt
+        }
+      };
+    } else if (options.oldestItemAt) {
+      updatedAtBase = {
+        created_at: {
+          $lt: options.oldestItemAt
+        }
+      };
+    }
+
+    if (!options.after && !options.before) {
+      _.merge(where, updatedAtBase)
+    } else if (options.before) {
+      _.merge(where, {
+        $and: [
+          {
+            created_at: { $lt: options.before }
+          },
+          updatedAtBase
+        ]
+      })
+    } else if (options.after) {
+      _.merge(where, {
+        $and: [
+          {
+            created_at: { $gt: options.after }
+          },
+          updatedAtBase
+        ]
+      })
+    }
+  } else {
+    if (options.before) {
+      _.merge(where, {
+        created_at: { $lt: options.before }
+      });
+    } else if (options.after) {
+      _.merge(where,
+        {
+          created_at: { $gt: options.after }
+        });
+    }
+  }
+
+};
+
+var getCommonWhereOptions = function(options) {
   var where = {
-    type: type,
+    status: 'active',
     user_id: options.user_id
   };
+
+  if (options.type) {
+    where = _.merge(where, {
+      type: options.type
+    })
+  }
 
   if (options.domain_id) {
     where = _.merge(where, {
@@ -31,22 +101,28 @@ var getRecommendedNewsFeedDate = function(options, type, callback) {
     })
   }
 
+  return where;
+};
+
+var getModelDate = function(model, options, callback) {
+  var where = getCommonWhereOptions(options);
+
   var order;
-  if (options.firstItem) {
-    order = [['latest_activity_at','DESC']]
+  if (options.oldest) {
+    order = [[options.dateColumn, 'ASC']]
   } else {
-    order = [['latest_activity_at','ASC']]
+    order = [[options.dateColumn, 'DESC']]
   }
 
-  models.AcNewsFeedItem.find({
+  model.find({
     where: where,
-    attributes: ['latest_activity_at'],
+    attributes: [options.dateColumn],
     order: [
-      [ 'latest_activity_at', options.latest ? 'desc' : 'asc' ]
+      [ options.dateColumn, options.latest ? 'desc' : 'asc' ]
     ]
   }).then(function (item) {
     if (item) {
-      callback(null, item.latest_activity_at);
+      callback(null, item.getDataValue(options.dateColumn));
     } else {
       callback();
     }
@@ -54,6 +130,20 @@ var getRecommendedNewsFeedDate = function(options, type, callback) {
     callback(error);
   });
 };
+
+var getNewsFeedDate = function(options, type, callback) {
+  getModelDate(models.AcNewsFeedItem, _.merge(options, {
+    dateColumn: 'latest_activity_at',
+    type: type
+  }), callback)
+};
+
+var getActivityDate = function(options, callback) {
+  getModelDate(models.AcActivity, _.merge(options, {
+    dateColumn: 'created_at'
+  }), callback)
+};
+
 
 var activitiesDefaultIncludes = [
   {
@@ -82,14 +172,41 @@ var activitiesDefaultIncludes = [
   }
 ];
 
+var getLatestAfterDate = function (afterDate, callback) {
+  var latestActivityTime, latestProcessedRange;
+
+  async.parallel([
+    function (seriesCallback) {
+      getActivityDate({ afterDate: afterDate }, function (error, latestActivityTimeIn) {
+        latestActivityTime = latestActivityTimeIn;
+          seriesCallback(error);
+      })
+    },
+    function (seriesCallback) {
+      getLatestProcessedRange({ afterDate: afterDate }, function (error, latestProcessedRangeIn) {
+        latestProcessedRange = latestProcessedRangeIn;
+        seriesCallback(error);
+      })
+    }
+  ],function (error) {
+    if (latestActivityTime>=latestProcessedRange.latest_activity_at) {
+      generateNewsfeedFromActivities({ afterDate: afterDate }, callback);
+    } else {
+      getNewsfeedItemsFromProccessedRange(latestProcessedRange, callback);
+    }
+  })
+};
+
 var whereFromOptions = function (options) {
 
   // Example query 1
   //  Get latest
     // If newer activities than latest_processed_range
-      // Generate items from activities newer than latest_processed_range_start or Max 30
       // Load latest notification news feed items with created_at $gt oldest_activity being processed
+      // Generate items from activities newer than latest_processed_range_start or Max 30
       // Create processed_range
+
+
   // Get more
     // If activities older than last viewed and newer than last_processed_at (older than last viewed also)
       // Generate Items
@@ -143,66 +260,6 @@ var whereFromOptions = function (options) {
     status: 'active'
   };
 
-  if (options.isAcActivity) {
-    var updatedAtBase = {};
-
-    if (options.latestDynamicItemModifiedAt && options.oldestDynamicItemModifiedAt) {
-      updatedAtBase = {
-        created_at: {
-          $or: {
-            $gt: options.latestDynamicItemModifiedAt,  //  >  15.01.2001
-            $lt: options.oldestDynamicItemModifiedAt   //  <  05.01.2001
-          }
-        }
-      };
-    } else if (options.latestDynamicItemModifiedAt) {
-      updatedAtBase = {
-        created_at: {
-          $gt: options.latestDynamicItemModifiedAt
-        }
-      };
-    } else if (options.oldestDynamicItemModifiedAt) {
-      updatedAtBase = {
-        created_at: {
-          $lt: options.oldestDynamicItemModifiedAt
-        }
-      };
-    }
-
-    if (!options.after && !options.before) {
-      _.merge(where, updatedAtBase)
-    } else if (options.before) {
-      _.merge(where, {
-        $and: [
-          {
-            created_at: { $lt: options.before }
-          },
-          updatedAtBase
-        ]
-      })
-    } else if (options.after) {
-      _.merge(where, {
-        $and: [
-          {
-            created_at: { $gt: options.after }
-          },
-          updatedAtBase
-        ]
-      })
-    }
-  } else {
-    if (options.before) {
-      _.merge(where, {
-        created_at: { $lt: options.before }
-      });
-    } else if (options.after) {
-      _.merge(where,
-        {
-          created_at: { $gt: options.after }
-        });
-    }
-  }
-
   if (options.domain_id) {
     _.merge(where, {
       domain_id: options.domain_id
@@ -241,7 +298,7 @@ defaultKeyActivities = ['activity.post.status.update','activity.post.officialSta
   'activity.post.officialStatus.inProgress'];
 
 module.exports = {
-  getRecommendedNewsFeedDate: getRecommendedNewsFeedDate,
+  getNewsFeedDate: getNewsFeedDate,
   activitiesDefaultIncludes: activitiesDefaultIncludes,
   whereFromOptions: whereFromOptions,
   defaultKeyActivities: defaultKeyActivities

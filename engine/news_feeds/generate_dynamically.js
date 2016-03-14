@@ -9,7 +9,7 @@ var toJson = require('../../utils/to_json');
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
 var getRecommendationFor = require('../recommendations/events_manager').getRecommendationFor;
 
-var getRecommendedNewsFeedDate = require('./news_feeds_utils').getRecommendedNewsFeedDate;
+var getNewsFeedDate = require('./news_feeds_utils').getNewsFeedDate;
 var activitiesDefaultIncludes = require('./news_feeds_utils').activitiesDefaultIncludes;
 var whereFromOptions = require('./news_feeds_utils').whereFromOptions;
 var defaultKeyActivities = require('./news_feeds_utils').defaultKeyActivities;
@@ -56,7 +56,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
     async.series([
       // Get firstDynamicRecommendedNewsFeed item AcActivity.created_at date for options
       function (seriesCallback) {
-        getRecommendedNewsFeedDate(_.merge(options, { latest: true }), 'newsFeed.dynamic.recommendation', function(error, itemUpdatedAt) {
+        getNewsFeedDate(options, 'newsFeed.dynamic.recommendation', function(error, itemUpdatedAt) {
           if (error) {
             seriesCallback(error);
           } else {
@@ -70,7 +70,7 @@ var addRecommendedActivities = function (user, currentInFeedItems, options, call
       },
       // Get oldersDynamicRecommendedNewsFeed item AcActivity.created_at date for options
       function (seriesCallback) {
-        getRecommendedNewsFeedDate(_.merge(options, { latest: false }), 'newsFeed.dynamic.recommendation', function(error, itemUpdatedAt) {
+        getNewsFeedDate(_.merge(options, { oldest: true }), 'newsFeed.dynamic.recommendation', function(error, itemUpdatedAt) {
           if (error) {
             seriesCallback(error);
           } else {

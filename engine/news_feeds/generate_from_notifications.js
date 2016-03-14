@@ -7,7 +7,7 @@ var _ = require('lodash');
 var toJson = require('../../utils/to_json');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
-var getRecommendedNewsFeedDate = require('./news_feeds_utils').getRecommendedNewsFeedDate;
+var getNewsFeedDate = require('./news_feeds_utils').getNewsFeedDate;
 
 var createItemFromNotification = function (notification, options, callback) {
   var detail = {};
@@ -100,7 +100,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Domain news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getRecommendedNewsFeedDate({domain_id: activity.domain_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
+            getNewsFeedDate({domain_id: activity.domain_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -127,7 +127,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Community news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getRecommendedNewsFeedDate({community_id: activity.community_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
+            getNewsFeedDate({community_id: activity.community_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -153,7 +153,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Group news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getRecommendedNewsFeedDate({group_id: activity.group_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
+            getNewsFeedDate({group_id: activity.group_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
@@ -179,7 +179,7 @@ var buildNewsFeedItems = function (notification, callback) {
           // Post news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
-            getRecommendedNewsFeedDate({post_id: activity.post_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
+            getNewsFeedDate({post_id: activity.post_id}, 'newsFeed.from.notification.recommendation', function(error, itemUpdatedAt) {
               lastNewsItemUpdatedAt = itemUpdatedAt;
               innerSeriesCallback(error);
             });
