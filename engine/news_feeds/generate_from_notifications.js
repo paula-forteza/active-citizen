@@ -176,6 +176,7 @@ var buildNewsFeedItems = function (notification, callback) {
               }
             });
           },
+
           // Post news feed from recommendations
           function (innerSeriesCallback) {
             lastNewsItemUpdatedAt = null;
@@ -184,6 +185,8 @@ var buildNewsFeedItems = function (notification, callback) {
               innerSeriesCallback(error);
             });
           },
+
+          // Create item if recommended
           function (innerSeriesCallback) {
             isItemRecommended(activity.post_id, notification.User, {
               after: lastNewsItemUpdatedAt ? lastNewsItemUpdatedAt.toISOString() : null

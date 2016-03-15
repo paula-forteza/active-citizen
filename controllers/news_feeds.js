@@ -7,8 +7,7 @@ var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var _ = require('lodash');
 
-var addRecommendedActivities = require('../engine/news_feeds/generate_dynamically').addRecommendedActivities;
-var getNewsFeed = require('../engine/news_feeds/generate_dynamically').getNewsFeed;
+var getCuratedNewsItems = require('../engine/news_feeds/generate_dynamically').getCuratedNewsItems;
 
 router.get('/domains/:id', auth.can('view domain'), function(req, res) {
   var options = {
@@ -18,21 +17,13 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
     before: req.params.before
   };
 
-  getNewsFeed(options,
-    function (error, items) {
-      if (error) {
-        log.error("News Feed Error Domain", { domainId: req.params.id, user: toJson(req.user.simple()), errorStatus:  500 });
-        res.sendStatus(500);
-      } else {
-        addRecommendedActivities(req.user, items, options, function(error, finalItems) {
-          if (error) {
-            log.error("News Feed Error Domain", { domainId: req.params.id, userId: req.user.id, error: error, errorStatus:  500 });
-            res.sendStatus(500);
-          } else {
-            res.send(finalItems);
-          }
-        });
-      }
+  getCuratedNewsItems(options, function (error, items) {
+    if (error) {
+      log.error("News Feed Error Domain", { domainId: req.params.id, user: toJson(req.user.simple()), errorStatus:  500 });
+      res.sendStatus(500);
+    } else {
+      res.send(items);
+    }
   });
 });
 

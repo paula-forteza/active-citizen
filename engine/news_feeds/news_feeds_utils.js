@@ -2,67 +2,94 @@ var models = require("../../../models");
 var _ = require('lodash');
 
 var getCommonWhereDateOptions = function(options) {
-  where = {};
-  if (options.isAcActivity) {
-    var updatedAtBase = {};
+  var where = {};
+  var dateBefore, dateAfter;
 
-    if (options.latestItemAt && options.oldestItemAt) {
-      updatedAtBase = {
-        created_at: {
-          $or: {
-            $gt: options.latestItemAt,  //  >  15.01.2001
-            $lt: options.oldestItemAt   //  <  05.01.2001
-          }
-        }
-      };
-    } else if (options.latestItemAt) {
-      updatedAtBase = {
-        created_at: {
-          $gt: options.latestItemAt
-        }
-      };
-    } else if (options.oldestItemAt) {
-      updatedAtBase = {
-        created_at: {
-          $lt: options.oldestItemAt
-        }
-      };
-    }
+  var dateAtBase = {};
 
-    if (!options.after && !options.before) {
-      _.merge(where, updatedAtBase)
-    } else if (options.before) {
-      _.merge(where, {
-        $and: [
-          {
-            created_at: { $lt: options.before }
-          },
-          updatedAtBase
-        ]
-      })
-    } else if (options.after) {
-      _.merge(where, {
-        $and: [
-          {
-            created_at: { $gt: options.after }
-          },
-          updatedAtBase
-        ]
-      })
+  if (options.beforeFilter && options.afterFilter) {
+    dateAtBase[options.dateColumn] = {
+      $or: {
+        $gt: options.beforeFilter,  //  >  15.01.2001
+        $lt: options.afterFilter   //  <  05.01.2001
+      }
+    };
+  } else if (options.beforeFilter) {
+    dateAtBase[options.dateColumn] = {
+      $gt: options.beforeFilter
+    };
+  } else if (options.afterFilter) {
+    dateAtBase[options.dateColumn] = {
+      $lt: options.afterFilter
+    };
+  } else if (options.beforeOrEqualFilter && options.afterOrEqualFilter) {
+    dateAtBase[options.dateColumn] = {
+      $or: {
+        $gte: options.beforeOrEqualFilter,  //  >  15.01.2001
+        $lte: options.afterOrEqualFilter   //  <  05.01.2001
+      }
+    };
+  } else if (options.beforeOrEqualFilter) {
+    dateAtBase[options.dateColumn] = {
+      $gte: options.beforeOrEqualFilter
+    };
+  } else if (options.afterOrEqualFilter) {
+    dateAtBase[options.dateColumn] = {
+      $lte: options.afterOrEqualFilter
+    };
+  }
+
+  if (!options.dateAfter && !options.dateBefore) {
+    _.merge(where, dateAtBase)
+  } else if (JSON.stringify(dateAtBase) == JSON.stringify({})) {
+    if (options.dateBefore) {
+      dateBefore = {};
+
+      before[options.dateColumn] = {
+        $lt: options.dateBefore
+      };
+
+      _.merge(where, dateBefore);
+    } else if (options.dateAfter) {
+      dateAfter = {};
+
+      dateAfter[options.dateColumn] = {
+        $gt: options.after
+      };
+
+      _.merge(where, dateAfter);
     }
   } else {
-    if (options.before) {
+    if (options.dateBefore) {
+      dateBefore = {};
+
+      dateBefore[options.dateColumn] = {
+        $lt: options.dateBefore
+      };
+
       _.merge(where, {
-        created_at: { $lt: options.before }
+        $and: [
+          dateBefore,
+          dateAtBase
+        ]
       });
-    } else if (options.after) {
-      _.merge(where,
-        {
-          created_at: { $gt: options.after }
-        });
+    } else if (options.dateAfter) {
+      dateAfter = {};
+
+      dateAfter[options.dateColumn] = {
+        $gt: options.dateAfter
+      };
+
+      _.merge(where, {
+        $and: [
+          dateAfter,
+          dateAtBase
+        ]
+      });
     }
   }
 
+  return where;
 };
 
 var getCommonWhereOptions = function(options) {
@@ -101,7 +128,7 @@ var getCommonWhereOptions = function(options) {
     })
   }
 
-  return where;
+  return _.merge(where, getCommonWhereDateOptions(options));
 };
 
 var getModelDate = function(model, options, callback) {
@@ -112,6 +139,10 @@ var getModelDate = function(model, options, callback) {
     order = [[options.dateColumn, 'ASC']]
   } else {
     order = [[options.dateColumn, 'DESC']]
+  }
+
+  if (model == models.AcActivity) {
+    delete where.user_id;
   }
 
   model.find({
@@ -144,6 +175,32 @@ var getActivityDate = function(options, callback) {
   }), callback)
 };
 
+var getProcessedRange = function(options, callback) {
+  var where = getCommonWhereOptions(options);
+
+  var order;
+  if (options.oldest) {
+    order = [['latest_activity_at', 'ASC']]
+  } else {
+    order = [['latest_activity_at', 'DESC']]
+  }
+
+  model.AcNewsFeedProcessedRange.find({
+    where: where,
+    attributes: ['latest_activity_at'],
+    order: [
+      [ 'latest_activity_at', options.oldest ? 'asc' : 'desc' ]
+    ]
+  }).then(function (item) {
+    if (item) {
+      callback(null, item.latest_activity_at);
+    } else {
+      callback();
+    }
+  }).catch(function (error) {
+    callback(error);
+  });
+};
 
 var activitiesDefaultIncludes = [
   {
@@ -172,32 +229,6 @@ var activitiesDefaultIncludes = [
   }
 ];
 
-var getLatestAfterDate = function (afterDate, callback) {
-  var latestActivityTime, latestProcessedRange;
-
-  async.parallel([
-    function (seriesCallback) {
-      getActivityDate({ afterDate: afterDate }, function (error, latestActivityTimeIn) {
-        latestActivityTime = latestActivityTimeIn;
-          seriesCallback(error);
-      })
-    },
-    function (seriesCallback) {
-      getLatestProcessedRange({ afterDate: afterDate }, function (error, latestProcessedRangeIn) {
-        latestProcessedRange = latestProcessedRangeIn;
-        seriesCallback(error);
-      })
-    }
-  ],function (error) {
-    if (latestActivityTime>=latestProcessedRange.latest_activity_at) {
-      generateNewsfeedFromActivities({ afterDate: afterDate }, callback);
-    } else {
-      getNewsfeedItemsFromProccessedRange(latestProcessedRange, callback);
-    }
-  })
-};
-
-var whereFromOptions = function (options) {
 
   // Example query 1
   //  Get latest
@@ -256,43 +287,6 @@ var whereFromOptions = function (options) {
   //      modified_at $gt last_dynamically_generated_processed_news_feed_ac_activity_modified_at
   //      modified_at $lt first_dynamically_generated_processed_news_feed_ac_activity_modified_at
 
-  var where = {
-    status: 'active'
-  };
-
-  if (options.domain_id) {
-    _.merge(where, {
-      domain_id: options.domain_id
-    })
-  }
-
-  if (options.community_id) {
-    _.merge(where, {
-      community_id: options.community_id
-    })
-  }
-
-  if (options.group_id) {
-    _.merge(where, {
-      group_id: options.group_id
-    })
-  }
-
-  if (options.post_id) {
-    _.merge(where, {
-      post_id: options.post_id
-    })
-  }
-
-  if (options.user_id) {
-    _.merge(where, {
-      user_id: options.user_id
-    })
-  }
-
-  return where;
-};
-
 defaultKeyActivities = ['activity.post.status.update','activity.post.officialStatus.successful',
   'activity.point.new','activity.post.new','activity.post.officialStatus.failed',
   'activity.post.officialStatus.inProgress'];
@@ -300,6 +294,6 @@ defaultKeyActivities = ['activity.post.status.update','activity.post.officialSta
 module.exports = {
   getNewsFeedDate: getNewsFeedDate,
   activitiesDefaultIncludes: activitiesDefaultIncludes,
-  whereFromOptions: whereFromOptions,
+  getCommonWhereOptions: getCommonWhereOptions,
   defaultKeyActivities: defaultKeyActivities
 };
