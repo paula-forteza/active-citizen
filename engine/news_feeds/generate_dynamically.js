@@ -280,7 +280,18 @@ var getNewsFeedItemsFromProcessedRange = function (processedRange, options, call
     afterOrEqualFilter: processedRange.latest_activity_at,
     beforeOrEqualFilter: processedRange.oldest_activity_at
   });
-  getNewsFeedItems(options, callback);
+  getNewsFeedItems(options, function (error, newsitems) {
+    if (error) {
+      callback(error)
+
+    } else {
+      var activities  = _.map(newsitems, function (item) { return item.AcActivity });
+      callback(null, activities);
+    }
+  });
+
+
+
 };
 
 var getCuratedNewsItems = function (options, callback) {
