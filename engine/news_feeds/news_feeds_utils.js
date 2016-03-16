@@ -39,50 +39,50 @@ var getCommonWhereDateOptions = function(options) {
     };
   }
 
-  if (!options.dateAfter && !options.dateBefore) {
+  if (!options.afterDate && !options.beforeDate) {
     _.merge(where, dateAtBase)
   } else if (JSON.stringify(dateAtBase) == JSON.stringify({})) {
-    if (options.dateBefore) {
-      dateBefore = {};
+    if (options.beforeDate) {
+      beforeDate = {};
 
-      before[options.dateColumn] = {
-        $lt: options.dateBefore
+      beforeDate[options.dateColumn] = {
+        $lt: options.beforeDate
       };
 
-      _.merge(where, dateBefore);
-    } else if (options.dateAfter) {
-      dateAfter = {};
+      _.merge(where, beforeDate);
+    } else if (options.afterDate) {
+      afterDate = {};
 
-      dateAfter[options.dateColumn] = {
-        $gt: options.after
+      afterDate[options.dateColumn] = {
+        $gt: options.afterDate
       };
 
-      _.merge(where, dateAfter);
+      _.merge(where, afterDate);
     }
   } else {
-    if (options.dateBefore) {
-      dateBefore = {};
+    if (options.beforeDate) {
+      beforeDate = {};
 
-      dateBefore[options.dateColumn] = {
-        $lt: options.dateBefore
+      beforeDate[options.dateColumn] = {
+        $lt: options.beforeDate
       };
 
       _.merge(where, {
         $and: [
-          dateBefore,
+          beforeDate,
           dateAtBase
         ]
       });
-    } else if (options.dateAfter) {
-      dateAfter = {};
+    } else if (options.afterDate) {
+      afterDate = {};
 
-      dateAfter[options.dateColumn] = {
-        $gt: options.dateAfter
+      afterDate[options.dateColumn] = {
+        $gt: options.afterDate
       };
 
       _.merge(where, {
         $and: [
-          dateAfter,
+          afterDate,
           dateAtBase
         ]
       });
@@ -223,7 +223,12 @@ var activitiesDefaultIncludes = [
   },
   {
     model: models.Point,
-    required: false
+    required: false,
+    include: [
+      {
+        model: models.PointRevision
+      }
+    ]
   },
   {
     model: models.PostStatusChange,

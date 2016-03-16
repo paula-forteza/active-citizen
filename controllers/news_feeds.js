@@ -13,10 +13,20 @@ router.get('/domains/:id', auth.can('view domain'), auth.isLoggedIn, function(re
 
   var options = {
     user_id: req.user.id,
-    domain_id: req.params.id,
-    after: req.params.after,
-    before: req.params.before
+    domain_id: req.params.id
   };
+
+  if (req.query.afterDate) {
+    options = _.merge(options, {
+      afterDate: new Date(req.query.afterDate)
+    })
+  }
+
+  if (req.query.beforeDate) {
+    options = _.merge(options, {
+      beforeDate: new Date(req.query.beforeDate)
+    })
+  }
 
   getCuratedNewsItems(options, function (error, items) {
     if (error) {
