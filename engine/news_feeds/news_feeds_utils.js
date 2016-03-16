@@ -134,22 +134,20 @@ var getCommonWhereOptions = function(options) {
 var getModelDate = function(model, options, callback) {
   var where = getCommonWhereOptions(options);
 
-  var order;
-  if (options.oldest) {
-    order = [[options.dateColumn, 'ASC']]
-  } else {
-    order = [[options.dateColumn, 'DESC']]
-  }
-
   if (model == models.AcActivity) {
     delete where.user_id;
+    where = _.merge(where, {
+      type: {
+        $in: defaultKeyActivities
+      }
+    });
   }
 
   model.find({
     where: where,
     attributes: [options.dateColumn],
     order: [
-      [ options.dateColumn, options.latest ? 'desc' : 'asc' ]
+      [ options.dateColumn, options.oldest ? 'asc' : 'desc' ]
     ]
   }).then(function (item) {
     if (item) {
@@ -185,15 +183,15 @@ var getProcessedRange = function(options, callback) {
     order = [['latest_activity_at', 'DESC']]
   }
 
-  model.AcNewsFeedProcessedRange.find({
+  models.AcNewsFeedProcessedRange.find({
     where: where,
-    attributes: ['latest_activity_at'],
+    attributes: ['latest_activity_at', 'oldest_activity_at'],
     order: [
       [ 'latest_activity_at', options.oldest ? 'asc' : 'desc' ]
     ]
   }).then(function (item) {
     if (item) {
-      callback(null, item.latest_activity_at);
+      callback(null, item);
     } else {
       callback();
     }
@@ -226,9 +224,12 @@ var activitiesDefaultIncludes = [
   {
     model: models.Point,
     required: false
+  },
+  {
+    model: models.PostStatusChange,
+    required: false
   }
 ];
-
 
   // Example query 1
   //  Get latest
@@ -292,8 +293,9 @@ defaultKeyActivities = ['activity.post.status.update','activity.post.officialSta
   'activity.post.officialStatus.inProgress'];
 
 module.exports = {
-  getNewsFeedDate: getNewsFeedDate,
   activitiesDefaultIncludes: activitiesDefaultIncludes,
   getCommonWhereOptions: getCommonWhereOptions,
-  defaultKeyActivities: defaultKeyActivities
+  defaultKeyActivities: defaultKeyActivities,
+  getActivityDate: getActivityDate,
+  getProcessedRange: getProcessedRange
 };

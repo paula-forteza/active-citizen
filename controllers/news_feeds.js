@@ -9,7 +9,8 @@ var _ = require('lodash');
 
 var getCuratedNewsItems = require('../engine/news_feeds/generate_dynamically').getCuratedNewsItems;
 
-router.get('/domains/:id', auth.can('view domain'), function(req, res) {
+router.get('/domains/:id', auth.can('view domain'), auth.isLoggedIn, function(req, res) {
+
   var options = {
     user_id: req.user.id,
     domain_id: req.params.id,
@@ -19,7 +20,7 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
 
   getCuratedNewsItems(options, function (error, items) {
     if (error) {
-      log.error("News Feed Error Domain", { domainId: req.params.id, user: toJson(req.user.simple()), errorStatus:  500 });
+      log.error("News Feed Error Domain", { domainId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
       res.send(items);

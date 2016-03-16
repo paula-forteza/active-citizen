@@ -181,7 +181,7 @@ var generateRecommendationEvent = function (activity, callback) {
   }
 };
 
-var getRecommendationFor = function (user, dateRange, options, callback) {
+var getRecommendationFor = function (userId, dateRange, options, callback) {
   var fields = [];
 
   fields.push({
@@ -217,12 +217,12 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange});
 
   engine.sendQuery({
-    user: user.id,
+    user: userId,
     num: options.limit || 200,
     fields: fields,
     dateRange: dateRange
   }).then(function (results) {
-    log.info('Events Manager getRecommendationFor', { userId: user.id, results: results});
+    log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
     var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
     callback(null,resultMap);
   }).catch(function (error) {
@@ -230,13 +230,13 @@ var getRecommendationFor = function (user, dateRange, options, callback) {
   });
 };
 
-isItemRecommended = function (itemId, user, dateRange, options, callback) {
-  getRecommendationFor(user, dateRange, options, function (error, items) {
+isItemRecommended = function (itemId, userId, dateRange, options, callback) {
+  getRecommendationFor(userId, dateRange, options, function (error, items) {
     if (error) {
-      log.error("Recommendation Events Manager Error", { itemId: itemId, userId: user.id, err: error });
+      log.error("Recommendation Events Manager Error", { itemId: itemId, userId: userId, err: error });
       callback(false);
     } else {
-      log.info('Events Manager isItemRecommended', { itemId: itemId, userId: user.id, items: items});
+      log.info('Events Manager isItemRecommended', { itemId: itemId, userId: userId, items: items});
       callback(_.includes(items, itemId.toString()));
     }
   });

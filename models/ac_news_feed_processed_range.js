@@ -8,9 +8,9 @@ var _ = require('lodash');
 
 module.exports = function(sequelize, DataTypes) {
 
-  var AcNewsFeedItem = sequelize.define("AcNewsFeedItem", {
-    type: { type: DataTypes.STRING, allowNull: false },
+  var AcNewsFeedProcessedRange = sequelize.define("AcNewsFeedProcessedRange", {
     latest_activity_at: { type: DataTypes.DATE, allowNull: false },
+    oldest_activity_at: { type: DataTypes.DATE, allowNull: false },
     status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {
@@ -22,7 +22,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
 
-    indexes: _.concat(commonIndexForActivitiesAndNewsFeeds('latest_activity_at'), [
+    indexes: [
       {
         fields: ['id'],
         where: {
@@ -30,40 +30,44 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       {
-        fields: ['ac_notification_id'],
+        name: 'latest_at_oldest_at',
+        fields: ['latest_activity_at', 'oldest_activity_at'],
         where: {
           status: 'active',
           deleted: false
         }
       },
       {
-        fields: ['ac_activity_id'],
+        fields: ['latest_activity_at'],
+        where: {
+          status: 'active',
+          deleted: false
+        }
+      },
+      {
+        fields: ['oldest_activity_at'],
         where: {
           status: 'active',
           deleted: false
         }
       }
-    ]),
+    ],
 
     underscored: true,
 
-    tableName: 'ac_news_feed_items',
+    tableName: 'ac_news_feed_processed_ranges',
 
     classMethods: {
 
       associate: function(models) {
-        AcNewsFeedItem.belongsTo(models.Domain);
-        AcNewsFeedItem.belongsTo(models.Community);
-        AcNewsFeedItem.belongsTo(models.Group);
-        AcNewsFeedItem.belongsTo(models.Post);
-        AcNewsFeedItem.belongsTo(models.Point);
-        AcNewsFeedItem.belongsTo(models.Promotion);
-        AcNewsFeedItem.belongsTo(models.AcNotification);
-        AcNewsFeedItem.belongsTo(models.AcActivity);
-        AcNewsFeedItem.belongsTo(models.User);
+        AcNewsFeedProcessedRange.belongsTo(models.Domain);
+        AcNewsFeedProcessedRange.belongsTo(models.Community);
+        AcNewsFeedProcessedRange.belongsTo(models.Group);
+        AcNewsFeedProcessedRange.belongsTo(models.Post);
+        AcNewsFeedProcessedRange.belongsTo(models.User);
       }
     }
   });
 
-  return AcNewsFeedItem;
+  return AcNewsFeedProcessedRange;
 };
