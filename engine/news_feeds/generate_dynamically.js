@@ -221,19 +221,14 @@ var generateNewsFeedFromActivities = function(options, callback) {
         if (error) {
           seriesCallback(error);
         } else {
-          allActivities = activities;
-          seriesCallback();
-        }
-      });
-    },
-
-    // Save all new news feed items
-    function (seriesCallback) {
-      createNewsFeedItemsFromActivities(allActivities, options, function (error, results) {
-        if (error) {
-          seriesCallback(error);
-        } else {
-          seriesCallback();
+          // Save all new news feed items
+          createNewsFeedItemsFromActivities(activities, options, function (error, results) {
+            if (error) {
+              seriesCallback(error);
+            } else {
+              seriesCallback();
+            }
+          });
         }
       });
     },
@@ -286,12 +281,11 @@ var generateNewsFeedFromActivities = function(options, callback) {
 };
 
 var getNewsFeedItemsFromProcessedRange = function (processedRange, options, callback) {
-  var options = _.merge(options, {
+  getNewsFeedItems(_.merge(options, {
     afterOrEqualFilter: processedRange.oldest_activity_at,
     beforeOrEqualFilter: processedRange.latest_activity_at,
     dateColumn: 'latest_activity_at'
-  });
-  getNewsFeedItems(options, function (error, newsitems) {
+  }), function (error, newsitems) {
     if (error) {
       callback(error)
 
@@ -324,7 +318,7 @@ var getCuratedNewsItems = function (options, callback) {
     } else {
       if (!latestProcessedRange || latestActivityTime>latestProcessedRange.latest_activity_at) {
         if (latestProcessedRange) {
-          options.beforeFilter = latestProcessedRange.latest_activity_at;
+          options.afterFilter = latestProcessedRange.latest_activity_at;
         }
         generateNewsFeedFromActivities(options, callback);
       } else {

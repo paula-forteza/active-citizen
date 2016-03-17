@@ -133,7 +133,7 @@ var getCommonWhereOptions = function(options) {
 
 var getModelDate = function(model, options, callback) {
   var where = getCommonWhereOptions(options);
-
+  var dateColumn = options.dateColumn;
   if (model == models.AcActivity) {
     delete where.user_id;
     where = _.merge(where, {
@@ -145,13 +145,14 @@ var getModelDate = function(model, options, callback) {
 
   model.find({
     where: where,
-    attributes: [options.dateColumn],
+    attributes: [dateColumn],
     order: [
-      [ options.dateColumn, options.oldest ? 'asc' : 'desc' ]
+      [ dateColumn, options.oldest ? 'asc' : 'desc' ]
     ]
   }).then(function (item) {
     if (item) {
-      callback(null, item.getDataValue(options.dateColumn));
+      var date = item.getDataValue(dateColumn);
+      callback(null, date);
     } else {
       callback();
     }
