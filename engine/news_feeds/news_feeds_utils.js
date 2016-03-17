@@ -10,32 +10,32 @@ var getCommonWhereDateOptions = function(options) {
   if (options.beforeFilter && options.afterFilter) {
     dateAtBase[options.dateColumn] = {
       $or: {
-        $gt: options.beforeFilter,  //  >  15.01.2001
-        $lt: options.afterFilter   //  <  05.01.2001
+        $lt: options.beforeFilter,  //  >  15.01.2001
+        $gt: options.afterFilter   //  <  05.01.2001
       }
     };
   } else if (options.beforeFilter) {
     dateAtBase[options.dateColumn] = {
-      $gt: options.beforeFilter
+      $lt: options.beforeFilter
     };
   } else if (options.afterFilter) {
     dateAtBase[options.dateColumn] = {
-      $lt: options.afterFilter
+      $gt: options.afterFilter
     };
   } else if (options.beforeOrEqualFilter && options.afterOrEqualFilter) {
     dateAtBase[options.dateColumn] = {
-      $or: {
-        $gte: options.beforeOrEqualFilter,  //  >  15.01.2001
-        $lte: options.afterOrEqualFilter   //  <  05.01.2001
+      $and: {
+        $lte: options.beforeOrEqualFilter,  //  >  15.01.2001
+        $gte: options.afterOrEqualFilter   //  <  05.01.2001
       }
     };
   } else if (options.beforeOrEqualFilter) {
     dateAtBase[options.dateColumn] = {
-      $gte: options.beforeOrEqualFilter
+      $lte: options.beforeOrEqualFilter
     };
   } else if (options.afterOrEqualFilter) {
     dateAtBase[options.dateColumn] = {
-      $lte: options.afterOrEqualFilter
+      $gte: options.afterOrEqualFilter
     };
   }
 
@@ -174,7 +174,7 @@ var getActivityDate = function(options, callback) {
 };
 
 var getProcessedRange = function(options, callback) {
-  var where = getCommonWhereOptions(options);
+  var where = getCommonWhereOptions(_.merge(options, {dateColumn: 'latest_activity_at'}));
 
   var order;
   if (options.oldest) {
@@ -293,9 +293,11 @@ var activitiesDefaultIncludes = [
   //      modified_at $gt last_dynamically_generated_processed_news_feed_ac_activity_modified_at
   //      modified_at $lt first_dynamically_generated_processed_news_feed_ac_activity_modified_at
 
-defaultKeyActivities = ['activity.post.status.update','activity.post.officialStatus.successful',
-  'activity.point.new','activity.post.new','activity.post.officialStatus.failed',
-  'activity.post.officialStatus.inProgress'];
+//defaultKeyActivities = ['activity.post.status.update','activity.post.officialStatus.successful',
+//  'activity.point.new','activity.post.new','activity.post.officialStatus.failed',
+//  'activity.post.officialStatus.inProgress'];
+
+defaultKeyActivities = ['activity.post.status.update','activity.point.new','activity.post.new'];
 
 module.exports = {
   activitiesDefaultIncludes: activitiesDefaultIncludes,

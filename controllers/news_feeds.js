@@ -28,12 +28,15 @@ router.get('/domains/:id', auth.can('view domain'), auth.isLoggedIn, function(re
     })
   }
 
-  getCuratedNewsItems(options, function (error, items) {
+  getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
     if (error) {
       log.error("News Feed Error Domain", { domainId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
-      res.send(items);
+      res.send({
+        activities: activities,
+        oldestProcessedActivityAt: oldestProcessedActivityAt
+      });
     }
   });
 });

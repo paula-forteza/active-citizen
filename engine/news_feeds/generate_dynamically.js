@@ -22,7 +22,7 @@ var getActivityDate = require('./news_feeds_utils').getActivityDate;
 // Send data back to user
 
 var GENERAL_NEWS_FEED_LIMIT = 30;
-var RECOMMENDATION_FILTER_THRESHOLD = 5;
+var RECOMMENDATION_FILTER_THRESHOLD = 10;
 
 var getNewsFeedItems = function(options, callback) {
   var where = getCommonWhereOptions(options);
@@ -62,7 +62,8 @@ var getAllActivities = function (options, callback) {
     limit: GENERAL_NEWS_FEED_LIMIT,
     order: [
       [ "created_at", "desc"]
-    ]
+    ],
+    include: activitiesDefaultIncludes
   }).then(function(activities) {
     log.info("Generate News Feed Dynamically Got defaultKeyActivities", { activitiesLength: activities.length });
     callback(null, activities);
@@ -154,10 +155,12 @@ var createNewsFeedItemsFromActivities = function(allActivities, options, callbac
   });
 };
 
-var loadOtherNewsItemsInRange = function(oldestActivity, options, callback) {
+var loadOtherNewsItemsInRange = function(latestActivity, oldestActivity, options, callback) {
   getNewsFeedItems(_.merge(options, {
-    beforeOrEqualFilter: oldestActivity.created_at,
-    type: 'newsFeed.from.notification.recommendation'
+    afterOrEqualFilter: oldestActivity.created_at,
+    beforeOrEqualFilter: latestActivity.created_at,
+    type: 'newsFeed.from.notification.recommendation',
+    dateColumn: 'latest_activity_at'
   }), callback);
 };
 
@@ -168,14 +171,14 @@ var createProcessedRange = function (latestActivity, oldestActivity, options, ca
     user_id: options.user_id, domain_id: options.domain_id, community_id: options.community_id,
     group_id: options.group_id, post_id: options.post_id
   }).then(function (results) {
-    callback();
+    callback(null, results);
   }).catch(function (error) {
     callback(error);
   });
 };
 
 var generateNewsFeedFromActivities = function(options, callback) {
-  var allActivities, finalActivities, latestActivity, oldestActivity, otherNewsItems;
+  var allActivities, finalActivities, latestActivity, oldestActivity, otherNewsItems, processedRange;
 
   async.series([
 
@@ -238,7 +241,7 @@ var generateNewsFeedFromActivities = function(options, callback) {
     // Load other news items created from notifications
     function (seriesCallback) {
       if (oldestActivity) {
-        loadOtherNewsItemsInRange(oldestActivity, options, function (error, newsItems) {
+        loadOtherNewsItemsInRange(latestActivity, oldestActivity, options, function (error, newsItems) {
           if (error) {
             seriesCallback(error);
           } else {
@@ -264,21 +267,29 @@ var generateNewsFeedFromActivities = function(options, callback) {
     // Create the News Feed Processed Range
     function (seriesCallback) {
       if (latestActivity && oldestActivity) {
-        createProcessedRange(latestActivity, oldestActivity, options, seriesCallback);
+        createProcessedRange(latestActivity, oldestActivity, options, function(error, processedRangeIn) {
+          if (error) {
+            seriesCallback(error);
+          } else {
+            processedRange = processedRangeIn;
+            seriesCallback();
+          }
+        });
       } else {
         seriesCallback();
       }
     }
   ], function (error) {
     // Return all
-    callback(error, finalActivities);
+    callback(error, finalActivities, processedRange ? processedRange.oldest_activity_at : null);
   });
 };
 
 var getNewsFeedItemsFromProcessedRange = function (processedRange, options, callback) {
   var options = _.merge(options, {
-    afterOrEqualFilter: processedRange.latest_activity_at,
-    beforeOrEqualFilter: processedRange.oldest_activity_at
+    afterOrEqualFilter: processedRange.oldest_activity_at,
+    beforeOrEqualFilter: processedRange.latest_activity_at,
+    dateColumn: 'latest_activity_at'
   });
   getNewsFeedItems(options, function (error, newsitems) {
     if (error) {
@@ -286,12 +297,9 @@ var getNewsFeedItemsFromProcessedRange = function (processedRange, options, call
 
     } else {
       var activities  = _.map(newsitems, function (item) { return item.AcActivity });
-      callback(null, activities);
+      callback(null, activities, processedRange.oldest_activity_at);
     }
   });
-
-
-
 };
 
 var getCuratedNewsItems = function (options, callback) {
