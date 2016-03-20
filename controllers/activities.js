@@ -80,5 +80,4 @@ router.get('/groups/:id', auth.can('view group'), function(req, res) {
   });
 });
 
-
 module.exports = router;

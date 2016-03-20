@@ -10,8 +10,8 @@ var getCommonWhereDateOptions = function(options) {
   if (options.beforeFilter && options.afterFilter) {
     dateAtBase[options.dateColumn] = {
       $or: {
-        $lt: options.beforeFilter,  //  >  15.01.2001
-        $gt: options.afterFilter   //  <  05.01.2001
+        $lt: options.beforeFilter,
+        $gt: options.afterFilter
       }
     };
   } else if (options.beforeFilter) {
@@ -25,8 +25,8 @@ var getCommonWhereDateOptions = function(options) {
   } else if (options.beforeOrEqualFilter && options.afterOrEqualFilter) {
     dateAtBase[options.dateColumn] = {
       $and: {
-        $lte: options.beforeOrEqualFilter,  //  >  15.01.2001
-        $gte: options.afterOrEqualFilter   //  <  05.01.2001
+        $lte: options.beforeOrEqualFilter,
+        $gte: options.afterOrEqualFilter
       }
     };
   } else if (options.beforeOrEqualFilter) {
@@ -94,7 +94,7 @@ var getCommonWhereDateOptions = function(options) {
 
 var getCommonWhereOptions = function(options) {
   var where = {
-    status: 'active',
+    status: 'active'
   };
 
   if (options.user_id) {
