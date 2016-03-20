@@ -3,7 +3,11 @@ var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
 var log = require('../../utils/logger');
-var engine = new predictionio.Engine({url: process.env.PIOEngineUrl });
+var engine;
+
+if (process.env.PIOEngineUrl) {
+  engine = new predictionio.Engine({url: process.env.PIOEngineUrl });
+}
 
 var getClient = function (appId) {
   return new predictionio.Events({appId: appId});
