@@ -95,8 +95,13 @@ var getCommonWhereDateOptions = function(options) {
 var getCommonWhereOptions = function(options) {
   var where = {
     status: 'active',
-    user_id: options.user_id
   };
+
+  if (options.user_id) {
+    where = _.merge(where, {
+      user_id: options.user_id
+    })
+  }
 
   if (options.type) {
     where = _.merge(where, {

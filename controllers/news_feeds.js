@@ -104,4 +104,5 @@ router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, func
     }
   });
 });
+
 module.exports = router;
