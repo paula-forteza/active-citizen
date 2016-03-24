@@ -232,7 +232,14 @@ var activitiesDefaultIncludes = [
     required: false,
     include: [
       {
-        model: models.PointRevision
+        model: models.PointRevision,
+        include: [
+          {
+            model: models.User,
+            required: false
+          }
+        ],
+        required: false
       }
     ]
   },
