@@ -225,7 +225,21 @@ var activitiesDefaultIncludes = [
   },
   {
     model: models.Post,
-    required: false
+    required: false,
+    include: [
+      {
+        // Category
+        model: models.Category,
+        required: false,
+        include: [
+          {
+            model: models.Image,
+            required: false,
+            as: 'CategoryIconImages'
+          }
+        ]
+      }
+    ]
   },
   {
     model: models.Point,
