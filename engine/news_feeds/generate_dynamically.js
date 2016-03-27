@@ -21,8 +21,8 @@ var getActivityDate = require('./news_feeds_utils').getActivityDate;
 // Create critical priority job to insert recommendation and promotions to postgres
 // Send data back to user
 
-var GENERAL_NEWS_FEED_LIMIT = 20;
-var RECOMMENDATION_FILTER_THRESHOLD = 10;
+var GENERAL_NEWS_FEED_LIMIT = 8;
+var RECOMMENDATION_FILTER_THRESHOLD = 6;
 
 var getNewsFeedItems = function(options, callback) {
   var where = getCommonWhereOptions(options);

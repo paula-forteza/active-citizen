@@ -35,7 +35,7 @@ var getActivities = function (req, res, options, callback) {
       ["created_at", "desc"]
     ],
     include: activitiesDefaultIncludes,
-    limit: 15
+    limit: 8
   }).then(function(activities) {
     res.send({
       activities: activities,
