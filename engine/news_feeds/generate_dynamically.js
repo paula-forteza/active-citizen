@@ -36,7 +36,7 @@ var getNewsFeedItems = function(options, callback) {
       {
         model: models.AcActivity,
         required: true,
-        include: activitiesDefaultIncludes
+        include: activitiesDefaultIncludes(options)
       }
     ]
   }).then(function(items) {
@@ -63,7 +63,7 @@ var getAllActivities = function (options, callback) {
     order: [
       [ "created_at", "desc"]
     ],
-    include: activitiesDefaultIncludes
+    include: activitiesDefaultIncludes(options)
   }).then(function(activities) {
     log.info("Generate News Feed Dynamically Got defaultKeyActivities", { activitiesLength: activities.length });
     callback(null, activities);

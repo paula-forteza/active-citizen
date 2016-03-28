@@ -206,62 +206,96 @@ var getProcessedRange = function(options, callback) {
   });
 };
 
-var activitiesDefaultIncludes = [
-  {
-    model: models.User,
-    required: true
-  },
-  {
-    model: models.Domain,
-    required: true
-  },
-  {
-    model: models.Community,
-    required: false
-  },
-  {
-    model: models.Group,
-    required: false
-  },
-  {
-    model: models.Post,
-    required: false,
-    include: [
-      {
-        // Category
-        model: models.Category,
-        required: false,
-        include: [
-          {
-            model: models.Image,
-            required: false,
-            as: 'CategoryIconImages'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    model: models.Point,
-    required: false,
-    include: [
-      {
-        model: models.PointRevision,
-        include: [
-          {
-            model: models.User,
-            required: false
-          }
-        ],
-        required: false
-      }
-    ]
-  },
-  {
-    model: models.PostStatusChange,
-    required: false
+var activitiesDefaultIncludes = function (options) {
+  var community;
+  var group;
+
+  if (options.domain_id) {
+    community = {
+      model: models.Community,
+      required: false,
+      where: { access: models.Community.ACCESS_PUBLIC }
+    };
+
+    group = {
+      model: models.Group,
+      required: true,
+      where: { access: models.Group.ACCESS_PUBLIC }
+    }
+  } else if (options.community_id) {
+    community = {
+      model: models.Community,
+      required: false
+    };
+
+    group = {
+      model: models.Group,
+      required: true,
+      where: { access: models.Group.ACCESS_PUBLIC }
+    }
+  } else {
+    community = {
+      model: models.Community,
+      required: false
+    };
+
+    group = {
+      model: models.Group,
+      required: false
+    }
   }
-];
+
+  return [
+    {
+      model: models.User,
+      required: true
+    },
+    {
+      model: models.Domain,
+      required: true
+    },
+    community,
+    group,
+    {
+      model: models.Post,
+      required: false,
+      include: [
+        {
+          // Category
+          model: models.Category,
+          required: false,
+          include: [
+            {
+              model: models.Image,
+              required: false,
+              as: 'CategoryIconImages'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      model: models.Point,
+      required: false,
+      include: [
+        {
+          model: models.PointRevision,
+          include: [
+            {
+              model: models.User,
+              required: false
+            }
+          ],
+          required: false
+        }
+      ]
+    },
+    {
+      model: models.PostStatusChange,
+      required: false
+    }
+  ]
+};
 
   // Example query 1
   //  Get latest

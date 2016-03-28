@@ -34,7 +34,7 @@ var getActivities = function (req, res, options, callback) {
     order: [
       ["created_at", "desc"]
     ],
-    include: activitiesDefaultIncludes,
+    include: activitiesDefaultIncludes(options),
     limit: 8
   }).then(function(activities) {
     res.send({
