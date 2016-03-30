@@ -50,6 +50,28 @@ router.get('/domains/:id', auth.can('view domain'), auth.isLoggedIn, function(re
   });
 });
 
+
+router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, function(req, res) {
+
+  var options = setupOptions(req);
+
+  options = _.merge(options, {
+    community_id: req.params.id
+  });
+
+  getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
+    if (error) {
+      log.error("News Feed Error Domain", { err: error, communityId: req.params.id, userId: req.user.id, errorStatus:  500 });
+      res.sendStatus(500);
+    } else {
+      res.send({
+        activities: activities,
+        oldestProcessedActivityAt: oldestProcessedActivityAt
+      });
+    }
+  });
+});
+
 router.get('/groups/:id', auth.can('view group'), auth.isLoggedIn, function(req, res) {
 
   var options = setupOptions(req);
@@ -71,17 +93,17 @@ router.get('/groups/:id', auth.can('view group'), auth.isLoggedIn, function(req,
   });
 });
 
-router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, function(req, res) {
+router.get('/posts/:id', auth.can('view post'), auth.isLoggedIn, function(req, res) {
 
   var options = setupOptions(req);
 
   options = _.merge(options, {
-    community_id: req.params.id
+    post_id: req.params.id
   });
 
   getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
     if (error) {
-      log.error("News Feed Error Domain", { err: error, communityId: req.params.id, userId: req.user.id, errorStatus:  500 });
+      log.error("News Feed Error Domain", { err: error, postId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
       res.send({

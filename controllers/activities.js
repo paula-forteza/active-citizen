@@ -80,4 +80,15 @@ router.get('/groups/:id', auth.can('view group'), function(req, res) {
   });
 });
 
+router.get('/posts/:id', auth.can('view post'), function(req, res) {
+  var options = {
+    post_id: req.params.id
+  };
+  getActivities(req, res, options, function (error) {
+    if (error) {
+      log.error("Activities Error Group", { postId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+    }
+  });
+});
+
 module.exports = router;
