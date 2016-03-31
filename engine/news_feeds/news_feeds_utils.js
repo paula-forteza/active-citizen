@@ -260,6 +260,10 @@ var activitiesDefaultIncludes = function (options) {
       model: models.Post,
       required: false,
       include: [
+        { model: models.Image,
+          as: 'PostHeaderImages',
+          required: false
+        },
         {
           // Category
           model: models.Category,
