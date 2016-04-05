@@ -223,7 +223,7 @@ module.exports = function(sequelize, DataTypes) {
         AcActivity.belongsTo(models.Point);
         AcActivity.belongsTo(models.Invite);
         AcActivity.belongsTo(models.User);
-        //AcActivity.belongsTo(models.Image);
+        AcActivity.belongsTo(models.Image);
         AcActivity.belongsTo(models.PostStatusChange);
         AcActivity.belongsToMany(models.User, { through: 'other_users' });
         AcActivity.belongsToMany(models.AcNotification, { as: 'AcActivities', through: 'notification_activities' });
