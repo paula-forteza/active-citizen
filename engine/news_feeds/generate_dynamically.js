@@ -78,6 +78,8 @@ var filterRecommendations = function (allActivities, options, callback) {
   });
   var currentPostIds = _.map(allActivities, function (item) { return item.post_id ? item.post_id.toString() : null; });
   // There can be more than one instance of a post_id from a group of activities
+
+  // Get all status updates and make sure they are not removed due to lack of recommendations
   currentPostIds =_.uniq(currentPostIds);
   currentPostIds = _.without(currentPostIds, null);
   var dateRange = {};

@@ -362,12 +362,16 @@ var activitiesDefaultIncludes = function (options) {
 //  'activity.point.new','activity.post.new','activity.post.officialStatus.failed',
 //  'activity.post.officialStatus.inProgress'];
 
-defaultKeyActivities = ['activity.post.status.update','activity.point.new','activity.post.new'];
+defaultKeyActivities = ['activity.post.status.update','activity.point.new','activity.post.new',
+                        'activity.post.userImage.new', 'activity.point.newsStory.new' ];
+
+excludeActivitiesFromFilter = ['activity.point.newsStory.new','activity.post.status.update'];
 
 module.exports = {
   activitiesDefaultIncludes: activitiesDefaultIncludes,
   getCommonWhereOptions: getCommonWhereOptions,
   defaultKeyActivities: defaultKeyActivities,
+  excludeActivitiesFromFilter: excludeActivitiesFromFilter,
   getActivityDate: getActivityDate,
   getProcessedRange: getProcessedRange
 };
