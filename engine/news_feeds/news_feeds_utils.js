@@ -248,7 +248,17 @@ var activitiesDefaultIncludes = function (options) {
   return [
     {
       model: models.User,
-      required: true
+      required: true,
+      attributes: models.User.defaultAttributesWithSocialMedia,
+      order: [
+        [ { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ]
+      ],
+      include: [
+        {
+          model: models.Image, as: 'UserProfileImages',
+          required: false
+        }
+      ]
     },
     {
       model: models.Domain,
