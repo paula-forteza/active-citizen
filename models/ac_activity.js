@@ -354,19 +354,15 @@ module.exports = function(sequelize, DataTypes) {
             community: community,
             token: token
           },
+          domain_id: domain.id,
+          community_id: community ? community.id : null,
+          user_id: user.id,
           access: sequelize.models.AcActivity.ACCESS_PRIVATE
         }).save().then(function(activity) {
           if (activity) {
-            setupDefaultAssociations(activity, user, domain, community, null, function (error) {
-              if (error) {
-                log.error('Activity Creation Error', error);
-                done('Activity Creation Error');
-              } else {
-                queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
-                log.info('Activity Created', { activity: toJson(activity), user: toJson(user) });
-                done(null);
-              }
-            });
+            queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
+            log.info('Activity Created', { activity: toJson(activity), user: toJson(user) });
+            done(null);
           } else {
             done('Activity Not Found');
           }
