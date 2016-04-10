@@ -79,7 +79,7 @@ auth.role('domain.admin', function (domain, req, done) {
       } else if (req.user.email==='robert@citizens.is' || req.user.email==='gunnar@citizens.is') {
         done(null, true);
       } else {
-        domain.hasDomainAdmin(req.user).then(function (result) {
+        domain.hasDomainAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
@@ -134,7 +134,7 @@ auth.role('community.admin', function (community, req, done) {
       if (community.user_id === req.user.id) {
         done(null, true);
       } else {
-        community.hasCommunityAdmin(req.user).then(function (result) {
+        community.hasCommunityAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
@@ -189,7 +189,7 @@ auth.role('group.admin', function (group, req, done) {
       if (group.user_id === req.user.id) {
         done(null, true);
       } else {
-        group.hasGroupAdmin(req.user).then(function (result) {
+        group.hasGroupAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
@@ -251,7 +251,7 @@ auth.role('post.admin', function (post, req, done) {
       } else if (post.user_id === req.user.id) {
         done(null, true);
       } else {
-        group.hasGroupAdmin(req.user).then(function (result) {
+        group.hasGroupAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
@@ -339,7 +339,7 @@ auth.role('point.admin', function (point, req, done) {
       } else if (point.user_id === req.user.id) {
         done(null, true);
       } else {
-        group.hasGroupAdmin(req.user).then(function (result) {
+        group.hasGroupAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
@@ -438,7 +438,7 @@ auth.role('category.admin', function (category, req, done) {
       } else if (category.user_id === req.user.id) {
         done(null, true);
       } else {
-        group.hasGroupAdmin(req.user).then(function (result) {
+        group.hasGroupAdmins(req.user).then(function (result) {
           if (result) {
             done(null, true);
           } else {
