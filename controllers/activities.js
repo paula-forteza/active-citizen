@@ -32,7 +32,8 @@ var getActivities = function (req, res, options, callback) {
   models.AcActivity.findAll({
     where: where,
     order: [
-      ["created_at", "desc"]
+      ["created_at", "desc"],
+      [ models.User, { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ]
     ],
       include: activitiesDefaultIncludes(options),
       limit: 8

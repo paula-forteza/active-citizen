@@ -250,9 +250,6 @@ var activitiesDefaultIncludes = function (options) {
       model: models.User,
       required: true,
       attributes: models.User.defaultAttributesWithSocialMedia,
-      order: [
-        [ { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ]
-      ],
       include: [
         {
           model: models.Image, as: 'UserProfileImages',
