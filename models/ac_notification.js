@@ -86,6 +86,37 @@ module.exports = function(sequelize, DataTypes) {
       FREQUENCY_BI_WEEKLY: 4,
       FREQUENCY_MONTHLY: 5,
 
+      defaultNotificationSettings: {
+        my_posts: {
+          method: 0,
+          frequency: 0
+        },
+        my_posts_endorsements: {
+          method: 0,
+          frequency: 0
+        },
+        my_points: {
+          method: 0,
+          frequency:0
+        },
+        my_points_endorsements: {
+          method: 0,
+          frequency: 0
+        },
+        all_community: {
+          method: 0,
+          frequency: 0
+        },
+        all_group: {
+          method: 0,
+          frequency: 0
+        },
+        newsletter: {
+          method: 0,
+          frequency: 0
+        }
+      },
+
       ENDORSEMENT_GROUPING_TTL: 6 * 60 * 60 * 1000, // milliseconds
 
       associate: function(models) {
