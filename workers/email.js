@@ -36,7 +36,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
 
     template.render(emailLocals, function (error, results) {
       if (error) {
-        log.errors('EmailWorker', { err: error, user: emailLocals.user.simple() });
+        log.errors('EmailWorker', { err: error, userID: emailLocals.user.id });
         done();
       } else {
         if (process.env.SENDGRID_USERNAME && (emailLocals.user.email=='robert@citizens.is' || emailLocals.user.email=='gunnar@citizens.is')) {
@@ -52,7 +52,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
               log.error('EmailWorker', { err: error, user: emailLocals.user });
               done(error);
             } else {
-              log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, user: emailLocals.user.simple() });
+              log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, userId: emailLocals.user.id });
               done();
             }
           })
