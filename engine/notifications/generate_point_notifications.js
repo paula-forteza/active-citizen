@@ -6,6 +6,7 @@ var async = require('async');
 var getModelAndUsersByType = require('./notifications_utils').getModelAndUsersByType;
 var addNotificationsForUsers = require('./notifications_utils').addNotificationsForUsers;
 var addOrPossiblyGroupNotification = require('./notifications_utils').addOrPossiblyGroupNotification;
+var _ = require('lodash');
 
 var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callback) {
   async.series([

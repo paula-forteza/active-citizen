@@ -329,7 +329,9 @@ module.exports = function(sequelize, DataTypes) {
               access: options.access ? options.access : sequelize.models.AcActivity.ACCESS_PRIVATE
             }).save().then(function(activity) {
               if (activity) {
-                queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
+                if (activity.type!='activity.fromApp') {
+                  queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
+                }
                 log.info('Activity Created', { activity: toJson(activity), userId: options.userId});
                 callback();
               } else {
