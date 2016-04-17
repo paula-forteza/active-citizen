@@ -39,11 +39,11 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
         log.errors('EmailWorker', { err: error, userID: emailLocals.user.id });
         done();
       } else {
-        if (process.env.SENDGRID_USERNAME && (emailLocals.user.email=='robert@citizens.is' || emailLocals.user.email=='gunnar@citizens.is')) {
+        if (process.env.SENDGRID_USERNAME) {
           transport.sendMail({
-            from: emailLocals.community.admin_email,
+            from: 'robert@ibuar.is', // emailLocals.community.admin_email,
             to: 'robert@citizens.is', //emailLocals.user.email,
-            bcc: 'robert@ibuar.is',
+           // bcc: 'robert@ibuar.is',
             subject: emailLocals.subject,
             html: results.html,
             text: results.text
