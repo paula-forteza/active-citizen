@@ -125,7 +125,7 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         eventDate: date
       }).then(function (result) {
         log.info('Events Manager createAction', {action: action, postId: targetEntityId, userId: userId, result: result});
-        createOrUpdateItem(targetEntityId, date, callback);
+        //createOrUpdateItem(targetEntityId, date, callback);
       }).catch(function (error) {
         log.error('Events Manager createAction Error', {action: action, postId: targetEntityId, userId: userId, err: error});
         callback(error);

@@ -42,7 +42,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
         if (process.env.SENDGRID_USERNAME && (emailLocals.user.email=='robert@citizens.is' || emailLocals.user.email=='gunnar@citizens.is')) {
           transport.sendMail({
             from: emailLocals.community.admin_email,
-            to: emailLocals.user.email,
+            to: 'robert@citizens.is', //emailLocals.user.email,
             bcc: 'robert@ibuar.is',
             subject: emailLocals.subject,
             html: results.html,
