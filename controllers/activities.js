@@ -33,7 +33,8 @@ var getActivities = function (req, res, options, callback) {
     where: where,
     order: [
       ["created_at", "desc"],
-      [ models.User, { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ]
+      [ models.User, { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ],
+      [ models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
     ],
       include: activitiesDefaultIncludes(options),
       limit: 8

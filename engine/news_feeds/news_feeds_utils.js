@@ -254,6 +254,20 @@ var activitiesDefaultIncludes = function (options) {
         {
           model: models.Image, as: 'UserProfileImages',
           required: false
+        },
+        {
+          model: models.Organization,
+          as: 'OrganizationUsers',
+          required: false,
+          attributes: ['id', 'name'],
+          include: [
+            {
+              model: models.Image,
+              as: 'OrganizationLogoImages',
+              attributes: ['id', 'formats'],
+              required: false
+            }
+          ]
         }
       ]
     },
