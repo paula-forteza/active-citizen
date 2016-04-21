@@ -220,7 +220,13 @@ var activitiesDefaultIncludes = function (options) {
     group = {
       model: models.Group,
       required: true,
-      where: { access: models.Group.ACCESS_PUBLIC }
+      where: { access: models.Group.ACCESS_PUBLIC },
+      include: [
+        {
+          model: models.Image, as: 'GroupLogoImages',
+          required: false
+        }
+      ]
     }
   } else if (options.community_id) {
     community = {
@@ -231,7 +237,13 @@ var activitiesDefaultIncludes = function (options) {
     group = {
       model: models.Group,
       required: true,
-      where: { access: models.Group.ACCESS_PUBLIC }
+      where: { access: models.Group.ACCESS_PUBLIC },
+      include: [
+        {
+          model: models.Image, as: 'GroupLogoImages',
+          required: false
+        }
+      ]
     }
   } else {
     community = {
@@ -241,7 +253,13 @@ var activitiesDefaultIncludes = function (options) {
 
     group = {
       model: models.Group,
-      required: false
+      required: false,
+      include: [
+        {
+          model: models.Image, as: 'GroupLogoImages',
+          required: false
+        }
+      ]
     }
   }
 
