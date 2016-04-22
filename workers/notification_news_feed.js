@@ -24,7 +24,10 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
             [ { model: models.AcActivity, as: 'AcActivities' } ,'updated_at', 'asc' ]
           ],
           include: [
-            models.User,
+            {
+              model: models.User,
+              required: false
+            },
             {
               model: models.AcActivity,
               as: 'AcActivities',
@@ -32,7 +35,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
               include: [
                 {
                   model: models.User,
-                  required: true
+                  required: false
                 },
                 {
                   model: models.Domain,
@@ -78,16 +81,20 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
             user = userResults;
             callback();
           } else {
-            callback('User not found');
+            callback();
           }
         }).catch(function(error) {
           callback(error);
         });
       },
       function(callback){
-        user.setLocale(i18n, domain, community, function () {
+        if (user) {
+          user.setLocale(i18n, domain, community, function () {
+            callback();
+          });
+        } else {
           callback();
-        });
+        }
       }
     ],
     function(error) {
@@ -95,7 +102,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
         log.error("NotificationNewsFeedWorker Error", {err: error});
         callback();
       } else {
-        log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user.simple() });
+        log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user ? user.simple() : null });
         switch(notification.type) {
           case "notification.post.new":
           case "notification.post.endorsement":

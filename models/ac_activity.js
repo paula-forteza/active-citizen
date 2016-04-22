@@ -344,7 +344,6 @@ module.exports = function(sequelize, DataTypes) {
             });
           }
         });
-
       },
 
       createPasswordRecovery: function(user, domain, community, token, done) {
@@ -365,6 +364,34 @@ module.exports = function(sequelize, DataTypes) {
           if (activity) {
             queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
             log.info('Activity Created', { activity: toJson(activity), user: toJson(user) });
+            done(null);
+          } else {
+            done('Activity Not Found');
+          }
+        }).catch(function(error) {
+          log.error('Activity Created Error', { err: error });
+          done(error);
+        });
+      },
+
+      inviteCreated: function(options, done) {
+        sequelize.models.AcActivity.build({
+          type: "activity.user.invite",
+          status: 'active',
+          actor: { user_id: options.user_id, sender_user_id: options.sender_user_id },
+          object: {
+            email: options.email,
+            token: options.token,
+            invite_id: options.invite_id
+          },
+          community_id: options.community_id,
+          group_id: options.group_id,
+          user_id: options.user_id,
+          access: sequelize.models.AcActivity.ACCESS_PRIVATE
+        }).save().then(function(activity) {
+          if (activity) {
+            queue.create('process-activity', activity).priority('critical').removeOnComplete(true).save();
+            log.info('Activity Created', { activity: toJson(activity), userId: options.user_id, email: options.email });
             done(null);
           } else {
             done('Activity Not Found');

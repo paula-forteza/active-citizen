@@ -143,10 +143,17 @@ module.exports = function(sequelize, DataTypes) {
       createNotificationFromActivity: function(user, activity, type, priority, callback) {
         log.info('AcNotification Notification', {type: type, priority: priority });
 
+        if (user==null) {
+          user = { id: null };
+        }
+
+        if (typeof user == "number") {
+          user = { id: user };
+        }
         var domain = activity.object.domain;
         var community = activity.object.community;
 
-       //TODO: Check AcMute and mute if needed
+        //TODO: Check AcMute and mute if needed
 
        sequelize.models.AcNotification.build({
          type: type,
@@ -159,18 +166,18 @@ module.exports = function(sequelize, DataTypes) {
             notification.addAcActivities(activity).then(function (results) {
               if (results) {
                 sequelize.models.AcNotification.processNotification(notification, user, activity);
-                log.info('Notification Created', { notification: toJson(notification), user: user.simple() });
+                log.info('Notification Created', { notification: toJson(notification), userId: user.id});
                 callback();
               } else {
                 callback("Notification Error Can't add activity");
               }
             });
           } else {
-            log.error('Notification Creation Error', { err: "No notification", user: user.simple() });
+            log.error('Notification Creation Error', { err: "No notification", user: user.id});
             callback();
           }
         }).catch(function (error) {
-         log.error('Notification Creation Error', { err: error, user: user.simple() });
+         log.error('Notification Creation Error', { err: error, user: user.id});
        });
       }
     }

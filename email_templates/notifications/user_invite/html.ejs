@@ -1,0 +1,10 @@
+<% include ../header.html.ejs %>
+
+<p><%= t('notification.email.user_invite_1') %></p>
+<p>
+  <%= "https://"+community.hostname+'.'+domain.domain_name+"/#!/user/acceptInvite/"+token %>
+</p>
+<p><%= t('notification.email.user_invite_1') %></p>
+<p><%= t('notification.email.user_invite_1') %></p>
+
+<% include ../footer.html.ejs %>

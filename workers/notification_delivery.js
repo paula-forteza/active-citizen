@@ -18,140 +18,188 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
     var community;
 
     async.series([
-      function(callback){
-        models.AcNotification.find({
-          where: { id: notificationJson.id },
-          include: [
-            models.User,
-            {
-              model: models.AcActivity,
-              as: 'AcActivities',
-              required: true,
-              include: [
-                {
-                  model: models.Domain,
-                  required: false
-                },
-                {
-                  model: models.Community,
-                  required: false
-                },
-                {
-                  model: models.Group,
-                  required: false
-                },
-                {
-                  model: models.Post,
-                  required: false
-                },
-                {
-                  model: models.PostStatusChange,
-                  required: false
-                },
-                {
-                  model: models.Point,
-                  required: false
-                }
-              ]
+        function(callback){
+          models.AcNotification.find({
+            where: { id: notificationJson.id },
+            include: [
+              {
+                model: models.User,
+                required: false
+              },
+              {
+                model: models.AcActivity,
+                as: 'AcActivities',
+                required: true,
+                include: [
+                  {
+                    model: models.Domain,
+                    required: false
+                  },
+                  {
+                    model: models.Community,
+                    required: false
+                  },
+                  {
+                    model: models.Group,
+                    required: false,
+                    include: [
+                      {
+                        model: models.Community,
+                        required: false,
+                        include: [
+                          {
+                            model: models.Domain,
+                            required: false
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    model: models.Post,
+                    required: false
+                  },
+                  {
+                    model: models.PostStatusChange,
+                    required: false
+                  },
+                  {
+                    model: models.Point,
+                    required: false
+                  }
+                ]
+              }
+            ]
+          }).then(function(results) {
+            if (results) {
+              notification = results;
+              if (notification.AcActivities[0].Domain) {
+                domain = notification.AcActivities[0].Domain;
+              } else if (notification.AcActivities[0].Group.Community.Domain) {
+                domain = notification.AcActivities[0].Group.Community.Domain;
+              }
+
+              if (notification.AcActivities[0].Community) {
+                community = notification.AcActivities[0].Community;
+              } else if (notification.AcActivities[0].Group.Community) {
+                community = notification.AcActivities[0].Group.Community;
+              }
+              callback();
+            } else {
+              callback('Notification not found');
             }
-          ]
-        }).then(function(results) {
-          if (results) {
-            notification = results;
-            domain = notification.AcActivities[0].Domain;
-            community = notification.AcActivities[0].Community;
-            callback();
+          }).catch(function(error) {
+            callback(error);
+          });
+        },
+        function(callback){
+          if (notification.user_id) {
+            models.User.find({
+              where: { id: notification.user_id }
+            }).then(function(userResults) {
+              if (userResults) {
+                user = userResults;
+                callback();
+              } else {
+                if (notification.AcActivities[0].object.email) {
+                  callback();
+                } else {
+                  callback('User not found');
+                }
+              }
+            }).catch(function(error) {
+              callback(error);
+            });
           } else {
-            callback('Notification not found');
+            callback();
           }
-        }).catch(function(error) {
-          callback(error);
-        });
-      },
-      function(callback){
-        models.User.find({
-          where: { id: notification.user_id }
-        }).then(function(userResults) {
-          if (userResults) {
-            user = userResults;
-            callback();
-          } else {
-            callback('User not found');
-          }
-        }).catch(function(error) {
-          callback(error);
-        });
-      },
-      function(callback){
-        user.setLocale(i18n, domain, community, function () {
-          callback();
-        });
-      }
-    ],
-    function(error) {
-      if (error) {
-        log.error("NotificationDeliveryWorker Error", {err: error});
-        callback();
-      } else {
-        log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user.simple() });
-        switch(notification.type) {
-          case "notification.password.recovery":
-            queue.create('send-one-email', {
-              subject: i18n.t('email.password_recovery'),
-              template: 'password_recovery',
-              user: user,
-              domain: domain,
-              community: community,
-              token: notification.AcActivites[0].object.token
-            }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user.simple() });
-            callback();
-            break;
-          case "notification.password.changed":
-            queue.create('send-one-email', {
-              subject: i18n.t('email.password_changed'),
-              template: 'password_changed',
-              user: user,
-              domain: domain,
-              community: community,
-              token: notification.activity.object.token
-            }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
-            callback();
-            break;
-          case "notification.post.status.change":
-            queue.create('send-one-email', {
-              subject: i18n.t('statusChange.updateSubject'),
-              template: 'post_status_change',
-              user: user,
-              domain: domain,
-              community: community,
-              post: notification.AcActivities[0].Post,
-              content: notification.AcActivities[0].PostStatusChange.content,
-              status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
-            }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
-            callback();
-            break;
-          case "notification.post.new":
-          case "notification.post.endorsement":
-            deliverPostNotification(notification, user, function () {
-              log.info('Processing notification.post.* Completed', { type: notification.type, user: user.simple() });
+        },
+        function(callback){
+          if (user) {
+            user.setLocale(i18n, domain, community, function () {
               callback();
             });
-            break;
-          case "notification.point.new":
-          case "notification.point.quality":
-            deliverPointNotification(notification, user, function () {
-              log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
-              callback();
-            });
-            break;
-          default:
+          } else {
             callback();
+          }
         }
-      }
-    });
+      ],
+      function(error) {
+        if (error) {
+          log.error("NotificationDeliveryWorker Error", {err: error});
+          callback();
+        } else {
+          log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user ? user.simple() : null });
+          switch(notification.type) {
+            case "notification.user.invite":
+              queue.create('send-one-email', {
+                subject: i18n.t('email.user_invite'),
+                template: 'user_invite',
+                user: user ? user : { id: null, email: notification.AcActivities[0].object.email, name: notification.AcActivities[0].object.email },
+                domain: domain,
+                community: community,
+                token: notification.AcActivities[0].object.token
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user ? user.simple() : null });
+              callback();
+              break;
+            case "notification.password.recovery":
+              queue.create('send-one-email', {
+                subject: i18n.t('email.password_recovery'),
+                template: 'password_recovery',
+                user: user,
+                domain: domain,
+                community: community,
+                token: notification.AcActivites[0].object.token
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user.simple() });
+              callback();
+              break;
+            case "notification.password.changed":
+              queue.create('send-one-email', {
+                subject: i18n.t('email.password_changed'),
+                template: 'password_changed',
+                user: user,
+                domain: domain,
+                community: community,
+                token: notification.activity.object.token
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
+              callback();
+              break;
+            case "notification.post.status.change":
+              queue.create('send-one-email', {
+                subject: i18n.t('statusChange.updateSubject'),
+                template: 'post_status_change',
+                user: user,
+                domain: domain,
+                community: community,
+                post: notification.AcActivities[0].Post,
+                content: notification.AcActivities[0].PostStatusChange.content,
+                status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
+              callback();
+              break;
+            case "notification.post.new":
+            case "notification.post.endorsement":
+              deliverPostNotification(notification, user, function () {
+                log.info('Processing notification.post.* Completed', { type: notification.type, user: user.simple() });
+                callback();
+              });
+              break;
+            case "notification.point.new":
+            case "notification.point.quality":
+              deliverPointNotification(notification, user, function () {
+                log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
+                callback();
+              });
+              break;
+            default:
+              callback();
+          }
+        }
+      });
   } catch (error) {
     log.error("Processing Activity Error", {err: error});
     callback();
