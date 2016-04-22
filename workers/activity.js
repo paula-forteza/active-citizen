@@ -8,6 +8,9 @@ var async = require('async');
 var generatePostNotification = require('../engine/notifications/generate_post_notifications.js');
 var generatePointNotification = require('../engine/notifications/generate_point_notifications.js');
 var generateRecommendationEvent = require('../engine/recommendations/events_manager').generateRecommendationEvent;
+var generatePostStatusChangeNotification = require('../engine/notifications/generate_post_status_change_notifications.js');
+
+
 
 var ActivityWorker = function () {};
 
@@ -100,6 +103,16 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
                 log.error('Processing activity.point.* Completed', {type: activity.type, err: error});
               } else {
                 log.info('Processing activity.point.* Completed', {type: activity.type});
+              }
+              seriesCallback();
+            });
+            break;
+          case "activity.post.status.change":
+            generatePostStatusChangeNotification(activity, activity.User, function (error) {
+              if (error) {
+                log.error('Processing activity.post.status.change Completed', {type: activity.type, err: error});
+              } else {
+                log.info('Processing activity.post.status.change Completed', {type: activity.type});
               }
               seriesCallback();
             });

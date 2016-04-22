@@ -36,7 +36,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
 
     template.render(emailLocals, function (error, results) {
       if (error) {
-        log.errors('EmailWorker', { err: error, userID: emailLocals.user.id });
+        log.error('EmailWorker', { err: error, userID: emailLocals.user.id });
         done();
       } else {
         if (process.env.SENDGRID_USERNAME) {

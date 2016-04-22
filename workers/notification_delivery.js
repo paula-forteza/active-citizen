@@ -45,6 +45,10 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                   required: false
                 },
                 {
+                  model: models.PostStatusChange,
+                  required: false
+                },
+                {
                   model: models.Point,
                   required: false
                 }
@@ -111,6 +115,20 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               domain: domain,
               community: community,
               token: notification.activity.object.token
+            }).priority('critical').removeOnComplete(true).save();
+            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
+            callback();
+            break;
+          case "notification.post.status.change":
+            queue.create('send-one-email', {
+              subject: i18n.t('statusChange.updateSubject'),
+              template: 'post_status_change',
+              user: user,
+              domain: domain,
+              community: community,
+              post: notification.AcActivities[0].Post,
+              content: notification.AcActivities[0].PostStatusChange.content,
+              status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
             }).priority('critical').removeOnComplete(true).save();
             log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
             callback();

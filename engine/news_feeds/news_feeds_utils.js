@@ -397,14 +397,14 @@ var activitiesDefaultIncludes = function (options) {
   //      modified_at $gt last_dynamically_generated_processed_news_feed_ac_activity_modified_at
   //      modified_at $lt first_dynamically_generated_processed_news_feed_ac_activity_modified_at
 
-//defaultKeyActivities = ['activity.post.status.update','activity.post.officialStatus.successful',
+//defaultKeyActivities = ['activity.post.status.change','activity.post.officialStatus.successful',
 //  'activity.point.new','activity.post.new','activity.post.officialStatus.failed',
 //  'activity.post.officialStatus.inProgress'];
 
-defaultKeyActivities = ['activity.post.status.update','activity.point.new','activity.post.new',
+defaultKeyActivities = ['activity.post.status.change','activity.point.new','activity.post.new',
                         'activity.post.userImage.new', 'activity.point.newsStory.new' ];
 
-excludeActivitiesFromFilter = ['activity.point.newsStory.new','activity.post.status.update'];
+excludeActivitiesFromFilter = ['activity.point.newsStory.new','activity.post.status.change'];
 
 module.exports = {
   activitiesDefaultIncludes: activitiesDefaultIncludes,
