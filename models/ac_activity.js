@@ -326,6 +326,7 @@ module.exports = function(sequelize, DataTypes) {
               group_id: options.groupId,
               post_id: options.postId,
               point_id: options.pointId,
+              post_status_change_id: options.postStatusChangeId,
               access: options.access ? options.access : sequelize.models.AcActivity.ACCESS_PRIVATE
             }).save().then(function(activity) {
               if (activity) {
