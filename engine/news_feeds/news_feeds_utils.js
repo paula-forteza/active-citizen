@@ -267,7 +267,7 @@ var activitiesDefaultIncludes = function (options) {
     {
       model: models.User,
       required: true,
-      attributes: models.User.defaultAttributesWithSocialMedia,
+      attributes: models.User.defaultAttributesWithSocialMediaPublic,
       include: [
         {
           model: models.Image, as: 'UserProfileImages',
@@ -326,6 +326,7 @@ var activitiesDefaultIncludes = function (options) {
           include: [
             {
               model: models.User,
+              attributes: models.User.defaultAttributesWithSocialMediaPublic,
               required: false
             }
           ],

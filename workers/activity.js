@@ -24,6 +24,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
         include: [
           {
             model: models.User,
+            attributes: ['id','notifications_settings','email','name','created_at'],
             required: false
           },
           {

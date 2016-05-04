@@ -26,6 +26,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
           include: [
             {
               model: models.User,
+              attributes: ['id','notifications_settings','email','name','created_at'],
               required: false
             },
             {
@@ -35,6 +36,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
               include: [
                 {
                   model: models.User,
+                  attributes: ['id','notifications_settings','email','name','created_at'],
                   required: false
                 },
                 {
@@ -75,7 +77,8 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
       },
       function(callback){
         models.User.find({
-          where: { id: notification.user_id }
+          where: { id: notification.user_id },
+          attributes: ['id','notifications_settings','email','name','created_at']
         }).then(function(userResults) {
           if (userResults) {
             user = userResults;

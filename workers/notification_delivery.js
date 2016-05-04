@@ -24,6 +24,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             include: [
               {
                 model: models.User,
+                attributes: ['id','notifications_settings','email','name','created_at'],
                 required: false
               },
               {
@@ -95,7 +96,8 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         function(callback){
           if (notification.user_id) {
             models.User.find({
-              where: { id: notification.user_id }
+              where: { id: notification.user_id },
+              attributes: ['id','notifications_settings','email','name','created_at']
             }).then(function(userResults) {
               if (userResults) {
                 user = userResults;

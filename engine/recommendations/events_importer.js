@@ -29,7 +29,9 @@ var importAllUsers = function (done) {
 
   log.info('AcImportAllUsers', {});
   lineCrCounter = 0;
-  models.User.findAll().then(function (users) {
+  models.User.findAll({
+    attributes: ['id','notifications_settings','email','name','created_at']
+  }).then(function (users) {
     async.eachSeries(users, function (user, callback) {
       client.createUser( {
         appId: 1,

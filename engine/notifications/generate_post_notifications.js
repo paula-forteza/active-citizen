@@ -54,6 +54,7 @@ var generateNotificationsForEndorsements = function (activity, callback) {
     include: [
       {
         model: models.User,
+        attributes: ['id','notifications_settings','email','name'],
         required: true,
         where: {
           "notifications_settings.my_posts_endorsements.method": {

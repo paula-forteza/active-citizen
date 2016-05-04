@@ -97,6 +97,7 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
       {
         model: models.User,
         required: true,
+        attributes: ['id','notifications_settings','email','name'],
         where: {
           "notifications_settings.my_points_endorsements.method": {
             $gt: 0
