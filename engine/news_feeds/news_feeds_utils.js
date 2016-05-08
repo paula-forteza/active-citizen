@@ -291,7 +291,8 @@ var activitiesDefaultIncludes = function (options) {
     },
     {
       model: models.Domain,
-      required: true
+      required: true,
+      attributes: models.Domain.defaultAttributesPublic
     },
     community,
     group,
