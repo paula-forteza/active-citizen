@@ -34,7 +34,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                 include: [
                   {
                     model: models.Domain,
-                    required: false
+                    required: true
                   },
                   {
                     model: models.Community,
@@ -76,13 +76,18 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               notification = results;
               if (notification.AcActivities[0].Domain) {
                 domain = notification.AcActivities[0].Domain;
-              } else if (notification.AcActivities[0].Group.Community.Domain) {
+              } else if (notification.AcActivities[0].Group && notification.AcActivities[0].Group &&
+                         notification.AcActivities[0].Group.Community &&
+                         notification.AcActivities[0].Group.Community.Domain) {
                 domain = notification.AcActivities[0].Group.Community.Domain;
+              } else {
+                log.error("Couldn't find domain for NotificationDeliveryWorker");
               }
 
               if (notification.AcActivities[0].Community) {
                 community = notification.AcActivities[0].Community;
-              } else if (notification.AcActivities[0].Group.Community) {
+              } else if (notification.AcActivities[0].Group &&
+                         notification.AcActivities[0].Group.Community) {
                 community = notification.AcActivities[0].Group.Community;
               }
               callback();
