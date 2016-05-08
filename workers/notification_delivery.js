@@ -34,7 +34,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                 include: [
                   {
                     model: models.Domain,
-                    required: true
+                    required: false
                   },
                   {
                     model: models.Community,
