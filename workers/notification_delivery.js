@@ -160,6 +160,8 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               callback();
               break;
             case "notification.password.recovery":
+              log.info("NotificationDeliveryWorker Debug 7", {ACACTIVITIES:  notification.AcActivites, ACACTIVITIES_NULL: notification.AcActivites[0]});
+              log.info("NotificationDeliveryWorker Debug 8", { ACACTIVITIES_NULL: notification.AcActivites[0]});
               queue.create('send-one-email', {
                 subject: i18n.t('email.password_recovery'),
                 template: 'password_recovery',
