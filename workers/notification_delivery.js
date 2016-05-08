@@ -72,6 +72,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               }
             ]
           }).then(function(results) {
+            log.info("NotificationDeliveryWorker Debug 1", {results: results});
             if (results) {
               notification = results;
               if (notification.AcActivities[0].Domain) {
@@ -83,13 +84,16 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               } else {
                 log.error("Couldn't find domain for NotificationDeliveryWorker");
               }
-
+              log.info("NotificationDeliveryWorker Debug 2", {notification: notification});
               if (notification.AcActivities[0].Community) {
                 community = notification.AcActivities[0].Community;
               } else if (notification.AcActivities[0].Group &&
                          notification.AcActivities[0].Group.Community) {
                 community = notification.AcActivities[0].Group.Community;
+              } else {
+                log.error("Couldn't find community for NotificationDeliveryWorker");
               }
+              log.info("NotificationDeliveryWorker Debug 4", {AcActivities: notification.AcActivities});
               callback();
             } else {
               callback('Notification not found');
@@ -104,6 +108,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               where: { id: notification.user_id },
               attributes: ['id','notifications_settings','email','name','created_at']
             }).then(function(userResults) {
+              log.info("NotificationDeliveryWorker Debug 5", {userResults: userResults});
               if (userResults) {
                 user = userResults;
                 callback();
@@ -124,6 +129,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         function(callback){
           if (user) {
             user.setLocale(i18n, domain, community, function () {
+              log.info("NotificationDeliveryWorker Debug 6", {});
               callback();
             });
           } else {
@@ -133,7 +139,10 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
       ],
       function(error) {
         if (error) {
-          log.error("NotificationDeliveryWorker Error", {err: error});
+          if (error.stack)
+            log.error("NotificationDeliveryWorker Error", {err: error, stack: error.stack.split("\n") });
+          else
+            log.error("NotificationDeliveryWorker Error", {err: error });
           callback();
         } else {
           log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user ? user.simple() : null });
