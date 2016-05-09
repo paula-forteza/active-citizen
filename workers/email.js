@@ -56,6 +56,8 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
       locale = 'en';
     }
 
+    log.info("Selected locale", { locale: locale });
+
     i18n.changeLanguage(locale, function (err, t) {
       template.render(emailLocals, function (error, results) {
         if (error) {
