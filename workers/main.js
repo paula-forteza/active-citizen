@@ -1,6 +1,11 @@
 var i18n = require('../utils/i18n');
 var Backend = require('i18next-node-fs-backend');
 var log = require('../utils/logger');
+var path = require('path');
+
+log.info("Dirname", {dirname: __dirname});
+
+var localesPath = path.resolve(__dirname, '../locales');
 
 i18n
   .use(Backend)
@@ -12,10 +17,10 @@ i18n
     // this is the defaults
     backend: {
       // path where resources get loaded from
-      loadPath: '../locales/{{lng}}/translation.json',
+      loadPath: localesPath+'/{{lng}}/translation.json',
 
       // path to post missing resources
-      addPath: '../locales/{{lng}}/translation.missing.json',
+      addPath: localesPath+'/{{lng}}/translation.missing.json',
 
       // jsonIndent to use when storing json files
       jsonIndent: 2
