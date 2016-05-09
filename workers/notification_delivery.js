@@ -81,6 +81,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                          notification.AcActivities[0].Group.Community &&
                          notification.AcActivities[0].Group.Community.Domain) {
                 domain = notification.AcActivities[0].Group.Community.Domain;
+                log.info("NotificationDeliveryWorker Debug 1", {notification: notification});
               } else {
                 log.error("Couldn't find domain for NotificationDeliveryWorker");
               }
@@ -160,15 +161,15 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               callback();
               break;
             case "notification.password.recovery":
-              log.info("NotificationDeliveryWorker Debug 7", {ACACTIVITIES:  notification.AcActivites, ACACTIVITIES_NULL: notification.AcActivites[0]});
-              log.info("NotificationDeliveryWorker Debug 8", { ACACTIVITIES_NULL: notification.AcActivites[0]});
+              log.info("NotificationDeliveryWorker Debug 7", {ACACTIVITIES:  notification.AcActivites, ACACTIVITIES_NULL: notification.AcActivities[0]});
+              log.info("NotificationDeliveryWorker Debug 8", { ACACTIVITIES_NULL: notification.AcActivities[0]});
               queue.create('send-one-email', {
                 subject: i18n.t('email.password_recovery'),
                 template: 'password_recovery',
                 user: user,
                 domain: domain,
                 community: community,
-                token: notification.AcActivites[0].object.token
+                token: notification.AcActivities[0].object.token
               }).priority('critical').removeOnComplete(true).save();
               log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user.simple() });
               callback();
