@@ -34,6 +34,16 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
       emailLocals['community'] = { hostname: 'www' }
     }
 
+    var fromEmail;
+
+    if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
+      fromEmail = 'betrireykjavik@ibuar.is';
+    } else if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
+      fromEmail = 'betraisland@ibuar.is';
+    } else {
+      fromEmail = "admin@yrpri.org";
+    }
+
     template.render(emailLocals, function (error, results) {
       if (error) {
         log.error('EmailWorker', { err: error, userID: emailLocals.user.id });
@@ -41,9 +51,9 @@ EmailWorker.prototype.sendOne = function (emailLocals, done) {
       } else {
         if (process.env.SENDGRID_USERNAME) {
           transport.sendMail({
-            from: 'robert@ibuar.is', // emailLocals.community.admin_email,
+            from: fromEmail, // emailLocals.community.admin_email,
             to: 'robert@citizens.is', // emailLocals.user.email,
-           // bcc: 'robert@ibuar.is',
+            bcc: 'gunnar@ibuar.is',
             subject: emailLocals.subject,
             html: results.html,
             text: results.text
