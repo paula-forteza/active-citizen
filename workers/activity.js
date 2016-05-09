@@ -66,9 +66,6 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
       });
     },
     function (seriesCallback) {
-      generateRecommendationEvent(activity, seriesCallback);
-    },
-    function (seriesCallback) {
       log.info('Processing Activity Started', {type: activity.type});
       try {
         switch (activity.type) {
@@ -131,6 +128,9 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
         log.error("Processing Activity Error", {err: error});
         seriesCallback();
       }
+    },
+    function (seriesCallback) {
+      generateRecommendationEvent(activity, seriesCallback);
     }
   ], function (error) {
     if (error) {
