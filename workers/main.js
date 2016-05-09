@@ -5,6 +5,10 @@ var log = require('../utils/logger');
 i18n
   .use(Backend)
   .init({
+    preload: ['en','is'],
+
+    fallbackLng:'en',
+
     // this is the defaults
     backend: {
       // path where resources get loaded from
