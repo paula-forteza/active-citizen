@@ -1,4 +1,4 @@
-html {
+#wrapper {
   margin: 30px;
 }
 
@@ -37,15 +37,15 @@ img {
   margin: 0;
 }
 
-#header{
+#header {
   background: #edeeef !important;
   height: 91px;
-  padding: 0 10px 0 10px;
+  padding: 16px 16px 0 16px;
 }
 
 #footer{
   background: #edeeef !important;
-  padding: 10px;
+  padding: 16px;
   padding-top:20px;
   text-align: center;
 

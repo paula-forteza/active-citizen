@@ -1,4 +1,19 @@
-<div id="footer">
-  <a href="https://betrireykjavik.is/">Betri Reykjavik</a> - <a href="mailto:betrireykjavik@ibuar.is">betrireykjavik@ibuar.is</a> - <a href="#">Unsubscribe</a>
+  </div>
+  <div id="footer">
+    <% if (domain.domain_name == 'betrireykjavik.is') { %>
+      <a href="https://betrireykjavik.is/">Betri Reykjavik</a> -
+      <a href="mailto:betrireykjavik@ibuar.is">betrireykjavik@ibuar.is</a> -
+      <a href="<%='https://betrireykjavik.is/#!/user/'+user.id%>">Unsubscribe</a>
+    <% } %>
+    <% if (domain.domain_name == 'betraisland.is') { %>
+      <a href="https://betraisland.is/">Betra Ísland</a> -
+      <a href="mailto:betraisland@ibuar.is">betraisland@ibuar.is</a> -
+      <a href="<%='https://betraisland.is/#!/user/'+user.id%>">Unsubscribe</a>
+    <% } %>
+    <% if (domain.domain_name  == 'yrpri.org') { %>
+      <a href="https://yrpri.org/">Your Priorities</a> -
+      <a href="mailto:admin@yrpri.org">admin@yrpri.org</a> -
+      <a href="<%='https://yrpri.org/#!/user/'+user.id %>">Unsubscribe</a>
+    <% } %>
+  </div>
 </div>
-        
