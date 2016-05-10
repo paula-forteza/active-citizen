@@ -5,9 +5,9 @@ var filterNotificationForDelivery = require('./emails_utils').filterNotification
 
 module.exports = function (notification, user, callback) {
   if (notification.type=='notification.post.new') {
-    filterNotificationForDelivery(notification, user, 'my_posts', 'post_activity', i18n.t('email.post.subject.new'), callback);
+    filterNotificationForDelivery(notification, user, 'my_posts', 'post_activity', i18n.t('notification.email.postNew'), callback);
   } else if (notification.type=='notification.post.endorsement') {
-    filterNotificationForDelivery(notification, user, 'my_posts_endorsements', 'post_activity', i18n.t('email.post.subject.new'), callback);
+    filterNotificationForDelivery(notification, user, 'my_posts_endorsements', 'post_activity', i18n.t('notification.email.postNew'), callback);
   } else {
     callback();
   }
