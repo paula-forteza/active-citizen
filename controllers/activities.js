@@ -38,7 +38,7 @@ var getActivities = function (req, res, options, callback) {
       [ models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
     ],
       include: activitiesDefaultIncludes(options),
-      limit: 8
+      limit: 7
   }).then(function(activities) {
     res.send({
       activities: activities,
