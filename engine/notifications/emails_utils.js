@@ -10,10 +10,12 @@ var filterNotificationForDelivery = function (notification, user, notification_s
 
   //TODO: Switch from FREQUENCY_AS_IT_HAPPENS if user has had a lot of emails > 25 in the hour or something
 
-  console.log("Notification Email Processing", {user: user, method: method, frequency: frequency});
+  console.log("Notification Email Processing", {email: user.email, notification_settings_type: notification_settings_type,
+                                                method: method, frequency: frequency});
 
   if (method !== models.AcNotification.METHOD_MUTED) {
     if (frequency === models.AcNotification.FREQUENCY_AS_IT_HAPPENS) {
+      console.log("Notification Email Processing Sending eMail", {email: user.email, method: method, frequency: frequency});
       queue.create('send-one-email', {
         subject: subject,
         template: template,
