@@ -4,13 +4,14 @@ var toJson = require('../../utils/to_json');
 var async = require('async');
 var _ = require('lodash');
 
-var getModelAndUsersByType = function (model, userType, id, notification_type, callback) {
+var getModelAndUsersByType = function (model, userType, id, notification_setting_type, callback) {
   var userWhere = {};
 
-  userWhere["notifications_settings."+notification_type+".method"] = {
+  userWhere["notifications_settings."+notification_setting_type+".method"] = {
     $gt: 0
   };
 
+  log.info("Notification Processing getModelAndUsersByType", { notification_setting_type: notification_setting_type, userWhere: userWhere });
   // TODO: Use streams when ready https://github.com/sequelize/sequelize/issues/2454
   model.find({
     where: { id: id },
@@ -23,6 +24,7 @@ var getModelAndUsersByType = function (model, userType, id, notification_type, c
       }
     ]
   }).then( function(results) {
+    log.info("Notification Processing found users", { numberOfUsers: results ? results.length : null, userWhere: userWhere });
     if (results) {
       callback(null, results)
     } else {
@@ -33,12 +35,12 @@ var getModelAndUsersByType = function (model, userType, id, notification_type, c
   });
 };
 
-var addNotificationsForUsers = function (activity, users, notification_type, uniqueUserIds, callback) {
+var addNotificationsForUsers = function (activity, users, notification_type, notification_setting_type, uniqueUserIds, callback) {
   async.eachSeries(users, function (user, seriesCallback) {
     if (_.includes(uniqueUserIds.users, user.id)) {
       seriesCallback();
     } else {
-      models.AcNotification.createNotificationFromActivity(user, activity, notification_type, 50, function (error) {
+      models.AcNotification.createNotificationFromActivity(user, activity, notification_type, notification_setting_type, 50, function (error) {
         uniqueUserIds.users.push(user.id);
         seriesCallback(error);
       });
@@ -49,11 +51,11 @@ var addNotificationsForUsers = function (activity, users, notification_type, uni
 };
 
 // type: 'notification.post.endorsement';
-var addOrPossiblyGroupNotification = function (model, type, activity, user, priority, callback) {
+var addOrPossiblyGroupNotification = function (model, notification_type, notification_setting_type, activity, user, priority, callback) {
   models.AcNotification.find({
     where: {
       user_id: model.User.id,
-      type: type,
+      type: notification_type,
       created_at: {
         $lt: new Date(),
         $gt: new Date(new Date() - models.AcNotification.ENDORSEMENT_GROUPING_TTL)
@@ -64,7 +66,7 @@ var addOrPossiblyGroupNotification = function (model, type, activity, user, prio
       models.AcNotification.find({
         where: {
           user_id: user.id,
-          type: type,
+          type: notification_type,
           created_at: {
             $lt: new Date(),
             $gt: new Date(new Date() - models.AcNotification.ENDORSEMENT_GROUPING_TTL)
@@ -96,7 +98,7 @@ var addOrPossiblyGroupNotification = function (model, type, activity, user, prio
         }
       });
     } else {
-      models.AcNotification.createNotificationFromActivity(user, activity, type, priority, function (error) {
+      models.AcNotification.createNotificationFromActivity(user, activity, notification_type, notification_setting_type, priority, function (error) {
         callback(error);
       });
     }

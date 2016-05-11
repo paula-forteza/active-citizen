@@ -4,13 +4,13 @@ var toJson = require('../../utils/to_json');
 var async = require('async');
 var queue = require('../../workers/queue');
 
-var filterNotificationForDelivery = function (notification, user, notification_settings_type, template, subject, callback) {
-  var method = user.notifications_settings[notification_settings_type].method;
-  var frequency = user.notifications_settings[notification_settings_type].frequency;
+var filterNotificationForDelivery = function (notification, user, template, subject, callback) {
+  var method = user.notifications_settings[notification.from_notification_setting].method;
+  var frequency = user.notifications_settings[notification.from_notification_setting].frequency;
 
   //TODO: Switch from FREQUENCY_AS_IT_HAPPENS if user has had a lot of emails > 25 in the hour or something
 
-  console.log("Notification Email Processing", {email: user.email, notification_settings_type: notification_settings_type,
+  console.log("Notification Email Processing", {email: user.email, notification_settings_type: notification.notification_setting_type,
                                                 method: method, frequency: frequency});
 
   if (method !== models.AcNotification.METHOD_MUTED) {
@@ -27,8 +27,8 @@ var filterNotificationForDelivery = function (notification, user, notification_s
         point: notification.AcActivities[0].Point
       }).priority('critical').removeOnComplete(true).save();
       callback();
-    } else if (user.notifications_settings.my_posts.method != models.AcNotification.METHOD_MUTED) {
-      AcDelayedNotification.findOrCreate({
+    } else if (method !== models.AcNotification.METHOD_MUTED) {
+      models.AcDelayedNotification.findOrCreate({
         where: {
           user_id: user.id,
           method: method,
@@ -43,12 +43,13 @@ var filterNotificationForDelivery = function (notification, user, notification_s
         }
       }).spread(function(delayedNotification, created) {
         if (created) {
-          log.info('AcDelayedNotification Created', { delayedNotification: toJson(delayedNotification), context: 'create' });
+          log.info('Notification Email Processing AcDelayedNotification Created', { delayedNotification: toJson(delayedNotification), context: 'create' });
         } else {
-          log.info('AcDelayedNotification Loaded', { delayedNotification: toJson(delayedNotification), context: 'loaded' });
+          log.info('Notification Email Processing AcDelayedNotification Loaded', { delayedNotification: toJson(delayedNotification), context: 'loaded' });
         }
-        delayedNotification.addDelayedNotification(notification).then(function (results) {
+        delayedNotification.addAcNotifications(notification).then(function (results) {
           if (delayedNotification.delivered) {
+            log.info('Notification Email Processing AcDelayedNotification already delivered resetting');
             delayedNotification.delivered = false;
             delayedNotification.save().then(function (results) {
               callback();

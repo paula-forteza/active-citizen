@@ -45,7 +45,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
             }
             innerSeriesCallback();
           }, function (error) {
-            addNotificationsForUsers(activity, users, "notification.point.new", uniqueUserIds, seriesCallback);
+            addNotificationsForUsers(activity, users, "notification.point.new", 'my_points', uniqueUserIds, seriesCallback);
           });
         } else {
           seriesCallback();
@@ -59,7 +59,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
           if (error) {
             seriesCallback(error);
           } else if (community) {
-            addNotificationsForUsers(activity, community.CommunityUsers, "notification.point.new", uniqueUserIds, seriesCallback);
+            addNotificationsForUsers(activity, community.CommunityUsers, "notification.point.new", 'all_community', uniqueUserIds, seriesCallback);
           } else {
             log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
             seriesCallback();
@@ -75,7 +75,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         if (error) {
           seriesCallback(error);
         } else if (group) {
-          addNotificationsForUsers(activity, group.GroupUsers, "notification.point.new", uniqueUserIds, seriesCallback);
+          addNotificationsForUsers(activity, group.GroupUsers, "notification.point.new", "all_group", uniqueUserIds, seriesCallback);
         } else {
           log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
           seriesCallback();
@@ -107,7 +107,7 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
     ]
   }).then( function(point) {
     if (point) {
-      addOrPossiblyGroupNotification(point, 'notification.point.quality', activity, point.User, 50, callback);
+      addOrPossiblyGroupNotification(point, 'notification.point.quality', 'my_points_endorsements', activity, point.User, 50, callback);
     } else {
       log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
       callback();

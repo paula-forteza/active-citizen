@@ -70,19 +70,19 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
       try {
         switch (activity.type) {
           case "activity.user.invite":
-            models.AcNotification.createNotificationFromActivity(activity.actor.user_id, activity, "notification.user.invite", 70, function (error) {
+            models.AcNotification.createNotificationFromActivity(activity.actor.user_id, activity, "notification.user.invite", "priority", 70, function (error) {
               log.info('Processing activity.user.invite Completed', {type: activity.type, err: error});
               seriesCallback();
             });
             break;
           case "activity.password.recovery":
-            models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.recovery", 100, function (error) {
+            models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.recovery", "priority", 100, function (error) {
               log.info('Processing activity.password.recovery Completed', {type: activity.type, err: error});
               seriesCallback();
             });
             break;
           case "activity.password.changed":
-            models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.changed", 100, function (error) {
+            models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.changed", "priority", 100, function (error) {
               log.info('Processing activity.password.changed Completed', {type: activity.type, err: error});
               seriesCallback();
             });

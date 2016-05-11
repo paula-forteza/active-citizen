@@ -16,7 +16,7 @@ var generateNotificationsForNewPost = function (activity, uniqueUserIds, callbac
           if (error) {
             seriesCallback(error);
           } else if (community) {
-            addNotificationsForUsers(activity, community.CommunityUsers, "notification.post.new", uniqueUserIds, seriesCallback);
+            addNotificationsForUsers(activity, community.CommunityUsers, "notification.post.new", "all_community", uniqueUserIds, seriesCallback);
           } else {
             log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
             seriesCallback();
@@ -32,7 +32,7 @@ var generateNotificationsForNewPost = function (activity, uniqueUserIds, callbac
         if (error) {
           seriesCallback(error);
         } else if (group) {
-          addNotificationsForUsers(activity, group.GroupUsers, "notification.post.new", uniqueUserIds, seriesCallback);
+          addNotificationsForUsers(activity, group.GroupUsers, "notification.post.new", "all_group", uniqueUserIds, seriesCallback);
         } else {
           log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
           seriesCallback();
@@ -65,7 +65,7 @@ var generateNotificationsForEndorsements = function (activity, callback) {
     ]
   }).then( function(post) {
     if (post) {
-      addOrPossiblyGroupNotification(post, 'notification.post.endorsement', activity, post.User, 50, callback);
+      addOrPossiblyGroupNotification(post, 'notification.post.endorsement', 'my_posts_endorsements', activity, post.User, 50, callback);
     } else {
       log.warn("Generate Post Notification Not found or muted", { userId: activity.user_id, type: activity.type});
       callback();

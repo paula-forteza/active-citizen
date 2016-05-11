@@ -14,6 +14,7 @@ module.exports = function(sequelize, DataTypes) {
     sent_push: { type: DataTypes.INTEGER, default: false },
     processed_at: DataTypes.DATE,
     user_interaction_profile: DataTypes.JSONB,
+    from_notification_setting: DataTypes.STRING,
     viewed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {
@@ -121,7 +122,7 @@ module.exports = function(sequelize, DataTypes) {
 
       associate: function(models) {
         AcNotification.belongsToMany(models.AcActivity, { as: 'AcActivities', through: 'notification_activities' });
-        AcNotification.belongsToMany(models.AcActivity, { as: 'AcDelayedNotifications', through: 'delayed_notifications' });
+        AcNotification.belongsToMany(models.AcDelayedNotification, { as: 'AcDelayedNotifications', through: 'delayed_notifications' });
         AcNotification.belongsTo(models.User);
       },
 
@@ -140,7 +141,7 @@ module.exports = function(sequelize, DataTypes) {
         queue.create('process-notification-news-feed', notificationJson).priority(queuePriority).removeOnComplete(true).save();
       },
 
-      createNotificationFromActivity: function(user, activity, type, priority, callback) {
+      createNotificationFromActivity: function(user, activity, type, notification_setting_type, priority, callback) {
         log.info('AcNotification Notification', {type: type, priority: priority });
 
         if (user==null) {
@@ -160,6 +161,7 @@ module.exports = function(sequelize, DataTypes) {
          priority: priority,
          status: 'active',
          ac_activity_id: activity.id,
+         from_notification_setting: notification_setting_type,
          user_id: user.id
        }).save().then(function(notification) {
           if (notification) {

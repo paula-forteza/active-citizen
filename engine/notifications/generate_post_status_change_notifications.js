@@ -24,7 +24,7 @@ var generateNotificationsForPostStatusChange = function (activity, uniqueUserIds
           ]
         }).then(function (endorsements) {
           var users = _.map(endorsements, function (item) { return item.User });
-          addNotificationsForUsers(activity, users, "notification.post.status.change", uniqueUserIds, seriesCallback);
+          addNotificationsForUsers(activity, users, "notification.post.status.change", "priority", uniqueUserIds, seriesCallback);
         }).catch(function (error) {
           seriesCallback(error);
         });
