@@ -17,7 +17,7 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
     var community;
 
     async.series([
-      function(callback){
+      function(seriesCallback){
         models.AcNotification.find({
           where: { id: notificationJson.id },
           order: [
@@ -67,36 +67,36 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
             notification = results;
             domain = notification.AcActivities[0].Domain;
             community = notification.AcActivities[0].Community;
-            callback();
+            seriesCallback();
           } else {
-            callback('Notification not found');
+            seriesCallback('Notification not found');
           }
         }).catch(function(error) {
-          callback(error);
+          seriesCallback(error);
         });
       },
-      function(callback){
+      function(seriesCallback){
         models.User.find({
           where: { id: notification.user_id },
           attributes: ['id','notifications_settings','email','name','created_at']
         }).then(function(userResults) {
           if (userResults) {
             user = userResults;
-            callback();
+            seriesCallback();
           } else {
-            callback();
+            seriesCallback();
           }
         }).catch(function(error) {
-          callback(error);
+          seriesCallback(error);
         });
       },
-      function(callback){
+      function(seriesCallback){
         if (user) {
           user.setLocale(i18n, domain, community, function () {
-            callback();
+            seriesCallback();
           });
         } else {
-          callback();
+          seriesCallback();
         }
       }
     ],
