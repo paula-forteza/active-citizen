@@ -83,7 +83,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                     log.error('EmailWorker', { err: error, user: emailLocals.user });
                     seriesCallback(error);
                   } else {
-                    log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, userId: emailLocals.user.id });
+                    log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, email: emailLocals.user.email, userId: emailLocals.user.id });
                     seriesCallback();
                   }
                 })
