@@ -72,7 +72,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             }
           ]
         }).then(function(results) {
-          log.info("NotificationDeliveryWorker Debug 1", {results: results});
+          log.info("NotificationDeliveryWorker Debug 1", {results: results.dataValues});
           if (results) {
             notification = results;
             if (notification.AcActivities[0].Domain) {
@@ -81,7 +81,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                        notification.AcActivities[0].Group.Community &&
                        notification.AcActivities[0].Group.Community.Domain) {
               domain = notification.AcActivities[0].Group.Community.Domain;
-              log.info("NotificationDeliveryWorker Debug 1", {notification: notification.dataValues });
+              log.info("NotificationDeliveryWorker Debug 1a", {});
             } else {
               log.error("Couldn't find domain for NotificationDeliveryWorker");
             }
