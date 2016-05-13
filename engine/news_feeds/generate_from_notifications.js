@@ -5,7 +5,7 @@ var async = require('async');
 var log = require('../../utils/logger');
 var _ = require('lodash');
 var toJson = require('../../utils/to_json');
-var airbrake = require('../utils/airbrake');
+var airbrake = require('../../utils/airbrake');
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
 var getNewsFeedDate = require('./news_feeds_utils').getNewsFeedDate;
