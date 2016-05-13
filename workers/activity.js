@@ -4,13 +4,12 @@ var models = require("../../models");
 var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var async = require('async');
+var airbrake = require('../utils/airbrake');
 
 var generatePostNotification = require('../engine/notifications/generate_post_notifications.js');
 var generatePointNotification = require('../engine/notifications/generate_point_notifications.js');
 var generateRecommendationEvent = require('../engine/recommendations/events_manager').generateRecommendationEvent;
 var generatePostStatusChangeNotification = require('../engine/notifications/generate_post_status_change_notifications.js');
-
-
 
 var ActivityWorker = function () {};
 
@@ -72,19 +71,19 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.user.invite":
             models.AcNotification.createNotificationFromActivity(activity.actor.user_id, activity, "notification.user.invite", "priority", 70, function (error) {
               log.info('Processing activity.user.invite Completed', {type: activity.type, err: error});
-              seriesCallback();
+              seriesCallback(error);
             });
             break;
           case "activity.password.recovery":
             models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.recovery", "priority", 100, function (error) {
               log.info('Processing activity.password.recovery Completed', {type: activity.type, err: error});
-              seriesCallback();
+              seriesCallback(error);
             });
             break;
           case "activity.password.changed":
             models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.password.changed", "priority", 100, function (error) {
               log.info('Processing activity.password.changed Completed', {type: activity.type, err: error});
-              seriesCallback();
+              seriesCallback(error);
             });
             break;
           case "activity.post.new":
@@ -93,10 +92,11 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
             generatePostNotification(activity, activity.User, function (error) {
               if (error) {
                 log.error('Processing activity.post.* Completed', {type: activity.type, err: error});
+                seriesCallback(error);
               } else {
+                seriesCallback();
                 log.info('Processing activity.post.* Completed', {type: activity.type});
               }
-              seriesCallback();
             });
             break;
           case "activity.point.new":
@@ -105,20 +105,22 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
             generatePointNotification(activity, activity.User, function (error) {
               if (error) {
                 log.error('Processing activity.point.* Completed', {type: activity.type, err: error});
+                seriesCallback(error);
               } else {
                 log.info('Processing activity.point.* Completed', {type: activity.type});
+                seriesCallback();
               }
-              seriesCallback();
             });
             break;
           case "activity.post.status.change":
             generatePostStatusChangeNotification(activity, activity.User, function (error) {
               if (error) {
                 log.error('Processing activity.post.status.change Completed', {type: activity.type, err: error});
+                seriesCallback(error);
               } else {
                 log.info('Processing activity.post.status.change Completed', {type: activity.type});
+                seriesCallback();
               }
-              seriesCallback();
             });
             break;
           default:
@@ -126,7 +128,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
         }
       } catch (error) {
         log.error("Processing Activity Error", {err: error});
-        seriesCallback();
+        seriesCallback(error);
       }
     },
     function (seriesCallback) {
@@ -135,8 +137,15 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
   ], function (error) {
     if (error) {
       log.error("Processing Activity Error", {err: error});
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
+        }
+        callback(error);
+      });
+    } else {
+      callback();
     }
-    callback(error);
   });
 };
 

@@ -9,6 +9,8 @@ var nodemailer = require('nodemailer');
 var ejs = require('ejs');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
+var airbrake = require('../utils/airbrake');
+var async = require('async');
 
 var templatesDir = path.resolve(__dirname, '..', 'email_templates', 'notifications');
 
@@ -24,77 +26,92 @@ var transport = nodemailer.createTransport({
   }
 });
 
-EmailWorker.prototype.sendOne = function (emailLocals, done) {
-  try {
-    var template = new EmailTemplate(path.join(templatesDir, emailLocals.template));
+EmailWorker.prototype.sendOne = function (emailLocals, callback) {
+  async.series([
+    function (seriesCallback) {
+      var template = new EmailTemplate(path.join(templatesDir, emailLocals.template));
 
-    emailLocals['t'] = i18nFilter;
+      emailLocals['t'] = i18nFilter;
 
-    if (!emailLocals['community']) {
-      emailLocals['community'] = { hostname: 'www' }
-    }
+      if (!emailLocals['community']) {
+        emailLocals['community'] = { hostname: 'www' }
+      }
 
-    var fromEmail;
+      var fromEmail;
 
-    if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
-      fromEmail = 'betrireykjavik@ibuar.is';
-    } else if (emailLocals.domain.domain_name.indexOf('betraisland.is') > -1) {
-      fromEmail = 'betraisland@ibuar.is';
-    } else {
-      fromEmail = "admin@yrpri.org";
-    }
-
-    var locale;
-
-    if (emailLocals.user.default_locale && emailLocals.user.default_locale != "") {
-      locale = emailLocals.user.default_locale;
-    } else if (emailLocals.community && emailLocals.community.default_locale && emailLocals.community.default_locale != "") {
-      locale = emailLocals.community.default_locale;
-    } else if (emailLocals.domain && emailLocals.domain.default_locale && emailLocals.domain.default_locale != "") {
-      locale = emailLocals.domain.default_locale;
-    } else {
-      locale = 'en';
-    }
-
-    emailLocals.headerImageUrl = "";
-
-    log.info("Selected locale", { locale: locale });
-
-    i18n.changeLanguage(locale, function (err, t) {
-      template.render(emailLocals, function (error, results) {
-        if (error) {
-          log.error('EmailWorker', { err: error, userID: emailLocals.user.id });
-          done();
+      if (emailLocals.domain && emailLocals.domain.domain_name) {
+        if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
+          fromEmail = 'betrireykjavik@ibuar.is';
+        } else if (emailLocals.domain.domain_name.indexOf('betraisland.is') > -1) {
+          fromEmail = 'betraisland@ibuar.is';
         } else {
-          if (process.env.SENDGRID_USERNAME) {
-            transport.sendMail({
-              from: fromEmail, // emailLocals.community.admin_email,
-              to: emailLocals.user.email,
-              bcc: 'gunnar@ibuar.is,robert@citizens.is',
-              subject: emailLocals.subject,
-              html: results.html,
-              text: results.text
-            }, function (error, responseStatus) {
-              if (error) {
-                log.error('EmailWorker', { err: error, user: emailLocals.user });
-                done(error);
-              } else {
-                log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, userId: emailLocals.user.id });
-                done();
-              }
-            })
-          } else {
-            log.warn('EmailWorker no SMTP server', { subject: emailLocals.subject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
-            done();
-          }
+          fromEmail = "admin@yrpri.org";
         }
-      });
-    });
 
-  } catch (err) {
-    log.error("Processing Email Error", {err: err});
-    done();
-  }
+        var locale;
+
+        if (emailLocals.user.default_locale && emailLocals.user.default_locale != "") {
+          locale = emailLocals.user.default_locale;
+        } else if (emailLocals.community && emailLocals.community.default_locale && emailLocals.community.default_locale != "") {
+          locale = emailLocals.community.default_locale;
+        } else if (emailLocals.domain && emailLocals.domain.default_locale && emailLocals.domain.default_locale != "") {
+          locale = emailLocals.domain.default_locale;
+        } else {
+          locale = 'en';
+        }
+
+        emailLocals.headerImageUrl = "";
+
+        log.info("Selected locale", { locale: locale });
+
+        i18n.changeLanguage(locale, function (err, t) {
+          template.render(emailLocals, function (error, results) {
+            if (error) {
+              log.error('EmailWorker', { err: error, userID: emailLocals.user.id });
+              seriesCallback(error);
+            } else {
+              if (process.env.SENDGRID_USERNAME) {
+                transport.sendMail({
+                  from: fromEmail, // emailLocals.community.admin_email,
+                  to: emailLocals.user.email,
+                  bcc: 'gunnar@ibuar.is,robert@citizens.is',
+                  subject: emailLocals.subject,
+                  html: results.html,
+                  text: results.text
+                }, function (error, responseStatus) {
+                  if (error) {
+                    log.error('EmailWorker', { err: error, user: emailLocals.user });
+                    seriesCallback(error);
+                  } else {
+                    log.info('EmailWorker Completed', { responseStatusMessage: responseStatus.message, userId: emailLocals.user.id });
+                    seriesCallback();
+                  }
+                })
+              } else {
+                log.warn('EmailWorker no SMTP server', { subject: emailLocals.subject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
+                seriesCallback();
+              }
+            }
+          });
+        });
+      } else {
+        log.error("Can't find domain for email", {emailLocals: emailLocals});
+        seriesCallback("Can't find domain for email");
+      }
+    }
+  ], function (error) {
+    if (error) {
+      log.error("Processing Email Error", {err: error});
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
+        }
+        callback(error);
+      });
+    } else {
+      callback();
+    }
+  });
 };
 
 module.exports = new EmailWorker();

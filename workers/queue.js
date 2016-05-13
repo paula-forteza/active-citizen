@@ -5,6 +5,7 @@ var log = require('../utils/logger');
 var email = require('./email');
 var activity = require('./activity');
 var toJson = require('../utils/to_json');
+var airbrake = require('../utils/airbrake');
 
 // make sure we use the Heroku Redis To Go URL
 // (put REDISTOGO_URL=redis://localhost:6379 in .env for local testing)
@@ -21,8 +22,12 @@ queue.on('job enqueue', function(id, type){
 }).on('job complete', function(id, result){
   log.info('Job Completed', { id: id });
 }).on( 'error', function( err ) {
-  log.error('Job Error', { err: err }
-  );
+  log.error('Job Error', { err: err } );
+  airbrake.notify(err, function(airbrakeErr, url) {
+    if (airbrakeErr) {
+      log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
+    }
+  });
 });
 
 if (process.env.NODE_ENV === 'development' || process.env.FORCE_KUE_UI) {
