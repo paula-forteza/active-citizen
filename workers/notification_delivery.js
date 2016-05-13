@@ -81,11 +81,11 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                        notification.AcActivities[0].Group.Community &&
                        notification.AcActivities[0].Group.Community.Domain) {
               domain = notification.AcActivities[0].Group.Community.Domain;
-              log.info("NotificationDeliveryWorker Debug 1", {notification: notification});
+              log.info("NotificationDeliveryWorker Debug 1", {notification: notification.dataValues });
             } else {
               log.error("Couldn't find domain for NotificationDeliveryWorker");
             }
-            log.info("NotificationDeliveryWorker Debug 2", {notification: notification});
+            log.info("NotificationDeliveryWorker Debug 2", {notification: notification.dataValues });
             if (notification.AcActivities[0].Community) {
               community = notification.AcActivities[0].Community;
             } else if (notification.AcActivities[0].Group &&
@@ -94,7 +94,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             } else {
               log.error("Couldn't find community for NotificationDeliveryWorker");
             }
-            log.info("NotificationDeliveryWorker Debug 4", {AcActivities: notification.AcActivities});
+            log.info("NotificationDeliveryWorker Debug 4", {});
             seriesCallback();
           } else {
             seriesCallback('Notification not found');
@@ -109,12 +109,13 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             where: { id: notification.user_id },
             attributes: ['id','notifications_settings','email','name','created_at']
           }).then(function(userResults) {
-            log.info("NotificationDeliveryWorker Debug 5", {userResults: userResults});
             if (userResults) {
+              log.info("NotificationDeliveryWorker Debug 5", {userResults: userResults.dataValues});
               user = userResults;
               seriesCallback();
             } else {
               if (notification.AcActivities[0].object.email) {
+                log.info("NotificationDeliveryWorker Debug 5.5", {});
                 seriesCallback();
               } else {
                 seriesCallback('User not found');
