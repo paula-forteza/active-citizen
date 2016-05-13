@@ -229,7 +229,7 @@ module.exports = function (notification, user, callback) {
           log.info("Generate News Feed Notifications found old item and updating timestamp", { oldNewsFeedItemId: oldNewsFeedItem.id });
           news_feed_item = oldNewsFeedItem;
           news_feed_item.latest_activity_at = activity.created_at;
-          news_feed_item.update().then(function (updateResults) {
+          news_feed_item.save().then(function (updateResults) {
             if (updateResults) {
               log.error("Filtering News Feed Notifications Error", { err: "Could not update timestamp" });
             }
