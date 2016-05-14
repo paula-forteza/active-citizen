@@ -27,8 +27,10 @@ var transport = nodemailer.createTransport({
 });
 
 EmailWorker.prototype.sendOne = function (emailLocals, callback) {
+  log.info("EmailWorker Started 1", {});
   async.series([
     function (seriesCallback) {
+      log.info("EmailWorker Started 2", {});
       var template = new EmailTemplate(path.join(templatesDir, emailLocals.template));
 
       emailLocals['t'] = i18nFilter;
@@ -62,12 +64,12 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
 
         emailLocals.headerImageUrl = "";
 
-        log.info("Selected locale", { locale: locale });
+        log.info("EmailWorker Selected locale", { locale: locale });
 
         i18n.changeLanguage(locale, function (err, t) {
           template.render(emailLocals, function (error, results) {
             if (error) {
-              log.error('EmailWorker', { err: error, userID: emailLocals.user.id });
+              log.error('EmailWorker Error', { err: error, userID: emailLocals.user.id });
               seriesCallback(error);
             } else {
               if (process.env.SENDGRID_USERNAME) {
@@ -95,13 +97,13 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
           });
         });
       } else {
-        log.error("Can't find domain for email", {emailLocals: emailLocals});
+        log.error("EmailWorker Can't find domain for email", {emailLocals: emailLocals});
         seriesCallback("Can't find domain for email");
       }
     }
   ], function (error) {
     if (error) {
-      log.error("Processing Email Error", {err: error});
+      log.error("EmailWorker Error", {err: error});
       airbrake.notify(error, function(airbrakeErr, url) {
         if (airbrakeErr) {
           log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });

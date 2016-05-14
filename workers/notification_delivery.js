@@ -97,7 +97,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             log.info("NotificationDeliveryWorker Debug 4", {});
             seriesCallback();
           } else {
-            seriesCallback('Notification not found');
+            seriesCallback('NotificationDeliveryWorker Notification not found');
           }
         }).catch(function(error) {
           seriesCallback(error);
@@ -164,7 +164,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               community: community,
               token: notification.AcActivities[0].object.token
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user ? user.simple() : null });
+            log.info('NotificationDeliveryWorker notification.user.invite Queued', { type: notification.type, user: user ? user.simple() : null });
             callback();
             break;
           case "notification.password.recovery":
@@ -176,7 +176,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               community: community,
               token: notification.AcActivities[0].object.token
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.recovery Completed', { type: notification.type, user: user.simple() });
+            log.info('NotificationDeliveryWorker notification.password.recovery Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
           case "notification.password.changed":
@@ -188,7 +188,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               community: community,
               token: notification.activity.object.token
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
+            log.info('NotificationDeliveryWorker notification.password.changed Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
           case "notification.post.status.change":
