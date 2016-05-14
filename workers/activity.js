@@ -91,11 +91,11 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.post.endorsement.new":
             generatePostNotification(activity, activity.User, function (error) {
               if (error) {
-                log.error('Processing activity.post.* Completed', {type: activity.type, err: error});
+                log.error('Processing activity.post.* Error', {type: activity.type, err: error});
                 seriesCallback(error);
               } else {
-                seriesCallback();
                 log.info('Processing activity.post.* Completed', {type: activity.type});
+                seriesCallback();
               }
             });
             break;
@@ -144,6 +144,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
         callback(error);
       });
     } else {
+      log.info('Processing Activity and Recommendation Completed', {type: activity.type});
       callback();
     }
   });

@@ -414,5 +414,6 @@ module.exports = {
   defaultKeyActivities: defaultKeyActivities,
   excludeActivitiesFromFilter: excludeActivitiesFromFilter,
   getActivityDate: getActivityDate,
-  getProcessedRange: getProcessedRange
+  getProcessedRange: getProcessedRange,
+  getNewsFeedDate: getNewsFeedDate
 };
