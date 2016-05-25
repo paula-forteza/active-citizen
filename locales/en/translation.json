@@ -1,5 +1,8 @@
 {
   "notification": {
+    "post": {
+      "statusChangeSubject": "Status of post changed"
+    },
     "email": {
       "postNew": "New idea",
       "postNewsSelf": "Your new idea",

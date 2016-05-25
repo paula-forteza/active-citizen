@@ -192,14 +192,17 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             callback();
             break;
           case "notification.post.status.change":
+            var post = notification.AcActivities[0].Post;
+            var content = notification.AcActivities[0].PostStatusChange.content;
+
             queue.create('send-one-email', {
-              subject: i18n.t('statusChange.updateSubject'),
+              subject: i18n.t('notification.post.statusChangeSubject') + ": " + post.name,
               template: 'post_status_change',
               user: user,
               domain: domain,
               community: community,
-              post: notification.AcActivities[0].Post,
-              content: notification.AcActivities[0].PostStatusChange.content,
+              post: post,
+              content: content ? content : "",
               status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
             }).priority('critical').removeOnComplete(true).save();
             log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });

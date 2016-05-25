@@ -1,5 +1,8 @@
 {
   "notification": {
+    "post": {
+      "statusChangeSubject": "Stöðu hugmyndar breytt"
+    },
     "email": {
       "postNew": "Ný hugmynd",
       "postNewsSelf": "Þín nýja hugmynd",

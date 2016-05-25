@@ -1,12 +1,10 @@
 <% include ../header.html.ejs %>
 
-<h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"><%= t('notification.email.post_status_change_header') %></h1>
-<p style="margin-top: 5px;padding-top: 8px;"><%= t('notification.email.post_status_change') %></p>
-<% if (status_changed_to) { %>
-  <%= t('notification.email.post_status_changed_to') %><%= t(status_changed_to) %>
-<% } %>
+<h2 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"><%= t('notification.post.statusChangeSubject') %></h2>
+<h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"><%= post.name %></h1>
+
 <p style="margin-top: 5px;padding-top: 8px;">
-  <%= content %>
+  <%- escape(content).replace(/\n/g, '<br/>') %>
 </p>
 <p style="margin-top: 5px;padding-top: 8px;">
   <%= "https://"+community.hostname+"."+domain.domain_name+"/#!/post/"+post.id %>
