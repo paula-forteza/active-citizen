@@ -14,7 +14,8 @@ var redisUrl = process.env.REDIS_URL ? process.env.REDIS_URL : "redis://localhos
 log.info("Starting app access to Kue Queue", {redis_url: redisUrl});
 
 var queue = kue.createQueue({
-  redis: redisUrl
+  redis: redisUrl,
+  "socket_keepalive" : true
 });
 
 queue.on('job enqueue', function(id, type){
@@ -29,6 +30,8 @@ queue.on('job enqueue', function(id, type){
     }
   });
 });
+
+queue.watchStuckJobs(1000);
 
 if (process.env.NODE_ENV === 'development' || process.env.FORCE_KUE_UI) {
   kue.app.listen(3000).on('error', function (error) {
