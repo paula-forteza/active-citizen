@@ -4,6 +4,7 @@
       "statusChangeSubject": "Status of post changed"
     },
     "email": {
+      "postEndorsementNew": "Your idea has support",
       "postNew": "New idea",
       "postNewsSelf": "Your new idea",
       "postEndorsementSelf": "Endorsement for your idea",

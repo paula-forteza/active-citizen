@@ -4,6 +4,7 @@
       "statusChangeSubject": "Stöðu hugmyndar breytt"
     },
     "email": {
+      "postEndorsementNew": "Nýr stuðningur við hugmynd",
       "postNew": "Ný hugmynd",
       "postNewsSelf": "Þín nýja hugmynd",
       "postEndorsementSelf": "Stuðningur við þína hugmynd",
