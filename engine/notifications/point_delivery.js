@@ -5,9 +5,11 @@ var filterNotificationForDelivery = require('./emails_utils').filterNotification
 
 module.exports = function (notification, user, callback) {
   var post = notification.AcActivities[0].Post;
+  var postName = post ? post.name : "?";
+
   if (notification.type=='notification.point.new') {
-    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointOnMyPoint')+": "+post.name, callback);
+    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointOnMyPoint')+": "+postName, callback);
   } else if (notification.type=='notification.point.quality') {
-    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointQuality')+": "+post.name, callback);
+    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointQuality')+": "+postName, callback);
   }
 };
