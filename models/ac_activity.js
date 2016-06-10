@@ -388,10 +388,12 @@ module.exports = function(sequelize, DataTypes) {
           object: {
             email: options.email,
             token: options.token,
-            invite_id: options.invite_id
+            invite_id: options.invite_id,
+            sender_name: options.sender_name
           },
           community_id: options.community_id,
           group_id: options.group_id,
+          domain_id: options.domain_id,
           user_id: options.user_id,
           access: sequelize.models.AcActivity.ACCESS_PRIVATE
         }).save().then(function(activity) {

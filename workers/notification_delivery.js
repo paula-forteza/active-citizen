@@ -16,6 +16,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
   var notification;
   var domain;
   var community;
+  var group;
 
   async.series([
       function(seriesCallback){
@@ -77,6 +78,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             notification = results;
             if (notification.AcActivities[0].Domain) {
               domain = notification.AcActivities[0].Domain;
+              group = notification.AcActivities[0].Group;
             } else if (notification.AcActivities[0].Group && notification.AcActivities[0].Group &&
                        notification.AcActivities[0].Group.Community &&
                        notification.AcActivities[0].Group.Community.Domain) {
@@ -160,8 +162,10 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               subject: i18n.t('email.user_invite'),
               template: 'user_invite',
               user: user ? user : { id: null, email: notification.AcActivities[0].object.email, name: notification.AcActivities[0].object.email },
+              sender_name: notification.AcActivities[0].object.sender_name,
               domain: domain,
               community: community,
+              group: group,
               token: notification.AcActivities[0].object.token
             }).priority('critical').removeOnComplete(true).save();
             log.info('NotificationDeliveryWorker notification.user.invite Queued', { type: notification.type, user: user ? user.simple() : null });
