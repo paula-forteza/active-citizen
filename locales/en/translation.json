@@ -4,6 +4,7 @@
       "statusChangeSubject": "Status of post changed"
     },
     "email": {
+      "user_invite": "Invitation to participate",
       "user_invite_1": "You have been invited to participate in...",
       "user_invite_2": "Click on the link or paste it into a browser address bar to accept the invitation",
       "user_invite_3": "You were invited by",
