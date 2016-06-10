@@ -159,7 +159,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         switch(notification.type) {
           case "notification.user.invite":
             queue.create('send-one-email', {
-              subject: i18n.t('email.user_invite'),
+              subject: i18n.t('notification.email.user_invite'),
               template: 'user_invite',
               user: user ? user : { id: null, email: notification.AcActivities[0].object.email, name: notification.AcActivities[0].object.email },
               sender_name: notification.AcActivities[0].object.sender_name,
