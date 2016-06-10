@@ -79,7 +79,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             if (notification.AcActivities[0].Domain) {
               domain = notification.AcActivities[0].Domain;
               group = notification.AcActivities[0].Group;
-            } else if (notification.AcActivities[0].Group && notification.AcActivities[0].Group &&
+            } else if (notification.AcActivities[0].Group &&
                        notification.AcActivities[0].Group.Community &&
                        notification.AcActivities[0].Group.Community.Domain) {
               domain = notification.AcActivities[0].Group.Community.Domain;
