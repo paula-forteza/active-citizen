@@ -286,15 +286,21 @@ module.exports = function(sequelize, DataTypes) {
                 seriesCallback(error);
               });
             } else if (options.postId) {
+              log.info("Looking for post, group and community START");
               sequelize.models.Post.find({where: { id: options.postId },
                 include: [
                   {
                     model: sequelize.models.Group,
+                    attributes: ['id'],
                     include: [
-                      sequelize.models.Community
+                      {
+                        model: sequelize.models.Community,
+                        attributes: ['id']
+                      }
                     ]
                   }
                 ]}).then(function(post) {
+                log.info("Looking for post, group and community END");
                 if (post) {
                   options.groupId = post.Group.id;
                   options.communityId = post.Group.Community.id;
