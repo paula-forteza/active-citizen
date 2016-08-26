@@ -1,0 +1,28 @@
+{
+  "notification": {
+    "post": {
+      "statusChangeSubject": "Status prijedloga je promijenjen"
+    },
+    "email": {
+      "postEndorsementNew": "Tvoj prijedlog ima podršku",
+      "postNew": "Novi prijedlog",
+      "postNewsSelf": "Tvoj novi prijedlog",
+      "postEndorsementSelf": "Endorsement for your idea",
+      "postEndorsement": "Endorsement for an idea",
+      "postOppositionSelf": "Opposition for your idea",
+      "postOpposition": "Opposition for idea",
+      "pointNewSelf": "Novi argument za tvoj prijedlog",
+      "pointNew'": "Novi argument",
+      "pointUnhelpfulSelf": "Argument je označen kao nekoristan u raspravi o mom prijedlogu",
+      "pointUnhelpful": "Argument je označen kao nekoristan za raspravu",
+      "pointHelpfulSelf": "Argument je označen kao koristan u raspravi o mom prijedlogu",
+      "pointHelpful": "Argument je označen kao koristan za raspravu",
+      "newPointOnMyPoint": "Novi argument",
+      "password_recovery": "Promijeni lozinku",
+      "dear": "Pozdrav",
+      "reset_password_1": "Evo poveznice za promjenu tvoje lozinke",
+      "reset_password_2": "Ukoliko nisi zatražio ovaj e-mail, molimo te da ga zanemariš.",
+      "reset_password_3": "Tvoja lozinka neće se promijeniti sve dok ne klikneš na poveznicu iznad te upišeš novu lozinku."
+    }
+  }
+}
