@@ -1,6 +1,5 @@
 var kue = require('kue')
   , url = require('url')
-  , redis = require('kue/node_modules/redis');
 var log = require('../utils/logger');
 var email = require('./email');
 var activity = require('./activity');
