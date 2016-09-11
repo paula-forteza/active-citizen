@@ -273,11 +273,11 @@ module.exports = function(sequelize, DataTypes) {
               seriesCallback();
             } else if (options.groupId) {
               sequelize.models.Group.find({where: { id: options.groupId },
-              include: [
-                sequelize.models.Community
-              ]}).then(function(group) {
+                attributes: ['id','community_id']
+              }).then(function(group) {
                 if (group) {
-                  options.communityId = group.Community.id;
+                  log.info("Found group info for post acitivity from app");
+                  options.communityId = group.community_id;
                   seriesCallback();
                 } else {
                   seriesCallback("Can't find group");
@@ -291,26 +291,21 @@ module.exports = function(sequelize, DataTypes) {
                 include: [
                   {
                     model: sequelize.models.Group,
-                    attributes: ['id'],
-                    include: [
-                      {
-                        model: sequelize.models.Community,
-                        attributes: ['id']
-                      }
-                    ]
+                    attributes: ['id','community_id']
                   }
                 ]}).then(function(post) {
-                log.info("Looking for post, group and community END");
-                if (post) {
-                  options.groupId = post.Group.id;
-                  options.communityId = post.Group.Community.id;
-                  seriesCallback();
-                } else {
-                  seriesCallback("Can't find post");
-                }
-              }).catch(function(error) {
-                seriesCallback(error);
-              });
+                  log.info("Looking for post, group and community END");
+                  if (post) {
+                    log.info("Found post info for post acitivity from app");
+                    options.groupId = post.Group.id;
+                    options.communityId = post.Group.community_id;
+                    seriesCallback();
+                  } else {
+                    seriesCallback("Can't find post");
+                  }
+                }).catch(function(error) {
+                  seriesCallback(error);
+                });
             } else {
               seriesCallback("Strange state of create ac activity looking up community id");
             }
