@@ -25,7 +25,7 @@ queue.on('job enqueue', function(id, type){
   log.error('Job Error', { err: err } );
   airbrake.notify(err, function(airbrakeErr, url) {
     if (airbrakeErr) {
-      log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
+      log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
     }
   });
 });
