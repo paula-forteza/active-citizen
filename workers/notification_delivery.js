@@ -158,8 +158,14 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user ? user.simple() : null });
         switch(notification.type) {
           case "notification.user.invite":
+            var inviteFromName;
+            if (notification.AcActivities[0].group_id) {
+              inviteFromName = notification.AcActivities[0].Group.name;
+            } else if (notification.AcActivities[0].community_id) {
+              inviteFromName = notification.AcActivities[0].Community.name;
+            }
             queue.create('send-one-email', {
-              subject: i18n.t('notification.email.user_invite'),
+              subject: { translationToken: 'notification.email.user_invite', contentName: inviteFromName },
               template: 'user_invite',
               user: user ? user : { id: null, email: notification.AcActivities[0].object.email, name: notification.AcActivities[0].object.email },
               sender_name: notification.AcActivities[0].object.sender_name,
@@ -173,7 +179,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.password.recovery":
             queue.create('send-one-email', {
-              subject: i18n.t('notification.email.password_recovery'),
+              subject: { translationToken: 'notification.email.password_recovery' },
               template: 'password_recovery',
               user: user,
               domain: domain,
@@ -185,7 +191,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.password.changed":
             queue.create('send-one-email', {
-              subject: i18n.t('email.password_changed'),
+              subject: { translationToken: 'email.password_changed' },
               template: 'password_changed',
               user: user,
               domain: domain,
@@ -198,9 +204,8 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
           case "notification.post.status.change":
             var post = notification.AcActivities[0].Post;
             var content = notification.AcActivities[0].PostStatusChange.content;
-
             queue.create('send-one-email', {
-              subject: i18n.t('notification.post.statusChangeSubject') + ": " + post.name,
+              subject: { translationToken: 'email.password_changed', contentName: post.name },
               template: 'post_status_change',
               user: user,
               domain: domain,

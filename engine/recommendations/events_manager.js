@@ -58,6 +58,9 @@ var getPost = function (postId, callback) {
     } else {
       callback(null);
     }
+  }).catch(function (error) {
+    log.error('Events Manager getPost Error', {postId: postId, err: "Could not find post" });
+    callback(null);
   });
 };
 

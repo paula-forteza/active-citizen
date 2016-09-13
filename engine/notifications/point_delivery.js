@@ -8,8 +8,8 @@ module.exports = function (notification, user, callback) {
   var postName = post ? post.name : "?";
 
   if (notification.type=='notification.point.new') {
-    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointOnMyPoint')+": "+postName, callback);
+    filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: 'notification.email.newPointOnMyPoint', contentName: postName }, callback);
   } else if (notification.type=='notification.point.quality') {
-    filterNotificationForDelivery(notification, user, 'point_activity', i18n.t('notification.email.newPointQuality')+": "+postName, callback);
+    filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: 'notification.email.newPointQuality', contentName: postName }, callback);
   }
 };

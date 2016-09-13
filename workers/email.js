@@ -26,6 +26,13 @@ var transport = nodemailer.createTransport({
   }
 });
 
+var translateSubject = function (subjectHash) {
+  var subject = i18n.t(subjectHash.translateToken);
+  if (subjectHash.contentName) {
+    subject += ": "+subjectHash.contentName
+  }
+};
+
 EmailWorker.prototype.sendOne = function (emailLocals, callback) {
   log.info("EmailWorker Started 1", {});
   async.series([
@@ -77,7 +84,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                   from: fromEmail, // emailLocals.community.admin_email,
                   to: emailLocals.user.email,
                   bcc: 'gunnar@ibuar.is,robert@citizens.is',
-                  subject: emailLocals.subject,
+                  subject: translateSubject(emailLocals.subject),
                   html: results.html,
                   text: results.text
                 }, function (error, responseStatus) {
