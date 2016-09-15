@@ -10,6 +10,7 @@ module.exports = function (notification, user, callback) {
   if (notification.type=='notification.point.new') {
     filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: 'notification.email.newPointOnMyPoint', contentName: postName }, callback);
   } else if (notification.type=='notification.point.quality') {
-    filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: 'notification.email.newPointQuality', contentName: postName }, callback);
+    var subjectTranslateToken = (notification.AcActivities[0].type.indexOf('activity.point.helpful') > -1) ? 'notification.email.pointHelpful' : 'notification.email.pointUnhelpful';
+    filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: subjectTranslateToken, contentName: postName }, callback);
   }
 };

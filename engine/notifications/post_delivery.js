@@ -10,7 +10,8 @@ module.exports = function (notification, user, callback) {
   if (notification.type=='notification.post.new') {
     filterNotificationForDelivery(notification, user, 'post_activity', { translateToken: 'notification.email.postNew', contentName: postName }, callback);
   } else if (notification.type=='notification.post.endorsement') {
-    filterNotificationForDelivery(notification, user, 'post_activity', { translateToken: 'notification.email.postEndorsementNew', contentName: postName }, callback);
+    var subjectTranslateToken = (notification.AcActivities[0].type.indexOf('activity.post.endorsement') > -1) ? 'notification.email.postEndorsement' : 'notification.email.postOpposition';
+    filterNotificationForDelivery(notification, user, 'post_activity', { translateToken: subjectTranslateToken, contentName: postName }, callback);
   } else {
     callback();
   }
