@@ -31,6 +31,7 @@ var translateSubject = function (subjectHash) {
   if (subjectHash.contentName) {
     subject += ": "+subjectHash.contentName
   }
+  return subject;
 };
 
 EmailWorker.prototype.sendOne = function (emailLocals, callback) {
@@ -74,6 +75,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
         log.info("EmailWorker Selected locale", { locale: locale });
 
         i18n.changeLanguage(locale, function (err, t) {
+          var translatedSubject = translateSubject(emailLocals.subject);
           template.render(emailLocals, function (error, results) {
             if (error) {
               log.error('EmailWorker Error', { err: error, userID: emailLocals.user.id });
@@ -84,7 +86,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                   from: fromEmail, // emailLocals.community.admin_email,
                   to: emailLocals.user.email,
                   bcc: 'gunnar@ibuar.is,robert@citizens.is',
-                  subject: translateSubject(emailLocals.subject),
+                  subject: translatedSubject,
                   html: results.html,
                   text: results.text
                 }, function (error, responseStatus) {
@@ -97,7 +99,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                   }
                 })
               } else {
-                log.warn('EmailWorker no SMTP server', { subject: emailLocals.subject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
+                log.warn('EmailWorker no SMTP server', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
                 seriesCallback();
               }
             }

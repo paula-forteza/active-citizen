@@ -150,7 +150,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
 
         airbrake.notify(error, function(airbrakeErr, url) {
           if (airbrakeErr) {
-            log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr });
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr });
           }
           callback(error);
         });
