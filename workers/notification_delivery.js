@@ -165,7 +165,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               inviteFromName = notification.AcActivities[0].Community.name;
             }
             queue.create('send-one-email', {
-              subject: { translationToken: 'notification.email.user_invite', contentName: inviteFromName },
+              subject: { translateToken: 'notification.email.user_invite', contentName: inviteFromName },
               template: 'user_invite',
               user: user ? user : { id: null, email: notification.AcActivities[0].object.email, name: notification.AcActivities[0].object.email },
               sender_name: notification.AcActivities[0].object.sender_name,
@@ -179,7 +179,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.password.recovery":
             queue.create('send-one-email', {
-              subject: { translationToken: 'notification.email.password_recovery' },
+              subject: { translateToken: 'notification.email.password_recovery' },
               template: 'password_recovery',
               user: user,
               domain: domain,
@@ -191,7 +191,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.password.changed":
             queue.create('send-one-email', {
-              subject: { translationToken: 'email.password_changed' },
+              subject: { translateToken: 'email.password_changed' },
               template: 'password_changed',
               user: user,
               domain: domain,
@@ -205,7 +205,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             var post = notification.AcActivities[0].Post;
             var content = notification.AcActivities[0].PostStatusChange.content;
             queue.create('send-one-email', {
-              subject: { translationToken: 'email.password_changed', contentName: post.name },
+              subject: { translateToken: 'email.password_changed', contentName: post.name },
               template: 'post_status_change',
               user: user,
               domain: domain,
