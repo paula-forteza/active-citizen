@@ -52,17 +52,40 @@ var addNotificationsForUsers = function (activity, users, notification_type, not
 
 // type: 'notification.post.endorsement';
 var addOrPossiblyGroupNotification = function (model, notification_type, notification_setting_type, activity, user, priority, callback) {
+  var modelWhereOptions;
+  if (model.$modelOptions.tableName=='posts') {
+    modelWhereOptions = {
+      post_id: model.id
+    }
+  } else {
+    modelWhereOptions = {
+      point_id: model.id
+    }
+  }
+
+  // Look for already generated notification for this content in the group ttl time
   models.AcNotification.find({
     where: {
-      user_id: model.User.id,
+      user_id: user.id,
       type: notification_type,
       created_at: {
         $lt: new Date(),
         $gt: new Date(new Date() - models.AcNotification.ENDORSEMENT_GROUPING_TTL)
       }
-    }
+    },
+    include: [
+      {
+        model: models.AcActivity,
+        as: 'AcActivities',
+        required: true,
+        where: _.merge(modelWhereOptions, {
+          type: activity.type
+        })
+      }
+    ]
   }).then(function(notification) {
     if (notification) {
+      // We check for repeated activity by the same user on the same content and  thendon't create or update the notification
       models.AcNotification.find({
         where: {
           user_id: user.id,
@@ -77,10 +100,10 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
             model: models.AcActivity,
             as: 'AcActivities',
             required: true,
-            where: {
+            where: _.merge(modelWhereOptions, {
               user_id: activity.user_id,
               type: activity.type
-            }
+            })
           }
         ]
       }).then(function(specificNotification) {
@@ -89,8 +112,8 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
         } else {
           notification.addAcActivities(activity).then(function (results) {
             if (results) {
-              models.AcNotification.processNotification(notification, user, activity);
-              callback();
+              // Create events for the worker queue
+              models.AcNotification.processNotification(notification, user, activity, callback);
             } else {
               callback("Notification Error Can't add activity");
             }
@@ -98,6 +121,7 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
         }
       });
     } else {
+      // If not already found and grouped we
       models.AcNotification.createNotificationFromActivity(user, activity, notification_type, notification_setting_type, priority, function (error) {
         callback(error);
       });

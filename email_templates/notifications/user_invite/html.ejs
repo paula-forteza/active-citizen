@@ -11,7 +11,7 @@
 </p>
 
 <p style="margin-top: 5px;">
-  <%= "https://"+community.hostname+'.'+domain.domain_name+"/user/accept/invite/"+token %>
+  <%- linkTo("https://"+community.hostname+'.'+domain.domain_name+"/user/accept/invite/"+token) %>
 </p>
 <p style="margin-top: 5px;"><%= t('notification.email.user_invite_2') %></p>
 <p style="margin-top: 5px;"><%= t('notification.email.user_invite_3') %> <%= sender_name %></p>

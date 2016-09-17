@@ -205,7 +205,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             var post = notification.AcActivities[0].Post;
             var content = notification.AcActivities[0].PostStatusChange.content;
             queue.create('send-one-email', {
-              subject: { translateToken: 'email.password_changed', contentName: post.name },
+              subject: { translateToken: 'notification.post.statusChangeSubject', contentName: post.name },
               template: 'post_status_change',
               user: user,
               domain: domain,

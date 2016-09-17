@@ -34,6 +34,10 @@ var translateSubject = function (subjectHash) {
   return subject;
 };
 
+var linkTo = function (url) {
+  return '<a href="'+url+'">'+url+'</a>';
+};
+
 EmailWorker.prototype.sendOne = function (emailLocals, callback) {
   log.info("EmailWorker Started 1", {});
   async.series([
@@ -42,6 +46,8 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
       var template = new EmailTemplate(path.join(templatesDir, emailLocals.template));
 
       emailLocals['t'] = i18nFilter;
+
+      emailLocals['linkTo'] = linkTo;
 
       if (!emailLocals['community']) {
         emailLocals['community'] = { hostname: 'www' }
