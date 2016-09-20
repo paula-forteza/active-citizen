@@ -332,6 +332,10 @@ var activitiesDefaultIncludes = function (options) {
             }
           ],
           required: false
+        },
+        {
+          model: models.Post,
+          attributes: ['id', 'group_id']
         }
       ]
     },
