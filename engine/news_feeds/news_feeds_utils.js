@@ -94,7 +94,8 @@ var getCommonWhereDateOptions = function(options) {
 
 var getCommonWhereOptions = function(options) {
   var where = {
-    status: 'active'
+    status: 'active',
+    deleted: false
   };
 
   if (options.user_id) {
@@ -335,7 +336,8 @@ var activitiesDefaultIncludes = function (options) {
         },
         {
           model: models.Post,
-          attributes: ['id', 'group_id']
+          attributes: ['id', 'group_id'],
+          required: false
         }
       ]
     },

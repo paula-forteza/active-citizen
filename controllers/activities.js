@@ -38,11 +38,12 @@ var getActivities = function (req, res, options, callback) {
       [ models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
     ],
       include: activitiesDefaultIncludes(options),
-      limit: 7
+      limit: 27
   }).then(function(activities) {
+    var slicedActivitesBecauseOfLimitBug = _.take(activities, 7);
     res.send({
-      activities: activities,
-      oldestProcessedActivityAt: activities.length>0 ? _.last(activities).created_at : null
+      activities: slicedActivitesBecauseOfLimitBug,
+      oldestProcessedActivityAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
     });
     callback();
   }).catch(function(error) {
