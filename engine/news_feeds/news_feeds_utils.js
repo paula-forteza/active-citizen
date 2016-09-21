@@ -301,7 +301,13 @@ var activitiesDefaultIncludes = function (options) {
       model: models.Post,
       required: false,
       include: [
-        { model: models.Image,
+        {
+          model: models.Group,
+          required: false,
+          attributes: ['id', 'configuration']
+        },
+        {
+          model: models.Image,
           as: 'PostHeaderImages',
           required: false
         },
