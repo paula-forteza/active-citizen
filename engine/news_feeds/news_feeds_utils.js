@@ -423,6 +423,7 @@ excludeActivitiesFromFilter = ['activity.point.newsStory.new','activity.post.sta
 module.exports = {
   activitiesDefaultIncludes: activitiesDefaultIncludes,
   getCommonWhereOptions: getCommonWhereOptions,
+  getCommonWhereDateOptions: getCommonWhereDateOptions,
   defaultKeyActivities: defaultKeyActivities,
   excludeActivitiesFromFilter: excludeActivitiesFromFilter,
   getActivityDate: getActivityDate,

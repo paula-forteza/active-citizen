@@ -58,6 +58,7 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
   getActivities(req, res, options, function (error) {
     if (error) {
       log.error("Activities Error Domain", { domainId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+      res.sendStatus(500);
     }
   });
 });
@@ -69,6 +70,7 @@ router.get('/communities/:id', auth.can('view community'), function(req, res) {
   getActivities(req, res, options, function (error) {
     if (error) {
       log.error("Activities Error Community", { communityId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+      res.sendStatus(500);
     }
   });
 });
@@ -80,6 +82,7 @@ router.get('/groups/:id', auth.can('view group'), function(req, res) {
   getActivities(req, res, options, function (error) {
     if (error) {
       log.error("Activities Error Group", { groupId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+      res.sendStatus(500);
     }
   });
 });
@@ -91,6 +94,7 @@ router.get('/posts/:id', auth.can('view post'), function(req, res) {
   getActivities(req, res, options, function (error) {
     if (error) {
       log.error("Activities Error Group", { postId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+      res.sendStatus(500);
     }
   });
 });

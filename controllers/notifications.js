@@ -6,11 +6,9 @@ var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var _ = require('lodash');
 
-var getCommonWhereOptions = require('../engine/news_feeds/news_feeds_utils').getCommonWhereOptions;
-var defaultKeyActivities = require('../engine/news_feeds/news_feeds_utils').defaultKeyActivities;
-var activitiesDefaultIncludes = require('../engine/news_feeds/news_feeds_utils').activitiesDefaultIncludes;
+var getCommonWhereDateOptions = require('../engine/news_feeds/news_feeds_utils').getCommonWhereDateOptions;
 
-var getActivities = function (req, res, options, callback) {
+var getNotifications = function (req, res, options, callback) {
   options = _.merge(options, {
     dateColumn: 'created_at'
   });
@@ -27,23 +25,56 @@ var getActivities = function (req, res, options, callback) {
     })
   }
 
-  var where = _.merge(getCommonWhereOptions(options), { type: { $in: defaultKeyActivities }});
+  var where = _.merge({
+    user_id: req.user.id
+  }, getCommonWhereDateOptions(options));
 
-  models.AcActivity.findAll({
+  models.AcNotification.findAll({
     where: where,
     order: [
-      ["created_at", "desc"],
-      [ models.User, { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ],
-      [ models.Group, { model: models.Image, as: 'GroupLogoImages' }, 'created_at', 'asc' ],
-      [ models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
+      ["created_at", "desc"]
     ],
-      include: activitiesDefaultIncludes(options),
-      limit: 27
-  }).then(function(activities) {
-    var slicedActivitesBecauseOfLimitBug = _.take(activities, 7);
+    include: [
+      {
+        model: models.AcActivity,
+        as: 'AcActivities',
+        attributes: ['id','type','domain_id'],
+        required: true,
+        include: [
+          {
+            model: models.Post,
+            required: false,
+            attributes: ['id','name','user_id']
+          },
+          {
+            model: models.User,
+            required: false,
+            attributes: ['id','name']
+          },
+          {
+            model: models.Community,
+            required: false,
+            attributes: ['id','name']
+          },
+          {
+            model: models.Group,
+            required: false,
+            attributes: ['id','name']
+          },
+          {
+            model: models.Point,
+            required: false,
+            attributes: ['id']
+          }
+        ]
+      }
+    ],
+    limit: 10
+  }).then(function(notifications) {
+    var slicedActivitesBecauseOfLimitBug = _.take(notifications, 7);
     res.send({
-      activities: slicedActivitesBecauseOfLimitBug,
-      oldestProcessedActivityAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
+      notifications: slicedActivitesBecauseOfLimitBug,
+      oldestProcessedNotificationAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
     });
     callback();
   }).catch(function(error) {
@@ -51,46 +82,12 @@ var getActivities = function (req, res, options, callback) {
   });
 };
 
-router.get('/domains/:id', auth.can('view domain'), function(req, res) {
-  var options = {
-    domain_id: req.params.id
-  };
-  getActivities(req, res, options, function (error) {
+router.get('/', auth.isLoggedIn, function(req, res) {
+  var options = {};
+  getNotifications(req, res, options, function (error) {
     if (error) {
-      log.error("Activities Error Domain", { domainId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
-    }
-  });
-});
-
-router.get('/communities/:id', auth.can('view community'), function(req, res) {
-  var options = {
-    community_id: req.params.id
-  };
-  getActivities(req, res, options, function (error) {
-    if (error) {
-      log.error("Activities Error Community", { communityId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
-    }
-  });
-});
-
-router.get('/groups/:id', auth.can('view group'), function(req, res) {
-  var options = {
-    group_id: req.params.id
-  };
-  getActivities(req, res, options, function (error) {
-    if (error) {
-      log.error("Activities Error Group", { groupId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
-    }
-  });
-});
-
-router.get('/posts/:id', auth.can('view post'), function(req, res) {
-  var options = {
-    post_id: req.params.id
-  };
-  getActivities(req, res, options, function (error) {
-    if (error) {
-      log.error("Activities Error Group", { postId: req.params.id, userId: req.user ? req.user.id : null, errorStatus:  500 });
+      log.error("Notifications Error", { userId: req.user ? req.user.id : null, errorStatus:  500 });
+      res.sendStatus(500);
     }
   });
 });
