@@ -64,14 +64,14 @@ var getNotifications = function (req, res, options, callback) {
           {
             model: models.Point,
             required: false,
-            attributes: ['id']
+            attributes: ['id','value']
           }
         ]
       }
     ],
-    limit: 10
+    limit: 20
   }).then(function(notifications) {
-    var slicedActivitesBecauseOfLimitBug = _.take(notifications, 7);
+    var slicedActivitesBecauseOfLimitBug = _.take(notifications, 20);
     res.send({
       notifications: slicedActivitesBecauseOfLimitBug,
       oldestProcessedNotificationAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
