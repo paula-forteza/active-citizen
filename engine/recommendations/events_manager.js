@@ -172,10 +172,14 @@ var generateRecommendationEvent = function (activity, callback) {
       createAction(activity.Post.id, activity.user_id, activity.created_at.toISOString(), 'oppose', callback);
       break;
     case "activity.point.new":
-      if (activity.Point.value==0) {
-        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-comment-new', callback);
+      if (activity.Point) {
+        if (activity.Point.value==0) {
+          createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-comment-new', callback);
+        } else {
+          createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-new', callback);
+        }
       } else {
-        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-new', callback);
+        callback();
       }
       break;
     case "activity.point.helpful.new":

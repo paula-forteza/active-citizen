@@ -10,7 +10,7 @@ var getCommonWhereDateOptions = require('../engine/news_feeds/news_feeds_utils')
 
 var getNotifications = function (req, res, options, callback) {
   options = _.merge(options, {
-    dateColumn: 'created_at'
+    dateColumn: 'updated_at'
   });
 
   if (req.query.afterDate) {
@@ -32,7 +32,7 @@ var getNotifications = function (req, res, options, callback) {
   models.AcNotification.findAll({
     where: where,
     order: [
-      ["created_at", "desc"]
+      ["updated_at", "desc"]
     ],
     include: [
       {
