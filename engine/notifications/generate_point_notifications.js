@@ -38,10 +38,11 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
       }).then(function (post) {
         if (post) {
           var users = [];
+          var userIds = [];
           async.eachSeries(post.Points, function(point, innerSeriesCallback) {
-            if (!_.includes(uniqueUserIds.users, point.User.id)) {
+            if (!_.includes(userIds, point.User.id)) {
               users.push(point.User);
-              uniqueUserIds.users.push(point.User.id);
+              userIds.push(point.User.id);
             }
             innerSeriesCallback();
           }, function (error) {
