@@ -4,7 +4,7 @@
       "statusChangeSubject": "Status prijedloga je promijenjen"
     },
     "email": {
-      "user_invite": "Pozivnica za sudjelovanje",
+      "user_invite": "Pozivnica za participaciju",
       "user_invite_1": "Pozvan si da sudjeluješ u...",
       "user_invite_2": "Klikni na poveznicu ili je kopiraj u preglednik kako bi prihvatio pozivnicu",
       "user_invite_3": "Pozivnicu si dobio od",
@@ -18,9 +18,9 @@
       "pointNewSelf": "Novi argument za tvoj prijedlog",
       "pointNew'": "Novi argument",
       "pointUnhelpfulSelf": "Argument je označen kao nekoristan u raspravi o tvom prijedlogu",
-      "pointUnhelpful": "Argument je označen kao nekoristan za raspravu",
+      "pointUnhelpful": "Unos je označen kao nekoristan za raspravu",
       "pointHelpfulSelf": "Argument je označen kao koristan u raspravi o tvom prijedlogu",
-      "pointHelpful": "Argument je označen kao koristan za raspravu",
+      "pointHelpful": "Unos je označen kao koristan za raspravu",
       "newPointOnMyPoint": "Novi argument",
       "password_recovery": "Promijeni lozinku",
       "dear": "Pozdrav,",
