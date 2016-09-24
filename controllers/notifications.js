@@ -32,7 +32,8 @@ var getNotifications = function (req, res, options, callback) {
   models.AcNotification.findAll({
     where: where,
     order: [
-      ["updated_at", "desc"]
+      ["updated_at", "desc"],
+      [ { model: models.AcActivity, as: 'AcActivities'} ,'created_at', 'desc' ]
     ],
     include: [
       {

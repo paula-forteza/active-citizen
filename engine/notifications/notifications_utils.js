@@ -73,19 +73,24 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
         $gt: new Date(new Date() - models.AcNotification.ENDORSEMENT_GROUPING_TTL)
       }
     },
+    attributes: ['id','type','user_id','created_at'],
+    order: [
+      ["created_at", "desc"]
+    ],
     include: [
       {
         model: models.AcActivity,
         as: 'AcActivities',
+        attributes: ['id','post_id','point_id','type'],
         required: true,
         where: _.merge(modelWhereOptions, {
-          type: activity.type
+          // type: activity.type
         })
       }
     ]
   }).then(function(notification) {
     if (notification) {
-      // We check for repeated activity by the same user on the same content and  thendon't create or update the notification
+      // We check for repeated activity by the same user on the same content and  then don't create or update the notification
       models.AcNotification.find({
         where: {
           user_id: user.id,
@@ -95,6 +100,9 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
             $gt: new Date(new Date() - models.AcNotification.ENDORSEMENT_GROUPING_TTL)
           }
         },
+        order: [
+          ["created_at", "desc"]
+        ],
         include: [
           {
             model: models.AcActivity,
@@ -108,7 +116,12 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
         ]
       }).then(function(specificNotification) {
         if (specificNotification) {
-          callback();
+          specificNotification.changed('updated_at', true);
+          specificNotification.save().then(function () {
+            callback();
+          }).catch(function (error) {
+            callback(error);
+          });
         } else {
           notification.addAcActivities(activity).then(function (results) {
             if (results) {
