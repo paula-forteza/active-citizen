@@ -87,7 +87,7 @@ var getNotifications = function (req, res, options, callback) {
           {
             model: models.Point,
             required: false,
-            attributes: ['id','value']
+            attributes: ['id','value','content']
           }
         ]
       }
