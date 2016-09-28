@@ -47,10 +47,29 @@ var getNotifications = function (req, res, options, callback) {
             required: false,
             attributes: ['id','name','user_id']
           },
-          {
-            model: models.User,
+          { model: models.User,
+            attributes: ["id", "name", "facebook_id", "twitter_id", "google_id", "github_id"],
             required: false,
-            attributes: ['id','name']
+            include: [
+              {
+                model: models.Image, as: 'UserProfileImages',
+                required: false
+              },
+              {
+                model: models.Organization,
+                as: 'OrganizationUsers',
+                required: false,
+                attributes: ['id', 'name'],
+                include: [
+                  {
+                    model: models.Image,
+                    as: 'OrganizationLogoImages',
+                    attributes: ['id', 'formats'],
+                    required: false
+                  }
+                ]
+              }
+            ]
           },
           {
             model: models.Community,
