@@ -33,7 +33,9 @@ var getNotifications = function (req, res, options, callback) {
     where: where,
     order: [
       ["updated_at", "desc"],
-      [ { model: models.AcActivity, as: 'AcActivities'} ,'created_at', 'desc' ]
+      [ { model: models.AcActivity, as: 'AcActivities'} ,'created_at', 'desc' ],
+      [ { model: models.AcActivity, as: 'AcActivities'}, models.User, { model: models.Image, as: 'UserProfileImages' }, 'created_at', 'asc' ],
+      [ { model: models.AcActivity, as: 'AcActivities'}, models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
     ],
     include: [
       {
@@ -64,6 +66,7 @@ var getNotifications = function (req, res, options, callback) {
                   {
                     model: models.Image,
                     as: 'OrganizationLogoImages',
+                    //TODO: Figure out why there are no formats attributes coming through here
                     attributes: ['id', 'formats'],
                     required: false
                   }
