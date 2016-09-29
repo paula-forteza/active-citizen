@@ -2,6 +2,8 @@
 
 <% if (activity.type == 'activity.post.new') { %>
   <%= post.id == user.id ? t('notification.email.postNewsSelf') : t('notification.email.postNew') %>
+    <%= post.name %>
+    <%= post.description %>
 <% } if (activity.type == 'activity.post.endorsement.new') { %>
   <%= post.id == user.id ? t('notification.email.postEndorsementSelf') : t('notification.email.postEndorsement') %>
 <% } if (activity.type == 'activity.post.opposition.new') { %>

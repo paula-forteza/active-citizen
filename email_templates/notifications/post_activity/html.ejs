@@ -2,6 +2,10 @@
 
 <% if (activity.type == 'activity.post.new') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"><%= post.id == user.id ? t('notification.email.postNewsSelf') : t('notification.email.postNew') %></h1>
+  <h2><%= post.name %></h2>
+  <p>
+    <%= post.description %>
+  </p>
 <% } if (activity.type == 'activity.post.endorsement.new') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"><%= post.id == user.id ? t('notification.email.postEndorsementSelf') : t('notification.email.postEndorsement') %></h1>
 <% } if (activity.type == 'activity.post.opposition.new') { %>
