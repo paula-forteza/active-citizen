@@ -91,7 +91,7 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                 transport.sendMail({
                   from: fromEmail, // emailLocals.community.admin_email,
                   to: emailLocals.user.email,
-                  bcc: 'gunnar@ibuar.is,robert@citizens.is',
+                  bcc: 'robert@citizens.is',
                   subject: translatedSubject,
                   html: results.html,
                   text: results.text
