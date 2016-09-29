@@ -29,6 +29,14 @@ var getNotifications = function (req, res, options, callback) {
     user_id: req.user.id
   }, getCommonWhereDateOptions(options));
 
+  var activityWhereOptions;
+  //TODO: Enabled this when limit bug is fixed in Sequelize or de normalize domain_id to notifications
+  /*
+  if (process.env.NODE_ENV == 'production') {
+    activityWhereOptions = { domain_id: req.ypDomain.id }
+  }
+  */
+
   models.AcNotification.findAll({
     where: where,
     order: [
@@ -42,6 +50,7 @@ var getNotifications = function (req, res, options, callback) {
         model: models.AcActivity,
         as: 'AcActivities',
         attributes: ['id','type','domain_id'],
+        where: activityWhereOptions,
         required: true,
         include: [
           {
