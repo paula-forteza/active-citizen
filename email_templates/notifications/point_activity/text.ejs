@@ -10,8 +10,11 @@
 <% } %>
 <% if (activity.type == 'activity.point.helpful') { %>
 <p><%= post.id == user.id ? t('notification.email.point.helpful') : t('notification.email.point.helpful_self') %></p>
+<% } if (activity.type == 'activity.report.content') { %>
+    <%= t('notification.email.pointReport') %>
+    <%= post.name %>
+    <%= point.content %>
 <% } %>
-
 <%= "https://"+community.hostname+"."+domain.domain_name+"/post/"+post.id+"/"+point.id %>
 
 <% include ../footer.text.ejs %>

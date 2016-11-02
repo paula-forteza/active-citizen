@@ -86,6 +86,12 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
               seriesCallback(error);
             });
             break;
+          case "activity.report.content":
+            models.AcNotification.createReportNotifications(activity.actor.user, activity, function (error) {
+              log.info('Processing activity.report.content Completed', {type: activity.type, err: error});
+              seriesCallback(error);
+            });
+            break;
           case "activity.post.new":
           case "activity.post.opposition.new":
           case "activity.post.endorsement.new":

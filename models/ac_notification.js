@@ -4,6 +4,7 @@ var async = require("async");
 var queue = require('../workers/queue');
 var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
+var _ = require('lodash');
 
 module.exports = function(sequelize, DataTypes) {
   var AcNotification = sequelize.define("AcNotification", {
@@ -128,7 +129,7 @@ module.exports = function(sequelize, DataTypes) {
 
       processNotification: function (notification, user, activity, callback) {
         var notificationJson = notification.toJSON();
-        notificationJson['activity'] = activity.toJSON();
+        //notificationJson['activity'] = activity.toJSON();
 
         var queuePriority;
         if (user.last_login_at && ((new Date().getDate()-5)<user.last_login_at)) {
@@ -150,6 +151,104 @@ module.exports = function(sequelize, DataTypes) {
             callback(error);
           });
         }
+      },
+
+      createReportNotifications: function(user, activity, callback) {
+        log.info('createReportNotifications');
+
+        var activityWithAdmins;
+        var allAdmins;
+
+        async.series([
+          function (seriesCallback) {
+            sequelize.models.AcActivity.find({
+              where: { id: activity.id },
+              include: [
+                {
+                  model: sequelize.models.Community,
+                  required: true,
+                  include: [
+                    {
+                      model: sequelize.models.User,
+                      attributes: _.concat(sequelize.models.User.defaultAttributesWithSocialMediaPublicAndEmail, ['created_at', 'last_login_at']),
+                      as: 'CommunityAdmins',
+                      required: false
+                    }
+                  ]
+                },
+                {
+                  model: sequelize.models.Group,
+                  required: true,
+                  include: [
+                    {
+                      model: sequelize.models.User,
+                      attributes: _.concat(sequelize.models.User.defaultAttributesWithSocialMediaPublicAndEmail, ['created_at', 'last_login_at']),
+                      as: 'GroupAdmins',
+                      required: false
+                    }
+                  ]
+                },
+                {
+                  model: sequelize.models.Post,
+                  required: false
+                },
+                {
+                  model: sequelize.models.Point,
+                  required: false
+                }
+              ]
+            }).then(function (results) {
+              if (results && (results.Community.CommunityAdmins || results.Community.GroupAdmins)) {
+                activityWithAdmins = results;
+                seriesCallback();
+              } else {
+                seriesCallback('Activity not found');
+              }
+            }).catch(function (error) {
+              seriesCallback(error);
+            });
+          },
+          function (seriesCallback) {
+            allAdmins = _.concat(activityWithAdmins.Community.CommunityAdmins, activityWithAdmins.Group.GroupAdmins);
+            allAdmins = _.uniqBy(allAdmins, function (admin) {
+              return admin.email;
+            });
+            async.eachSeries(allAdmins, function (admin, innerSeriesCallback) {
+              sequelize.models.AcNotification.build({
+                type: 'notification.report.content',
+                priority: 100,
+                status: 'active',
+                ac_activity_id: activity.id,
+                from_notification_setting: "reportContent",
+                user_id: admin.id
+              }).save().then(function(notification) {
+                if (notification) {
+                  notification.addAcActivities(activity).then(function (results) {
+                    if (results) {
+                      var notificationJson = { id: notification.id };
+                      queue.create('process-notification-delivery', notificationJson).priority('high').removeOnComplete(true).save();
+                      log.info('Notification Created', { notification: toJson(notification), userId: admin.id});
+                      innerSeriesCallback();
+                    } else {
+                      innerSeriesCallback("Notification Error Can't add activity");
+                    }
+                  });
+                } else {
+                  log.error('Notification Creation Error', { err: "No notification", user: user.id});
+                  innerSeriesCallback("Could not create notification");
+                }
+              }).catch(function (error) {
+                log.error('Notification Creation Error', { err: error, user: user.id});
+                innerSeriesCallback(error)
+              });
+
+            }, function (error) {
+              seriesCallback(error);
+            });
+          }
+        ], function (error) {
+          callback(error);
+        });
       },
 
       createNotificationFromActivity: function(user, activity, type, notification_setting_type, priority, callback) {
@@ -187,10 +286,11 @@ module.exports = function(sequelize, DataTypes) {
             });
           } else {
             log.error('Notification Creation Error', { err: "No notification", user: user.id});
-            callback();
+            callback("Notification Create Error");
           }
         }).catch(function (error) {
          log.error('Notification Creation Error', { err: error, user: user.id});
+         callback(error);
        });
       }
     }

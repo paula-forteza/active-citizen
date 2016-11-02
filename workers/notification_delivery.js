@@ -189,6 +189,26 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             log.info('NotificationDeliveryWorker notification.password.recovery Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
+          case "notification.report.content":
+            var template;
+            if (notification.AcActivities[0].Point) {
+              template = 'point_activity';
+            } else {
+              template = 'post_activity';
+            }
+            queue.create('send-one-email', {
+              subject: { translateToken: 'notification.report.content' },
+              template: template,
+              user: user,
+              domain: domain,
+              community: community,
+              post: notification.AcActivities[0].Post.toJSON(),
+              point: notification.AcActivities[0].Point ?  notification.AcActivities[0].Point.toJSON() : null,
+              activity: notification.AcActivities[0].toJSON()
+            }).priority('critical').removeOnComplete(true).save();
+            log.info('NotificationDeliveryWorker notification.report.content Completed', { type: notification.type, user: user.simple() });
+            callback();
+            break;
           case "notification.password.changed":
             queue.create('send-one-email', {
               subject: { translateToken: 'email.password_changed' },
