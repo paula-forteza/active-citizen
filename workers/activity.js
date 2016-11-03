@@ -92,6 +92,12 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
               seriesCallback(error);
             });
             break;
+          case "activity.bulk.status.update":
+            models.AcNotification.createNotificationFromActivity(activity.actor.user, activity, "notification.bulk.status.update", "priority", 100, function (error) {
+              log.info('Processing activity.bulk.status.update Completed', {type: activity.type, err: error});
+              seriesCallback(error);
+            });
+            break;
           case "activity.post.new":
           case "activity.post.opposition.new":
           case "activity.post.endorsement.new":
@@ -119,15 +125,20 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
             });
             break;
           case "activity.post.status.change":
-            generatePostStatusChangeNotification(activity, activity.User, function (error) {
-              if (error) {
-                log.error('Processing activity.post.status.change Completed', {type: activity.type, err: error});
-                seriesCallback(error);
-              } else {
-                log.info('Processing activity.post.status.change Completed', {type: activity.type});
-                seriesCallback();
-              }
-            });
+            if (activity.object && activity.object.bulkStatusUpdate) {
+              log.info('Processing activity.post.status.change not creating notifications', {type: activity.type});
+              seriesCallback();
+            } else {
+              generatePostStatusChangeNotification(activity, activity.User, function (error) {
+                if (error) {
+                  log.error('Processing activity.post.status.change Completed', {type: activity.type, err: error});
+                  seriesCallback(error);
+                } else {
+                  log.info('Processing activity.post.status.change Completed', {type: activity.type});
+                  seriesCallback();
+                }
+              });
+            }
             break;
           default:
             seriesCallback();

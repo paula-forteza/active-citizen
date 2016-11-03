@@ -224,19 +224,39 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             callback();
             break;
           case "notification.post.status.change":
-            var post = notification.AcActivities[0].Post;
-            var content = notification.AcActivities[0].PostStatusChange.content;
+            if (notification.AcActivities[0].object && notification.AcActivities[0].object.bulkStatusUpdate) {
+              log.info('Processing notification.status.change Not Sent Due To Bulk Status Update', { type: notification.type, user: user.simple() });
+              callback();
+            } else {
+              var post = notification.AcActivities[0].Post;
+              var content = notification.AcActivities[0].PostStatusChange.content;
+              queue.create('send-one-email', {
+                subject: { translateToken: 'notification.post.statusChangeSubject', contentName: post.name },
+                template: 'post_status_change',
+                user: user,
+                domain: domain,
+                community: community,
+                post: post,
+                content: content ? content : "",
+                status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('Processing notification.status.change Completed', { type: notification.type, user: user.simple() });
+              callback();
+            }
+            break;
+          case "notification.bulk.status.update":
+            var bulkStatusUpdateId = notification.AcActivities[0].object.bulkStatusUpdateId;
+            var groupUpdate = notification.AcActivities[0].object.groupUpdate;
             queue.create('send-one-email', {
-              subject: { translateToken: 'notification.post.statusChangeSubject', contentName: post.name },
-              template: 'post_status_change',
+              subject: { translateToken: 'notification.bulkStatusUpdate', contentName: groupUpdate ? group.name : community.name },
+              template: 'bulk_status_update',
               user: user,
               domain: domain,
               community: community,
               post: post,
-              content: content ? content : "",
-              status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
+              bulkStatusUpdateId: bulkStatusUpdateId
             }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.password.changed Completed', { type: notification.type, user: user.simple() });
+            log.info('Processing notification.bulk.status.change Completed', { type: notification.type, user: user.simple() });
             callback();
             break;
           case "notification.post.new":
