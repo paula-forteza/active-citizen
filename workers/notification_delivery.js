@@ -193,10 +193,10 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             var template, translateToken;
             if (notification.AcActivities[0].Point) {
               template = 'point_activity';
-              translateToken = 'notification.email.postReport';
+              translateToken = 'notification.email.pointReport';
             } else {
               template = 'post_activity';
-              translateToken = 'notification.email.pointReport';
+              translateToken = 'notification.email.postReport';
             }
             queue.create('send-one-email', {
               subject: { translateToken: translateToken },
