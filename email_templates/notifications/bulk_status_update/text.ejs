@@ -1,0 +1,9 @@
+<% include ../header.text.ejs %>
+
+<%= t('notification.email.bulkStatusUpdate') %>
+
+<%= community.name %>
+
+<%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/statusUpdate/"+bulkStatusUpdateId+"/"+user.id, t('notification.email.bulksStatusUpdateLink')) %>
+
+<% include ../footer.text.ejs %>
