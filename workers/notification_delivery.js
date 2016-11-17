@@ -247,17 +247,31 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
           case "notification.bulk.status.update":
             var bulkStatusUpdateId = notification.AcActivities[0].object.bulkStatusUpdateId;
             var groupUpdate = notification.AcActivities[0].object.groupUpdate;
-            queue.create('send-one-email', {
-              subject: { translateToken: 'notification.bulkStatusUpdate', contentName: groupUpdate ? group.name : community.name },
-              template: 'bulk_status_update',
-              user: user,
-              domain: domain,
-              community: community,
-              post: post,
-              bulkStatusUpdateId: bulkStatusUpdateId
-            }).priority('critical').removeOnComplete(true).save();
-            log.info('Processing notification.bulk.status.change Completed', { type: notification.type, user: user.simple() });
-            callback();
+            models.BulkStatusUpdate.find({
+              where: {
+                id: bulkStatusUpdateId
+              }
+            }).then(function (statusUpdate) {
+              if (statusUpdate) {
+                queue.create('send-one-email', {
+                  subject: { translateToken: 'notification.bulkStatusUpdate', contentName: groupUpdate ? group.name : community.name },
+                  template: 'bulk_status_update',
+                  user: user,
+                  domain: domain,
+                  community: community,
+                  post: post,
+                  bulkStatusUpdateId: bulkStatusUpdateId,
+                  emailHeader: statusUpdate.config.emailHeader,
+                  emailFooter: statusUpdate.config.emailFooter
+                }).priority('critical').removeOnComplete(true).save();
+                log.info('Processing notification.bulk.status.change Completed', { type: notification.type, user: user.simple() });
+                callback();
+              } else {
+                callback("Can't find bulk status update");
+              }
+            }).catch(function (error) {
+              callback(error);
+            });
             break;
           case "notification.post.new":
           case "notification.post.endorsement":

@@ -9,6 +9,8 @@ var airbrake = require('../utils/airbrake');
 var _ = required('lodash');
 
 var BulkStatusUpdateWorker = function () {};
+var verifyMode = true;
+var verifiedMovedPostCount, verifiedStatusChangedPostsCount;
 
 var movePostToGroupId = function (postId, toGroupId, done) {
   var group, post, communityId, domainId;
@@ -47,34 +49,43 @@ var movePostToGroupId = function (postId, toGroupId, done) {
       }).then(function (postIn) {
         post = postIn;
         post.set('group_id', group.id);
-        post.save().then(function (results) {
-          console.log("Have changed group id");
-          callback();
-        });
+        if (!verifyMode) {
+          post.save().then(function (results) {
+            log.info("Have changed group id");
+            callback();
+          });
+        } else {
+          log.info("Not moving post, only verifying");
+          verifiedMovedPostCount+=1;
+        }
       }).catch(function (error) {
         callback(error);
       });
     },
     function (callback) {
-      models.AcActivity.findAll({
-        where: {
-          post_id: post.id
-        }
-      }).then(function (activities) {
-        async.eachSeries(activities, function (activity, innerSeriesCallback) {
-          activity.set('group_id', group.id);
-          activity.set('community_id', communityId);
-          activity.set('domain_id', domainId);
-          activity.save().then(function (results) {
-            console.log("Have changed group and all: "+activity.id);
-            innerSeriesCallback();
-          });
-        }, function (error) {
-          callback();
-        })
-      }).catch(function (error) {
-        callback(error);
-      });
+      if (!verifyMode) {
+        models.AcActivity.findAll({
+          where: {
+            post_id: post.id
+          }
+        }).then(function (activities) {
+          async.eachSeries(activities, function (activity, innerSeriesCallback) {
+            activity.set('group_id', group.id);
+            activity.set('community_id', communityId);
+            activity.set('domain_id', domainId);
+            activity.save().then(function (results) {
+              log.info("Have changed group and all: "+activity.id);
+              innerSeriesCallback();
+            });
+          }, function (error) {
+            callback();
+          })
+        }).catch(function (error) {
+          callback(error);
+        });
+      } else {
+        callback();
+      }
     }
   ], function (error) {
     if (error) {
@@ -114,7 +125,7 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
     ]
   }).then(function (post) {
     if (post) {
-      models.PostStatusChange.build({
+      var postStatusChange = models.PostStatusChange.build({
         post_id: post.id,
         status_changed_to: post.official_status != parseInt(official_status) ? official_status : null,
         content: content,
@@ -122,65 +133,72 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
         status: 'active',
         user_agent: req.useragent.source,
         ip_address: req.clientIp
-      }).save().then(function (post_status_change) {
-        if (post_status_change) {
-          models.AcActivity.createActivity({
-            type: 'activity.post.status.change',
-            userId: req.user.id,
-            postId: post.id,
-            object: { bulkStatusUpdate: true },
-            postStatusChangeId: post_status_change.id,
-            groupId: post.Group.id,
-            communityId: post.Group.Community.id,
-            domainId: post.Group.Community.Domain.id
-          }, function (error) {
-            if (error) {
-              log.error("Post Status Change Error", {
-                context: 'status_change',
-                post: toJson(post),
-                user: toJson(req.user),
-                err: error
-              });
-              callback("Post Status Change Error");
-            } else {
-              if (post.official_status != parseInt(official_status)) {
-                post.official_status = official_status;
-                post.save().then(function (results) {
-                  log.info('Post Status Change Created And New Status', {
+      });
+
+      if (!verifyMode) {
+        postStatusChange.save().then(function (post_status_change) {
+          if (post_status_change) {
+            models.AcActivity.createActivity({
+              type: 'activity.post.status.change',
+              userId: req.user.id,
+              postId: post.id,
+              object: { bulkStatusUpdate: true },
+              postStatusChangeId: post_status_change.id,
+              groupId: post.Group.id,
+              communityId: post.Group.Community.id,
+              domainId: post.Group.Community.Domain.id
+            }, function (error) {
+              if (error) {
+                log.error("Post Status Change Error", {
+                  context: 'status_change',
+                  post: toJson(post),
+                  user: toJson(req.user),
+                  err: error
+                });
+                callback("Post Status Change Error");
+              } else {
+                if (post.official_status != parseInt(official_status)) {
+                  post.official_status = official_status;
+                  post.save().then(function (results) {
+                    log.info('Post Status Change Created And New Status', {
+                      post: toJson(post),
+                      context: 'status_change',
+                      user: toJson(req.user)
+                    });
+                    callback();
+                  });
+                } else {
+                  log.info('Post Status Change Created', {
                     post: toJson(post),
                     context: 'status_change',
                     user: toJson(req.user)
                   });
                   callback();
-                });
-              } else {
-                log.info('Post Status Change Created', {
-                  post: toJson(post),
-                  context: 'status_change',
-                  user: toJson(req.user)
-                });
-                callback();
+                }
               }
-            }
-          });
-        } else {
+            });
+          } else {
+            log.error("Post Status Change Error", {
+              context: 'status_change',
+              post: toJson(post),
+              user: toJson(req.user),
+              err: "Could not created status change"
+            });
+            callback("Post Status Change Error")
+          }
+        }).catch(function (error) {
           log.error("Post Status Change Error", {
             context: 'status_change',
             post: toJson(post),
             user: toJson(req.user),
-            err: "Could not created status change"
+            err: error
           });
           callback("Post Status Change Error")
-        }
-      }).catch(function (error) {
-        log.error("Post Status Change Error", {
-          context: 'status_change',
-          post: toJson(post),
-          user: toJson(req.user),
-          err: error
         });
-        callback("Post Status Change Error")
-      });
+      } else {
+        console.log("Not changing status, only verifying");
+        verifiedStatusChangedPostsCount+=1;
+      }
     } else {
       log.error("Post Status Change Post Not Found", {
         context: 'status_change',
@@ -290,17 +308,93 @@ var moveNeededPosts = function (config, callback) {
   });
 };
 
-BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateId, callback) {
+createBulkStatusUpdates = function (statusUpdateJson, users, callback) {
+  models.BulkStatusUpdate.find({
+    where: {
+      id: statusUpdateJson.id
+    },
+    include: [
+      {
+        model: models.Community,
+        required: true,
+        attributes: ['id'],
+        include: [
+          {
+            model: models.Domain,
+            required: true,
+            attributes: ['id']
+          }
+        ]
+      }
+    ]
+  }).then(function (statusUpdate) {
+    if (statusUpdate) {
+      async.eachSeries(users, function (user, seriesCallback) {
+        models.AcActivity.createActivity({
+          type: 'activity.bulk.status.update',
+          userId: user.id,
+          object: {
+            bulkStatusUpdateId: statusUpdate.id
+          },
+          communityId: statusUpdate.Community.id,
+          domainId: statusUpdate.Community.Domain.id
+        }, function (error) {
+          if (error) {
+            log.error("Bulk Status Change Error", {
+              context: 'status_change',
+              post: toJson(post),
+              user: toJson(req.user),
+              err: error
+            });
+            seriesCallback("Bulk Status Change Error");
+          } else {
+            if (post.official_status != parseInt(official_status)) {
+              post.official_status = official_status;
+              post.save().then(function (results) {
+                log.info('Bulk Status Change Created And New Status', {
+                  post: toJson(post),
+                  context: 'status_change',
+                  user: toJson(req.user)
+                });
+                seriesCallback();
+              });
+            } else {
+              log.info('Bulk Status Change Created', {
+                post: toJson(post),
+                context: 'status_change',
+                user: toJson(req.user)
+              });
+              seriesCallback();
+            }
+          }
+        });
+      });
+    } else {
+      callback("Can't find status upodate");
+    }
+  }).catch(function (error) {
+    callback(error);
+  })
+};
+
+BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateInfo, callback) {
   var statusUpdate;
   var allUsersWithEndorsements;
   var allSuccessful, allFailed, allInProgress, allOpen;
   var allMoved;
 
+  if (bulkStatusUpdateInfo.verifyMode) {
+    verifyMode = true;
+    verifiedMovedPostCount = verifiedStatusChangedPostsCount = 0;
+  } else {
+    verifyMode = false;
+  }
+
   async.series([
     // Get Bulk Status Update
     function(seriesCallback){
       models.BulkStatusUpdate.find({
-        where: { id: bulkStatusUpdateId },
+        where: { id: bulkStatusUpdateInfo.bulkStatusUpdate.id },
         include: [
           {
             model: models.Community,
@@ -314,7 +408,7 @@ BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateId, callbac
       }).then(function(results) {
         log.info("BulkStatusUpdateWorker Debug 1", {results: results.dataValues});
         if (results) {
-          //
+          statusUpdate = results;
           seriesCallback();
         } else {
           seriesCallback('BulkStatusUpdateWorker Update not found');
@@ -323,50 +417,23 @@ BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateId, callbac
         seriesCallback(error);
       });
     },
+    function(seriesCallback) {
+      changeStatusOfAllPost(statusUpdate.config, seriesCallback);
+    },
+    function(seriesCallback) {
+      moveNeededPosts(statusUpdate.config, seriesCallback);
+    },
     // Get All Users With Endorsements
-    function(seriesCallback){
-      if (notification.user_id) {
-        models.User.find({
-          where: { id: notification.user_id },
-          attributes: ['id','notifications_settings','email','name','created_at']
-        }).then(function(userResults) {
-          if (userResults) {
-            log.info("BulkStatusUpdateWorker Debug 5", {userResults: userResults.dataValues});
-            user = userResults;
-            seriesCallback();
-          } else {
-            if (notification.AcActivities[0].object.email) {
-              log.info("BulkStatusUpdateWorker Debug 5.5", {});
-              seriesCallback();
-            } else {
-              seriesCallback('User not found');
-            }
-          }
-        }).catch(function(error) {
+    function(seriesCallback) {
+      getAllUsersWithEndorsements(statusUpdate.config, function (error, users) {
+        if (error) {
           seriesCallback(error);
-        });
-      } else {
-        seriesCallback();
-      }
-    },
-    // Sort all posts into buckets
-    function(seriesCallback){
-      seriesCallback();
-    },
-    // Do status changes for all posts
-    function(seriesCallback){
-      seriesCallback();
-    },
-    // Move all posts
-    function(seriesCallback){
-      seriesCallback();
-    },
-    // Loop through users and send one email to each
-    function(seriesCallback){
-      seriesCallback();
+        } else {
+          createBulkStatusUpdates(statusUpdate, users, seriesCallback);
+        }
+      });
     }
-
-    ],
+  ],
   function(error) {
     if (error) {
       if (error.stack)
