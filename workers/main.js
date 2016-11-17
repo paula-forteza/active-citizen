@@ -31,6 +31,7 @@ i18n
     var activity = require('./activity');
     var notification_delivery = require('./notification_delivery');
     var notification_news_feed = require('./notification_news_feed');
+    var bulk_status_update = require('./bulk_status_update');
     var queue = require('./queue');
 
     queue.process('send-one-email', 1, function(job, done) {
@@ -47,6 +48,10 @@ i18n
 
     queue.process('process-notification-news-feed', 5, function(job, done) {
       notification_news_feed.process(job.data, done);
+    });
+
+    queue.process('process-bulk-status-update', 1, function(job, done) {
+      bulk_status_update.process(job.data, done);
     });
   });
 

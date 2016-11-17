@@ -97,7 +97,7 @@ var movePostToGroupId = function (postId, toGroupId, done) {
   });
 };
 
-var createStatusUpdateForPostId = function(postId, official_status, content, callback) {
+var createStatusUpdateForPostId = function(postId, official_status, content, userId, callback) {
   models.Post.find({
     where: {
       id: postId
@@ -125,22 +125,22 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
     ]
   }).then(function (post) {
     if (post) {
-      var postStatusChange = models.PostStatusChange.build({
-        post_id: post.id,
-        status_changed_to: post.official_status != parseInt(official_status) ? official_status : null,
-        content: content,
-        user_id: req.user.id,
-        status: 'active',
-        user_agent: req.useragent.source,
-        ip_address: req.clientIp
-      });
-
       if (!verifyMode) {
+        var postStatusChange = models.PostStatusChange.build({
+          post_id: post.id,
+          status_changed_to: post.official_status != parseInt(official_status) ? official_status : null,
+          content: content,
+          user_id: userId,
+          status: 'active',
+          user_agent: "Bulk Status Update",
+          ip_address: "127.0.0.1"
+        });
+
         postStatusChange.save().then(function (post_status_change) {
           if (post_status_change) {
             models.AcActivity.createActivity({
               type: 'activity.post.status.change',
-              userId: req.user.id,
+              userId: userId,
               postId: post.id,
               object: { bulkStatusUpdate: true },
               postStatusChangeId: post_status_change.id,
@@ -152,7 +152,6 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
                 log.error("Post Status Change Error", {
                   context: 'status_change',
                   post: toJson(post),
-                  user: toJson(req.user),
                   err: error
                 });
                 callback("Post Status Change Error");
@@ -162,16 +161,14 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
                   post.save().then(function (results) {
                     log.info('Post Status Change Created And New Status', {
                       post: toJson(post),
-                      context: 'status_change',
-                      user: toJson(req.user)
+                      context: 'status_change'
                     });
                     callback();
                   });
                 } else {
                   log.info('Post Status Change Created', {
                     post: toJson(post),
-                    context: 'status_change',
-                    user: toJson(req.user)
+                    context: 'status_change'
                   });
                   callback();
                 }
@@ -181,7 +178,6 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
             log.error("Post Status Change Error", {
               context: 'status_change',
               post: toJson(post),
-              user: toJson(req.user),
               err: "Could not created status change"
             });
             callback("Post Status Change Error")
@@ -190,7 +186,6 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
           log.error("Post Status Change Error", {
             context: 'status_change',
             post: toJson(post),
-            user: toJson(req.user),
             err: error
           });
           callback("Post Status Change Error")
@@ -202,8 +197,6 @@ var createStatusUpdateForPostId = function(postId, official_status, content, cal
     } else {
       log.error("Post Status Change Post Not Found", {
         context: 'status_change',
-        postId: req.params.id,
-        user: toJson(req.user),
         err: "Could not created status change"
       });
       callback("404");
@@ -246,7 +239,7 @@ var getAllUsersWithEndorsements = function (config, callback) {
   });
 };
 
-var changeStatusOfAllPost = function (config, callback) {
+var changeStatusOfAllPost = function (config, userId, callback) {
   var allPosts = [];
   _.each(config.groups, function (group) {
     _.each(group.posts, function (post) {
@@ -269,7 +262,7 @@ var changeStatusOfAllPost = function (config, callback) {
         } else if (configPost.customMessage) {
           statusMessage = configPost.customMessage;
         }
-        createStatusUpdateForPostId(configPost.id, configPost.changeStatusTo, statusMessage, seriesCallback);
+        createStatusUpdateForPostId(configPost.id, configPost.changeStatusTo, statusMessage, userId, seriesCallback);
       } else {
         seriesCallback();
       }
@@ -343,7 +336,6 @@ createBulkStatusUpdates = function (statusUpdateJson, users, callback) {
             log.error("Bulk Status Change Error", {
               context: 'status_change',
               post: toJson(post),
-              user: toJson(req.user),
               err: error
             });
             seriesCallback("Bulk Status Change Error");
@@ -353,16 +345,14 @@ createBulkStatusUpdates = function (statusUpdateJson, users, callback) {
               post.save().then(function (results) {
                 log.info('Bulk Status Change Created And New Status', {
                   post: toJson(post),
-                  context: 'status_change',
-                  user: toJson(req.user)
+                  context: 'status_change'
                 });
                 seriesCallback();
               });
             } else {
               log.info('Bulk Status Change Created', {
                 post: toJson(post),
-                context: 'status_change',
-                user: toJson(req.user)
+                context: 'status_change'
               });
               seriesCallback();
             }
@@ -394,7 +384,7 @@ BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateInfo, callb
     // Get Bulk Status Update
     function(seriesCallback){
       models.BulkStatusUpdate.find({
-        where: { id: bulkStatusUpdateInfo.bulkStatusUpdate.id },
+        where: { id: bulkStatusUpdateInfo.bulkStatusUpdateId },
         include: [
           {
             model: models.Community,
@@ -418,7 +408,7 @@ BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateInfo, callb
       });
     },
     function(seriesCallback) {
-      changeStatusOfAllPost(statusUpdate.config, seriesCallback);
+      changeStatusOfAllPost(statusUpdate.config, statusUpdate.user_id, seriesCallback);
     },
     function(seriesCallback) {
       moveNeededPosts(statusUpdate.config, seriesCallback);
