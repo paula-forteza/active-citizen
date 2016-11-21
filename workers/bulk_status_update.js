@@ -6,7 +6,7 @@ var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
 var airbrake = require('../utils/airbrake');
-var _ = required('lodash');
+var _ = require('lodash');
 
 var BulkStatusUpdateWorker = function () {};
 var verifyMode = true;
