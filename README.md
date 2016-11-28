@@ -34,7 +34,8 @@ We have a milestone for creating documentation, tutorials and examples in July.
 
 ## Seed funding from EU's CHEST
 Active Citizen is seed funded by EU's FP7 through the CHEST, collective enhanced environment for social tasks. http://www.chest-project.eu/
-![CHEST & EY Logo](http://www.citizens.is/wp-content/uploads/2015/12/chest_blog.png)
+
+![CHEST & EU Logo](http://www.citizens.is/wp-content/uploads/2015/12/chest_blog.png)
 
 ## Join us!
 This is an open source project and we invite you to participate, if you are interested :)
