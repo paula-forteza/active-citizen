@@ -1,7 +1,7 @@
 ![Active Citizen Logo](https://s3.amazonaws.com/yrpri-direct-asset/ac_yp_flyer_2.png)
 
-# Active Citizen Developer Release 1
-*29.2.2016*
+# Active Citizen 1.1
+*4.11.2016*
 
 This is the first public developer release of Active Citizen. It is an open source library, API and UI for activity
 streams and notifications using machine learning to recommend content to users.
@@ -34,6 +34,8 @@ We have a milestone for creating documentation, tutorials and examples in July.
 
 ## Seed funding from EU's CHEST
 Active Citizen is seed funded by EU's FP7 through the CHEST, collective enhanced environment for social tasks. http://www.chest-project.eu/
+
+![CHEST & EU Logo](http://www.citizens.is/wp-content/uploads/2015/12/chest_blog.png)
 
 ## Join us!
 This is an open source project and we invite you to participate, if you are interested :)
