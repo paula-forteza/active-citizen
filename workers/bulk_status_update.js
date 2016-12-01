@@ -255,7 +255,7 @@ var changeStatusOfAllPost = function (config, userId, callback) {
         models.User
       ]
     }).then(function (dbPost) {
-      if (configPost.changeStatusTo) {
+      if (configPost.templateName || configPost.customMessage) {
         var statusMessage;
         if (configPost.templateName) {
           statusMessage = config.templates[configPost.templateName].content;
