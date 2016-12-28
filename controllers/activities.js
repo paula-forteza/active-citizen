@@ -40,7 +40,7 @@ var getActivities = function (req, res, options, callback) {
       include: activitiesDefaultIncludes(options),
       limit: 27
   }).then(function(activities) {
-    var slicedActivitesBecauseOfLimitBug = _.take(activities, 7);
+    var slicedActivitesBecauseOfLimitBug = _.take(activities, 27);
     res.send({
       activities: slicedActivitesBecauseOfLimitBug,
       oldestProcessedActivityAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
