@@ -15,14 +15,16 @@ var getCommonWhereOptions = require('./news_feeds_utils').getCommonWhereOptions;
 var defaultKeyActivities = require('./news_feeds_utils').defaultKeyActivities;
 var getActivityDate = require('./news_feeds_utils').getActivityDate;
 
+var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
+
 // Load current news feed generated from notifications by modified_at
 // Get recommendations and insert into the news with the modified_at timestamps
 // Get promotions to add to the news feed
 // Create critical priority job to insert recommendation and promotions to postgres
 // Send data back to user
 
-var GENERAL_NEWS_FEED_LIMIT = 8;
-var RECOMMENDATION_FILTER_THRESHOLD = 6;
+var GENERAL_NEWS_FEED_LIMIT = 60;
+var RECOMMENDATION_FILTER_THRESHOLD = 15;
 
 var getNewsFeedItems = function(options, callback) {
   var where = getCommonWhereOptions(options);
@@ -92,26 +94,31 @@ var filterRecommendations = function (allActivities, options, callback) {
   }
   getRecommendationFor(options.user_id, dateRange, options, function (error, recommendedItemIds) {
     if (error) {
-      callback(error);
-    } else {
-      var recommendedPostIds = _.filter(currentPostIds, function (activity) { return _.includes(recommendedItemIds, activity) });
-      var notRecommendedPostIds = _.filter(currentPostIds, function (activity) { return !_.includes(recommendedItemIds, activity)});
-      log.info("Generate News Feed Dynamically Recommendation status", {
-        recommendedPostIdsLength: recommendedPostIds.length, notRecommendedPostIdsLength: notRecommendedPostIds.length
-      });
-      var finalPostIds;
-      if (recommendedPostIds.length<RECOMMENDATION_FILTER_THRESHOLD) {
-        // Randomize the remaining not recommended activities
-        notRecommendedPostIds = _.shuffle(notRecommendedPostIds);
-        // Merge the recommended activities using the not recommended ones
-        finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds,
-          notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
-      } else {
-        finalPostIds = recommendedPostIds;
-      }
-      allActivities = _.filter(allActivities, function (activity) { return (activity.post_id && _.includes(finalPostIds, activity.post_id.toString()))});
-      callback(null, allActivities);
+      recommendedItemIds = [];
     }
+    airbrake.notify(error, function(airbrakeErr, url) {
+      if (airbrakeErr) {
+        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+      }
+    });
+
+    var recommendedPostIds = _.filter(currentPostIds, function (activity) { return _.includes(recommendedItemIds, activity) });
+    var notRecommendedPostIds = _.filter(currentPostIds, function (activity) { return !_.includes(recommendedItemIds, activity)});
+    log.info("Generate News Feed Dynamically Recommendation status", {
+      recommendedPostIdsLength: recommendedPostIds.length, notRecommendedPostIdsLength: notRecommendedPostIds.length
+    });
+    var finalPostIds;
+    if (recommendedPostIds.length<RECOMMENDATION_FILTER_THRESHOLD) {
+      // Randomize the remaining not recommended activities
+      notRecommendedPostIds = _.shuffle(notRecommendedPostIds);
+      // Merge the recommended activities using the not recommended ones
+      finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds,
+        notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
+    } else {
+      finalPostIds = recommendedPostIds;
+    }
+    allActivities = _.filter(allActivities, function (activity) { return (activity.post_id && _.includes(finalPostIds, activity.post_id.toString()))});
+    callback(null, allActivities);
   });
 };
 

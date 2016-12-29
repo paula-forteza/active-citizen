@@ -4,6 +4,7 @@ var _ = require('lodash');
 var async = require('async');
 var log = require('../../utils/logger');
 var engine;
+var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
 
 if (process.env.PIOEngineUrl) {
   engine = new predictionio.Engine({url: process.env.PIOEngineUrl });
@@ -230,7 +231,7 @@ var getRecommendationFor = function (userId, dateRange, options, callback) {
 
   engine.sendQuery({
     user: userId,
-    num: options.limit || 200,
+    num: options.limit || 400,
     fields: fields,
     dateRange: dateRange
   }).then(function (results) {
@@ -246,7 +247,12 @@ isItemRecommended = function (itemId, userId, dateRange, options, callback) {
   getRecommendationFor(userId, dateRange, options, function (error, items) {
     if (error) {
       log.error("Recommendation Events Manager Error", { itemId: itemId, userId: userId, err: error });
-      callback(false);
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+        }
+      });
+      callback(_.includes([], itemId.toString()));
     } else {
       log.info('Events Manager isItemRecommended', { itemId: itemId, userId: userId, items: items});
       callback(_.includes(items, itemId.toString()));

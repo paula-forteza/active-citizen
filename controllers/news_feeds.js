@@ -61,7 +61,7 @@ router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, func
 
   getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
     if (error) {
-      log.error("News Feed Error Domain", { err: error, communityId: req.params.id, userId: req.user.id, errorStatus:  500 });
+      log.error("News Feed Error Communities", { err: error, communityId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
       res.send({
@@ -82,7 +82,7 @@ router.get('/groups/:id', auth.can('view group'), auth.isLoggedIn, function(req,
 
   getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
     if (error) {
-      log.error("News Feed Error Domain", { err: error, groupId: req.params.id, userId: req.user.id, errorStatus:  500 });
+      log.error("News Feed Error Group", { err: error, groupId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
       res.send({
@@ -103,7 +103,7 @@ router.get('/posts/:id', auth.can('view post'), auth.isLoggedIn, function(req, r
 
   getCuratedNewsItems(options, function (error, activities, oldestProcessedActivityAt) {
     if (error) {
-      log.error("News Feed Error Domain", { err: error, postId: req.params.id, userId: req.user.id, errorStatus:  500 });
+      log.error("News Feed Error Post", { err: error, postId: req.params.id, userId: req.user.id, errorStatus:  500 });
       res.sendStatus(500);
     } else {
       res.send({
