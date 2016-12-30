@@ -24,7 +24,7 @@ var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID,
 // Send data back to user
 
 var GENERAL_NEWS_FEED_LIMIT = 60;
-var RECOMMENDATION_FILTER_THRESHOLD = 15;
+var RECOMMENDATION_FILTER_THRESHOLD = 30;
 
 var getNewsFeedItems = function(options, callback) {
   var where = getCommonWhereOptions(options);
@@ -99,12 +99,12 @@ var filterRecommendations = function (allActivities, options, callback) {
   getRecommendationFor(options.user_id, dateRange, options, function (error, recommendedItemIds) {
     if (error) {
       recommendedItemIds = [];
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+        }
+      });
     }
-    airbrake.notify(error, function(airbrakeErr, url) {
-      if (airbrakeErr) {
-        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-      }
-    });
 
     var recommendedPostIds = _.filter(currentPostIds, function (activity) { return _.includes(recommendedItemIds, activity) });
     var notRecommendedPostIds = _.filter(currentPostIds, function (activity) { return !_.includes(recommendedItemIds, activity)});
