@@ -14,7 +14,7 @@ var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID,
 
 var OVERALL_LIMIT=7;
 
-var DATE_OPTIONS = { after: moment().add(-3, 'months').toDate() };
+var DATE_OPTIONS = { after: moment().add(-6, 'months').toDate() };
 
 var setupOptions = function (req) {
   var options = {
@@ -115,7 +115,7 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
   });
 });
 
-router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, function(req, res) {
+router.get('/communities/:id', auth.can('view community'),  function(req, res) {
   var options = setupOptions(req);
 
   options = _.merge(options, {
@@ -128,7 +128,7 @@ router.get('/communities/:id', auth.can('view community'), auth.isLoggedIn, func
   });
 });
 
-router.get('/groups/:id', auth.can('view group'), auth.isLoggedIn, function(req, res) {
+router.get('/groups/:id', auth.can('view group'), function(req, res) {
   var options = setupOptions(req);
 
   options = _.merge(options, {
