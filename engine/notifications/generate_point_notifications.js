@@ -107,7 +107,8 @@ var generateNotificationsForHelpfulness = function (activity, callback) {
       }
     ]
   }).then( function(point) {
-    if (point) {
+    //TODO: do notifications for stories as well that are without a post_id
+    if (point && point.post_id) {
       addOrPossiblyGroupNotification(point, 'notification.point.quality', 'my_points_endorsements', activity, point.User, 50, callback);
     } else {
       log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
