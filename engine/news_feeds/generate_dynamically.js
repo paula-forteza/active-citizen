@@ -83,9 +83,13 @@ var filterRecommendations = function (allActivities, options, callback) {
     allActivitiesLength: allActivities.length, threshold: RECOMMENDATION_FILTER_THRESHOLD
   });
 
-  // Add my own activities to the recommended posts
+  // Add my own activities
   var myActivities = _.filter(allActivities, function (activity) { return activity.user_id == options.user_id});
   allActivities = _.filter(allActivities, function (activity) { return activity.user_id != options.user_id});
+
+  // Add non post activities
+  var noPostActivities = _.filter(allActivities, function (activity) { return !activity.post_id });
+  allActivities = _.filter(allActivities, function (activity) { return activity.post_id });
 
   var currentPostIds = _.map(allActivities, function (item) { return item.post_id ? item.post_id.toString() : null; });
   // There can be more than one instance of a post_id from a group of activities
@@ -129,6 +133,7 @@ var filterRecommendations = function (allActivities, options, callback) {
     }
     allActivities = _.filter(allActivities, function (activity) { return (activity.post_id && _.includes(finalPostIds, activity.post_id.toString()))});
     allActivities = _.concat(allActivities, myActivities);
+    allActivities = _.concat(allActivities, noPostActivities);
     callback(null, allActivities);
   });
 };
