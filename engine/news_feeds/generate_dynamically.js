@@ -82,6 +82,11 @@ var filterRecommendations = function (allActivities, options, callback) {
   log.info("Generate News Feed Dynamically Breached Recommendation Filter Threshold", {
     allActivitiesLength: allActivities.length, threshold: RECOMMENDATION_FILTER_THRESHOLD
   });
+
+  // Add my own activities to the recommended posts
+  var myActivities = _.filter(allActivities, function (activity) { return activity.user_id == options.user_id});
+  allActivities = _.filter(allActivities, function (activity) { return activity.user_id != options.user_id});
+
   var currentPostIds = _.map(allActivities, function (item) { return item.post_id ? item.post_id.toString() : null; });
   // There can be more than one instance of a post_id from a group of activities
 
@@ -96,6 +101,7 @@ var filterRecommendations = function (allActivities, options, callback) {
   } else if (options.before) {
     dateRange = { before: options.before }
   }
+
   getRecommendationFor(options.user_id, dateRange, options, function (error, recommendedItemIds) {
     if (error) {
       recommendedItemIds = [];
@@ -108,6 +114,7 @@ var filterRecommendations = function (allActivities, options, callback) {
 
     var recommendedPostIds = _.filter(currentPostIds, function (activity) { return _.includes(recommendedItemIds, activity) });
     var notRecommendedPostIds = _.filter(currentPostIds, function (activity) { return !_.includes(recommendedItemIds, activity)});
+
     log.info("Generate News Feed Dynamically Recommendation status", {
       recommendedPostIdsLength: recommendedPostIds.length, notRecommendedPostIdsLength: notRecommendedPostIds.length
     });
@@ -116,12 +123,12 @@ var filterRecommendations = function (allActivities, options, callback) {
       // Randomize the remaining not recommended activities
       notRecommendedPostIds = _.shuffle(notRecommendedPostIds);
       // Merge the recommended activities using the not recommended ones
-      finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds,
-        notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
+      finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds, notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
     } else {
       finalPostIds = recommendedPostIds;
     }
     allActivities = _.filter(allActivities, function (activity) { return (activity.post_id && _.includes(finalPostIds, activity.post_id.toString()))});
+    allActivities = _.concat(allActivities, myActivities);
     callback(null, allActivities);
   });
 };
