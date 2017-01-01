@@ -174,20 +174,30 @@ var generateRecommendationEvent = function (activity, callback) {
       break;
     case "activity.point.new":
       if (activity.Point) {
-        if (activity.Point.value==0) {
+        if (activity.Point.value==0 && activity.Point.Post) {
           createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-comment-new', callback);
-        } else {
+        } else if (activity.Point.Post) {
           createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-new', callback);
+        } else {
+          callback();
         }
       } else {
         callback();
       }
       break;
     case "activity.point.helpful.new":
-      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-helpful', callback);
+      if (activity.Point.Post) {
+        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-helpful', callback);
+      } else {
+        callback();
+      }
       break;
     case "activity.point.unhelpful.new":
-      createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-unhelpful', callback);
+      if (activity.Point.Post) {
+        createAction(activity.Point.Post.id, activity.user_id, activity.created_at.toISOString(), 'point-unhelpful', callback);
+      } else {
+        callback();
+      }
       break;
     default:
       callback();

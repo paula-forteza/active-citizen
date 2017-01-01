@@ -38,9 +38,9 @@ var getActivities = function (req, res, options, callback) {
       [ models.User, { model: models.Organization, as: 'OrganizationUsers' }, { model: models.Image, as: 'OrganizationLogoImages' }, 'created_at', 'asc' ]
     ],
       include: activitiesDefaultIncludes(options),
-      limit: 27
+      limit: 20
   }).then(function(activities) {
-    var slicedActivitesBecauseOfLimitBug = _.take(activities, 27);
+    var slicedActivitesBecauseOfLimitBug = _.take(activities, 20);
     res.send({
       activities: slicedActivitesBecauseOfLimitBug,
       oldestProcessedActivityAt: slicedActivitesBecauseOfLimitBug.length>0 ? _.last(slicedActivitesBecauseOfLimitBug).created_at : null
