@@ -139,6 +139,7 @@ var filterRecommendations = function (allActivities, options, callback) {
 };
 
 var removeDuplicates = function(allActivities, options, callback) {
+  allActivities =_.uniq(allActivities);
   var currentActivityIds = _.map(allActivities, function (item) { return item.id; });
   var where = _.merge(getCommonWhereOptions(options), {
     ac_activity_id: {
@@ -152,7 +153,7 @@ var removeDuplicates = function(allActivities, options, callback) {
       alreadySavedActivitiesLength: alreadySavedActivities.length
     });
     var alreadySavedActivitiesIds = _.map(alreadySavedActivities, function (item) { return item.id; });
-    // Filter out activities alreqady in this newsfeed
+    // Filter out activities already in this newsfeed
     allActivities = _.filter(allActivities, function (activity) { return !_.includes(alreadySavedActivities, activity.id)});
     callback(null, allActivities);
   }).catch(function(error) {
