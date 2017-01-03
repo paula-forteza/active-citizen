@@ -67,7 +67,19 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                 },
                 {
                   model: models.Point,
-                  required: false
+                  required: false,
+                  include: [
+                    {
+                      model: models.Community,
+                      required: false,
+                      attributes: ['id','name']
+                    },
+                    {
+                      model: models.Group,
+                      required: false,
+                      attributes: ['id','name']
+                    }
+                  ]
                 }
               ]
             }
@@ -282,6 +294,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             break;
           case "notification.point.new":
           case "notification.point.quality":
+          case "notification.point.newsStory":
             deliverPointNotification(notification, user, function () {
               log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
               callback();

@@ -9,6 +9,12 @@ var addOrPossiblyGroupNotification = require('./notifications_utils').addOrPossi
 var _ = require('lodash');
 
 var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callback) {
+  var notificationType;
+  if (activity.type=='activity.point.newsStory.new') {
+    notificationType = 'notification.point.newsStory';
+  } else {
+    notificationType = 'notification.point.new';
+  }
   async.series([
     function(seriesCallback){
       // Notifications for my points
@@ -46,7 +52,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
             }
             innerSeriesCallback();
           }, function (error) {
-            addNotificationsForUsers(activity, users, "notification.point.new", 'my_points', uniqueUserIds, seriesCallback);
+            addNotificationsForUsers(activity, users, notificationType, 'my_points', uniqueUserIds, seriesCallback);
           });
         } else {
           seriesCallback();
@@ -60,7 +66,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
           if (error) {
             seriesCallback(error);
           } else if (community) {
-            addNotificationsForUsers(activity, community.CommunityUsers, "notification.point.new", 'all_community', uniqueUserIds, seriesCallback);
+            addNotificationsForUsers(activity, community.CommunityUsers, notificationType, 'all_community', uniqueUserIds, seriesCallback);
           } else {
             log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
             seriesCallback();
@@ -76,7 +82,7 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         if (error) {
           seriesCallback(error);
         } else if (group) {
-          addNotificationsForUsers(activity, group.GroupUsers, "notification.point.new", "all_group", uniqueUserIds, seriesCallback);
+          addNotificationsForUsers(activity, group.GroupUsers, notificationType, "all_group", uniqueUserIds, seriesCallback);
         } else {
           log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
           seriesCallback();
@@ -126,7 +132,7 @@ module.exports = function (activity, user, callback) {
   // Make sure not to create duplicate notifications to the same user
   var uniqueUserIds = { users: [] };
 
-  if (activity.type=='activity.point.new') {
+  if (activity.type=='activity.point.new' || activity.type=='activity.point.newsStory.new') {
     generateNotificationsForNewPoint(activity, uniqueUserIds, callback);
   } else if (activity.type=='activity.point.helpful.new' || activity.type=='activity.point.unhelpful.new') {
     generateNotificationsForHelpfulness(activity, callback)
