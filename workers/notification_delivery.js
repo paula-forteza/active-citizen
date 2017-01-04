@@ -151,22 +151,8 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
         } else {
           seriesCallback();
         }
-      }
-    ],
-    function(error) {
-      if (error) {
-        if (error.stack)
-          log.error("NotificationDeliveryWorker Error", {err: error, stack: error.stack.split("\n") });
-        else
-          log.error("NotificationDeliveryWorker Error", {err: error });
-
-        airbrake.notify(error, function(airbrakeErr, url) {
-          if (airbrakeErr) {
-            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr });
-          }
-          callback(error);
-        });
-      } else {
+      },
+      function(seriesCallback){
         log.info('Processing NotificationDeliveryWorker Started', { type: notification.type, user: user ? user.simple() : null });
         switch(notification.type) {
           case "notification.user.invite":
@@ -187,7 +173,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               token: notification.AcActivities[0].object.token
             }).priority('critical').removeOnComplete(true).save();
             log.info('NotificationDeliveryWorker notification.user.invite Queued', { type: notification.type, user: user ? user.simple() : null });
-            callback();
+            seriesCallback();
             break;
           case "notification.password.recovery":
             queue.create('send-one-email', {
@@ -199,7 +185,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               token: notification.AcActivities[0].object.token
             }).priority('critical').removeOnComplete(true).save();
             log.info('NotificationDeliveryWorker notification.password.recovery Completed', { type: notification.type, user: user.simple() });
-            callback();
+            seriesCallback();
             break;
           case "notification.report.content":
             var template, translateToken;
@@ -221,7 +207,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               activity: notification.AcActivities[0].toJSON()
             }).priority('critical').removeOnComplete(true).save();
             log.info('NotificationDeliveryWorker notification.report.content Completed', { type: notification.type, user: user.simple() });
-            callback();
+            seriesCallback();
             break;
           case "notification.password.changed":
             queue.create('send-one-email', {
@@ -233,12 +219,12 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               token: notification.activity.object.token
             }).priority('critical').removeOnComplete(true).save();
             log.info('NotificationDeliveryWorker notification.password.changed Completed', { type: notification.type, user: user.simple() });
-            callback();
+            seriesCallback();
             break;
           case "notification.post.status.change":
             if (notification.AcActivities[0].object && notification.AcActivities[0].object.bulkStatusUpdate) {
               log.info('Processing notification.status.change Not Sent Due To Bulk Status Update', { type: notification.type, user: user.simple() });
-              callback();
+              seriesCallback();
             } else {
               var post = notification.AcActivities[0].Post;
               var content = notification.AcActivities[0].PostStatusChange.content;
@@ -253,7 +239,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                 status_changed_to: notification.AcActivities[0].PostStatusChange.status_changed_to
               }).priority('critical').removeOnComplete(true).save();
               log.info('Processing notification.status.change Completed', { type: notification.type, user: user.simple() });
-              callback();
+              seriesCallback();
             }
             break;
           case "notification.bulk.status.update":
@@ -277,32 +263,51 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                   emailFooter: statusUpdate.config.emailFooter
                 }).priority('critical').removeOnComplete(true).save();
                 log.info('Processing notification.bulk.status.change Completed', { type: notification.type, user: user.simple() });
-                callback();
+                seriesCallback();
               } else {
-                callback("Can't find bulk status update");
+                seriesCallback("Can't find bulk status update");
               }
             }).catch(function (error) {
-              callback(error);
+              seriesCallback(error);
             });
             break;
           case "notification.post.new":
           case "notification.post.endorsement":
-            deliverPostNotification(notification, user, function () {
+            deliverPostNotification(notification, user, function (error) {
               log.info('Processing notification.post.* Completed', { type: notification.type, user: user.simple() });
-              callback();
+              seriesCallback(error);
             });
             break;
           case "notification.point.new":
           case "notification.point.quality":
           case "notification.point.newsStory":
-            deliverPointNotification(notification, user, function () {
+          case "notification.point.comment.new":
+            deliverPointNotification(notification, user, function (error) {
               log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
-              callback();
+              seriesCallback(error);
             });
             break;
           default:
-            callback();
+            seriesCallback();
         }
+      }
+
+    ],
+    function(error) {
+      if (error) {
+        if (error.stack)
+          log.error("NotificationDeliveryWorker Error", {err: error, stack: error.stack.split("\n") });
+        else
+          log.error("NotificationDeliveryWorker Error", {err: error });
+
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr });
+          }
+          callback(error);
+        });
+      } else {
+        callback();
       }
     });
 };

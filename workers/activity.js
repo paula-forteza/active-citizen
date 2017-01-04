@@ -115,6 +115,7 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           case "activity.point.helpful.new":
           case "activity.point.unhelpful.new":
           case "activity.point.newsStory.new":
+          case "activity.point.comment.new":
             generatePointNotification(activity, activity.User, function (error) {
               if (error) {
                 log.error('Processing activity.point.* Completed', {type: activity.type, err: error});

@@ -98,6 +98,22 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
       } else {
         seriesCallback();
       }
+    },
+    function(seriesCallback){
+      log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user ? user.simple() : null });
+      switch(notification.type) {
+        case "notification.post.new":
+        case "notification.post.endorsement":
+        case "notification.point.new":
+        case "notification.point.quality":
+          GenerateNewsFeedFromNotifications(notification, user, function (error) {
+            log.info('Processing GenerateNewsFeedFromNotifications Completed', { type: notification.type, user: user.simple() });
+            seriesCallback(error);
+          });
+          break;
+        default:
+          seriesCallback();
+      }
     }
   ],
   function(error) {
@@ -110,20 +126,6 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
         callback(error);
       });
     } else {
-      log.info('Processing NotificationNewsFeedWorker Started', { type: notification.type, user: user ? user.simple() : null });
-      switch(notification.type) {
-        case "notification.post.new":
-        case "notification.post.endorsement":
-        case "notification.point.new":
-        case "notification.point.quality":
-          GenerateNewsFeedFromNotifications(notification, user, function () {
-            log.info('Processing GenerateNewsFeedFromNotifications Completed', { type: notification.type, user: user.simple() });
-            callback();
-          });
-          break;
-        default:
-          callback();
-      }
     }
   });
 };

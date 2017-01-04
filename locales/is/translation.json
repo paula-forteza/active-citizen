@@ -4,6 +4,8 @@
       "statusChangeSubject": "Stöðu hugmyndar breytt"
     },
     "email": {
+      "pointComment": "Athugasemd",
+      "newsStory": "Ný frétt",
       "postReport": "Tilkynning um hugmynd sem brýtur reglur",
       "pointReport": "Tilkynning um rök sem brjóta reglur",
       "user_invite": "Boð um að taka þátt",

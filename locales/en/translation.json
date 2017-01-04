@@ -4,6 +4,8 @@
       "statusChangeSubject": "Status of post changed"
     },
     "email": {
+      "pointComment": "Comment",
+      "newsStory": "News story",
       "postReport": "Idea reported for violating the terms",
       "pointReport": "Point reported for violating the terms",
       "user_invite": "Invitation to participate",

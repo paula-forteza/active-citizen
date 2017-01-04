@@ -1,20 +1,21 @@
-<% include ../header.text.ejs %>
+<% include ../header.html.ejs %>
 
-<% if (activity.type == 'activity.point.new') { %>
-<%= post.id == user.id ? t('notification.email.point.new') : t('notification.email.point.new_self') %>
+<%= t('notification.email.newsStory') %>
+<% if (post) { %>
 <%= post.name %>
+<% } %>
 <%= point.content %>
-<% } %>
-<% if (activity.type == 'activity.point.unhelpful') { %>
-<p><%= post.id == user.id ? t('notification.email.point.unhelpful') : t('notification.email.point.unhelpful_self') %></p>
-<% } %>
-<% if (activity.type == 'activity.point.helpful') { %>
-<p><%= post.id == user.id ? t('notification.email.point.helpful') : t('notification.email.point.helpful_self') %></p>
-<% } if (activity.type == 'activity.report.content') { %>
-    <%= t('notification.email.pointReport') %>
-    <%= post.name %>
-    <%= point.content %>
-<% } %>
-<%= "https://"+community.hostname+"."+domain.domain_name+"/post/"+post.id+"/"+point.id %>
 
-<% include ../footer.text.ejs %>
+<% if (point.Post) { %>
+<%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/post/"+point.Post.id+"/news/"+activity.id) %>
+<% } %>
+<% if (!point.Post && point.Group) { %>
+<%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/group/"+point.Group.id+"/news/"+activity.id) %>
+<% } %>
+<% if (!point.Post && !point.Group && point.community) { %>
+<%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/community/"+point.Community.id+"/news/"+activity.id) %>
+<% } %>
+<% if (!point.Post && !point.Group && !point.community) { %>
+<%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/domain/"+point.Domain.id+"/news/"+activity.id) %>
+<% } %>
+<% include ../footer.html.ejs %>

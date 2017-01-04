@@ -12,6 +12,8 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
   var notificationType;
   if (activity.type=='activity.point.newsStory.new') {
     notificationType = 'notification.point.newsStory';
+  } else if (activity.type=='activity.point.comment.new') {
+      notificationType = 'notification.point.comment';
   } else {
     notificationType = 'notification.point.new';
   }
@@ -24,40 +26,47 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         $gt: 0
       };
 
-      models.Post.find({
-        where: {
-          id: activity.post_id
-        },
-        include: [
-          {
-            model: models.Point,
-            include: [
-              {
-                model: models.User,
-                attributes: ['id','notifications_settings','email'],
-                where: userWhere,
-                required: true
-              }
-            ]
-          }
-        ]
-      }).then(function (post) {
-        if (post) {
-          var users = [];
-          var userIds = [];
-          async.eachSeries(post.Points, function(point, innerSeriesCallback) {
-            if (!_.includes(userIds, point.User.id)) {
-              users.push(point.User);
-              userIds.push(point.User.id);
+      if (activity.post_id) {
+        models.Post.find({
+          where: {
+            id: activity.post_id
+          },
+          include: [
+            {
+              model: models.Point,
+              include: [
+                {
+                  model: models.User,
+                  attributes: ['id','notifications_settings','email'],
+                  where: userWhere,
+                  required: true
+                }
+              ]
             }
-            innerSeriesCallback();
-          }, function (error) {
-            addNotificationsForUsers(activity, users, notificationType, 'my_points', uniqueUserIds, seriesCallback);
-          });
-        } else {
-          seriesCallback();
-        }
-      });
+          ]
+        }).then(function (post) {
+          if (post) {
+            var users = [];
+            var userIds = [];
+            async.eachSeries(post.Points, function(point, innerSeriesCallback) {
+              if (!_.includes(userIds, point.User.id)) {
+                users.push(point.User);
+                userIds.push(point.User.id);
+              }
+              innerSeriesCallback();
+            }, function (error) {
+              addNotificationsForUsers(activity, users, notificationType, 'my_points', uniqueUserIds, seriesCallback);
+            });
+          } else {
+            seriesCallback();
+          }
+        }).catch(function (error) {
+          seriesCallback(error);
+        });
+      } else {
+        // No post associated with this point
+        seriesCallback();
+      }
     },
     function(seriesCallback){
       if (activity.Community) {
@@ -76,18 +85,20 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
         seriesCallback();
       }
     },
-    function(seriesCallback){
-      // Notifications for all new points in group
-      getModelAndUsersByType(models.Group, 'GroupUsers', activity.Group.id, "all_group", function(error, group) {
-        if (error) {
-          seriesCallback(error);
-        } else if (group) {
-          addNotificationsForUsers(activity, group.GroupUsers, notificationType, "all_group", uniqueUserIds, seriesCallback);
-        } else {
-          log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
-          seriesCallback();
-        }
-      });
+    function(seriesCallback) {
+      if (activity.Group) {
+        // Notifications for all new points in group
+        getModelAndUsersByType(models.Group, 'GroupUsers', activity.Group.id, "all_group", function(error, group) {
+          if (error) {
+            seriesCallback(error);
+          } else if (group) {
+            addNotificationsForUsers(activity, group.GroupUsers, notificationType, "all_group", uniqueUserIds, seriesCallback);
+          } else {
+            log.warn("Generate Point Notification Not found or muted", { userId: activity.user_id, type: activity.type});
+            seriesCallback();
+          }
+        });
+      }
     }
   ], function (error) {
     callback(error);
@@ -132,9 +143,13 @@ module.exports = function (activity, user, callback) {
   // Make sure not to create duplicate notifications to the same user
   var uniqueUserIds = { users: [] };
 
-  if (activity.type=='activity.point.new' || activity.type=='activity.point.newsStory.new') {
+  if (activity.type=='activity.point.new' ||
+      activity.type=='activity.point.newsStory.new' ||
+      activity.type=='activity.point.comment.new') {
     generateNotificationsForNewPoint(activity, uniqueUserIds, callback);
   } else if (activity.type=='activity.point.helpful.new' || activity.type=='activity.point.unhelpful.new') {
     generateNotificationsForHelpfulness(activity, callback)
+  } else {
+    callback("Unexpected type for generatePointNotification");
   }
 };
