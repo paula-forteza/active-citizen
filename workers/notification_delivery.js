@@ -281,7 +281,7 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
           case "notification.point.new":
           case "notification.point.quality":
           case "notification.point.newsStory":
-          case "notification.point.comment.new":
+          case "notification.point.comment":
             deliverPointNotification(notification, user, function (error) {
               log.info('Processing notification.point.* Completed', { type: notification.type, user: user.simple() });
               seriesCallback(error);

@@ -19,10 +19,12 @@ module.exports = function (notification, user, callback) {
     filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: 'notification.email.newPointOnMyPoint', contentName: contentName }, callback);
   } else if (notification.type=='notification.point.newsStory') {
     filterNotificationForDelivery(notification, user, 'point_news_story', { translateToken: 'notification.email.newsStory', contentName: contentName }, callback);
-  } else if (notification.type=='activity.point.comment.new') {
+  } else if (notification.type=='notification.point.comment') {
     filterNotificationForDelivery(notification, user, 'point_comment', { translateToken: 'notification.email.comment', contentName: contentName }, callback);
   } else if (notification.type=='notification.point.quality') {
     var subjectTranslateToken = (notification.AcActivities[0].type.indexOf('activity.point.helpful') > -1) ? 'notification.email.pointHelpful' : 'notification.email.pointUnhelpful';
     filterNotificationForDelivery(notification, user, 'point_activity', { translateToken: subjectTranslateToken, contentName: contentName }, callback);
+  } else {
+    callback("Unknown state for notification filtering: "+notification.type)
   }
 };

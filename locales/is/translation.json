@@ -4,7 +4,7 @@
       "statusChangeSubject": "Stöðu hugmyndar breytt"
     },
     "email": {
-      "pointComment": "Athugasemd",
+      "comment": "Athugasemd",
       "newsStory": "Ný frétt",
       "postReport": "Tilkynning um hugmynd sem brýtur reglur",
       "pointReport": "Tilkynning um rök sem brjóta reglur",
