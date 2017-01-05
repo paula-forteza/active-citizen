@@ -192,7 +192,7 @@ var getProcessedRange = function(options, callback) {
 
   models.AcNewsFeedProcessedRange.find({
     where: where,
-    attributes: ['latest_activity_at', 'oldest_activity_at'],
+    attributes: ['id','latest_activity_at', 'oldest_activity_at', 'deleted'],
     order: [
       [ 'latest_activity_at', options.oldest ? 'asc' : 'desc' ]
     ]
@@ -200,7 +200,7 @@ var getProcessedRange = function(options, callback) {
     if (item) {
       callback(null, item);
     } else {
-      callback();
+      callback(null, null);
     }
   }).catch(function (error) {
     callback(error);

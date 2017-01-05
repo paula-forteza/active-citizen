@@ -23,8 +23,8 @@ var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID,
 // Create critical priority job to insert recommendation and promotions to postgres
 // Send data back to user
 
-var GENERAL_NEWS_FEED_LIMIT = 60;
-var RECOMMENDATION_FILTER_THRESHOLD = 30;
+var GENERAL_NEWS_FEED_LIMIT = 20;
+var RECOMMENDATION_FILTER_THRESHOLD = 14;
 
 var getNewsFeedItems = function(options, callback) {
   var where = getCommonWhereOptions(options);
@@ -313,45 +313,68 @@ var getNewsFeedItemsFromProcessedRange = function (processedRange, options, call
     dateColumn: 'latest_activity_at'
   }), function (error, newsitems) {
     if (error) {
-      callback(error)
-
+      callback(error, false);
+    } else if (newsitems.length==0) {
+      // We delete the processed range as the activities in it have been deleted
+      processedRange.deleted = true;
+      processedRange.save().then(function () {
+        callback(null, true);
+      }).catch(function (error) {
+        callback(error, false);
+      });
     } else {
       var activities  = _.map(newsitems, function (item) { return item.AcActivity });
-      callback(null, activities, processedRange.oldest_activity_at);
+      callback(null, false, activities, processedRange.oldest_activity_at);
     }
   });
 };
 
 var getCuratedNewsItems = function (options, callback) {
   var latestActivityTime, latestProcessedRange;
+  var possibleEmptyRanges = true;
 
-  async.parallel([
-    function (seriesCallback) {
-      getActivityDate(options, function (error, latestActivityTimeIn) {
-        latestActivityTime = latestActivityTimeIn;
-        seriesCallback(error);
+  var originalOptions = JSON.parse(JSON.stringify(options));
+
+  async.whilst(
+    function() { return possibleEmptyRanges; },
+    function(whilstCallback) {
+      options = JSON.parse(JSON.stringify(originalOptions));
+      async.parallel([
+        function (seriesCallback) {
+          getActivityDate(options, function (error, latestActivityTimeIn) {
+            latestActivityTime = latestActivityTimeIn;
+            seriesCallback(error);
+          })
+        },
+        function (seriesCallback) {
+          getProcessedRange(options, function (error, latestProcessedRangeIn) {
+            latestProcessedRange = latestProcessedRangeIn;
+            seriesCallback(error);
+          })
+        }
+      ],function (error) {
+        if (error) {
+          whilstCallback(error)
+        } else {
+          if (!latestProcessedRange || latestActivityTime>latestProcessedRange.latest_activity_at) {
+            possibleEmptyRanges = false;
+            if (latestProcessedRange) {
+              options.afterFilter = latestProcessedRange.latest_activity_at;
+            }
+            generateNewsFeedFromActivities(options, whilstCallback);
+          } else {
+            getNewsFeedItemsFromProcessedRange(latestProcessedRange, options, function (error, possibleEmptyRangesIn, activities, oldestActivityAt) {
+              possibleEmptyRanges = possibleEmptyRangesIn;
+              whilstCallback(error, activities, oldestActivityAt)
+            });
+          }
+        }
       })
     },
-    function (seriesCallback) {
-      getProcessedRange(options, function (error, latestProcessedRangeIn) {
-        latestProcessedRange = latestProcessedRangeIn;
-        seriesCallback(error);
-      })
+    function (error, activities, oldestActivityAt) {
+      callback(error, activities, oldestActivityAt)
     }
-  ],function (error) {
-    if (error) {
-      callback(error)
-    } else {
-      if (!latestProcessedRange || latestActivityTime>latestProcessedRange.latest_activity_at) {
-        if (latestProcessedRange) {
-          options.afterFilter = latestProcessedRange.latest_activity_at;
-        }
-        generateNewsFeedFromActivities(options, callback);
-      } else {
-        getNewsFeedItemsFromProcessedRange(latestProcessedRange, options, callback);
-      }
-    }
-  })
+  );
 };
 
 module.exports = {
