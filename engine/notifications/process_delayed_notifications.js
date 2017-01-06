@@ -47,8 +47,7 @@ var sendPointNew = function (delayedNotification, callback) {
 };
 
 var sendPointQuality = function (delayedNotification, callback) {
-  console.log("sendPointQuality");
-  console.log("User email: "+delayedNotification.User.email);
+  console.log("SendPointQuality User email: "+delayedNotification.User.email);
 
   var base = { email: delayedNotification.User.email, name: delayedNotification.User.name };
   var items = [];
@@ -84,7 +83,7 @@ var sendPointQuality = function (delayedNotification, callback) {
             },
             {
               model: models.Group,
-              required: false
+              required: true
             },
             {
               model: models.Point,
@@ -109,6 +108,8 @@ var sendPointQuality = function (delayedNotification, callback) {
         }
         if (post && notification.AcActivities[0].Point) {
           items.push({
+            notification_type: notification.type,
+            notification_id: notification.id,
             domain_id: notification.AcActivities[0].domain_id,
             Domain: notification.AcActivities[0].Domain,
             community_id: notification.AcActivities[0].community_id,
@@ -155,6 +156,7 @@ var sendPointQuality = function (delayedNotification, callback) {
         var groups = _.groupBy(communityGroups, 'group_id');
         _.forEach(groups, function (groupPosts, group) {
           group = groupPosts[0].Group;
+
           console.log(group.name);
 
           var posts = _.groupBy(groupPosts, 'post_id');
@@ -173,14 +175,21 @@ var sendPointQuality = function (delayedNotification, callback) {
               var activityIdsCollected = [];
               _.forEach(pointsIn, function (point) {
                 orgPointIdsCollected.push(point.point_id);
+                console.log("Notification type: "+point.notification_type);
                 _.forEach(point.AcActivities, function (activity) {
-                  if (activity.type=="activity.point.helpful.new") {
-                    helpfulUserNames.push(activity.User.name);
-                  } else if (activity.type=="activity.point.unhelpful.new") {
-                    unhelpfulUserNames.push(activity.User.name)
+                  if (activity.point_id==point.point_id) {
+                    if (activity.type=="activity.point.helpful.new") {
+                      helpfulUserNames.push(activity.User.name);
+                    } else if (activity.type=="activity.point.unhelpful.new") {
+                      unhelpfulUserNames.push(activity.User.name)
+                    } else {
+                      console.error("Unexpected activity type: "+activity.type);
+                    }
+                    pointIdsCollected.push(activity.point_id);
+                    activityIdsCollected.push(activity.id);
+                  } else {
+                    console.error("Wrong point id for notificationId: "+point.notification_id);
                   }
-                  pointIdsCollected.push(activity.point_id);
-                  activityIdsCollected.push(activity.id);
                 });
               });
               helpfulUserNames = _.uniq(helpfulUserNames);
@@ -190,6 +199,8 @@ var sendPointQuality = function (delayedNotification, callback) {
                 var b = activityIdsCollected;
                 var a = pointIdsCollected;
               }
+              console.log("Helpful: "+helpfulUserNames.join(','));
+              console.log("Not helpful: "+unhelpfulUserNames.join(','));
             });
             console.log("1");
           });

@@ -64,7 +64,7 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
   }
 
   // Look for already generated notification for this content in the group ttl time
-  models.AcNotification.find({
+  models.AcNotification.findAll({
     where: {
       user_id: user.id,
       type: notification_type,
@@ -83,15 +83,14 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
         as: 'AcActivities',
         attributes: ['id','post_id','point_id','type'],
         required: true,
-        where: _.merge(modelWhereOptions, {
-          // type: activity.type
-        })
+        where: modelWhereOptions
       }
     ]
-  }).then(function(notification) {
+  }).then(function(notifications) {
+    var notification = notifications[0];
     if (notification) {
       // We check for repeated activity by the same user on the same content and  then don't create or update the notification
-      models.AcNotification.find({
+      models.AcNotification.findAll({
         where: {
           user_id: user.id,
           type: notification_type,
@@ -114,8 +113,10 @@ var addOrPossiblyGroupNotification = function (model, notification_type, notific
             })
           }
         ]
-      }).then(function(specificNotification) {
+      }).then(function(specificNotifications) {
+        var specificNotification = specificNotifications[0];
         if (specificNotification) {
+          specificNotification.changed('viewed', false);
           specificNotification.changed('updated_at', true);
           specificNotification.save().then(function () {
             callback();

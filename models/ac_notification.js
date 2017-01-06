@@ -1,10 +1,10 @@
 "use strict";
 
 var async = require("async");
-var queue = require('../workers/queue');
 var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var _ = require('lodash');
+var queue = require('../workers/queue');
 
 module.exports = function(sequelize, DataTypes) {
   var AcNotification = sequelize.define("AcNotification", {
