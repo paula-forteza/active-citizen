@@ -1,4 +1,3 @@
-var models = require("../../../models");
 var log = require('../../utils/logger');
 var toJson = require('../../utils/to_json');
 var async = require('async');
@@ -7,12 +6,14 @@ var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
 var nodemailer = require('nodemailer');
 var ejs = require('ejs');
-var i18n = require('../utils/i18n');
-var airbrake = require('../utils/airbrake');
+var i18n = require('../../utils/i18n');
+var airbrake = require('../../utils/airbrake');
 
 var templatesDir = path.resolve(__dirname, '..', 'email_templates', 'notifications');
 
 var DEBUG_EMAILS_TO_TEMP_FIlE = false;
+
+var models = require("../../../models");
 
 var i18nFilter = function(text) {
   return i18n.t(text);
