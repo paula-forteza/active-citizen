@@ -29,9 +29,10 @@ var importAllUsers = function (done) {
 
   log.info('AcImportAllUsers', {});
   lineCrCounter = 0;
-  models.User.findAll({
-    attributes: ['id','notifications_settings','email','name','created_at']
-  }).then(function (users) {
+  models.User.findAll(
+    {
+      attributes: ['id','notifications_settings','email','name','created_at']
+    }).then(function (users) {
     async.eachSeries(users, function (user, callback) {
       client.createUser( {
         appId: 1,
@@ -144,6 +145,7 @@ var importAllPosts = function (done) {
           groupAccess: [ convertToString(post.Group.access) ],
           communityAccess: [ convertToString(post.Group.access) ],
           groupStatus: [ convertToString(post.Group.status) ],
+          communityStatus: [ convertToString(post.Group.Community.status) ],
           status: [ post.status ],
           official_status: [ convertToString(post.official_status) ]
         });

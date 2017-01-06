@@ -110,7 +110,7 @@ var createOrUpdateItem = function (postId, date, callback) {
         callback();
       });
     } else {
-      log.error('Events Manager createOrUpdateItem Error', {postId: post.id, err: "Could not find post" });
+      log.info('Events Manager createOrUpdateItem warning', {postId: post.id, err: "Could not find post" });
       callback();
     }
   })
@@ -237,7 +237,26 @@ var getRecommendationFor = function (userId, dateRange, options, callback) {
     });
   }
 
-  log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange});
+  /*if (!options.group_id && !options.community_id) {
+    fields.push({
+      name: 'groupStatus',
+      values: [ "active" ],
+      bias: -1
+    });
+    fields.push({
+      name: 'communityStatus',
+      values: [ "active" ],
+      bias: -1
+    });
+  } else if (!options.group_id) {
+    fields.push({
+      name: 'groupStatus',
+      values: [ "active" ],
+      bias: -1
+    });
+  }*/
+
+  log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange });
 
   engine.sendQuery({
     user: userId,
@@ -245,9 +264,13 @@ var getRecommendationFor = function (userId, dateRange, options, callback) {
     fields: fields,
     dateRange: dateRange
   }).then(function (results) {
-    log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
-    var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
-    callback(null,resultMap);
+    if (results) {
+      log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
+      var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
+      callback(null,resultMap);
+    } else {
+      callback("Not results for recommendations");
+    }
   }).catch(function (error) {
     callback(error);
   });

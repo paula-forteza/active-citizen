@@ -98,12 +98,12 @@ var filterRecommendations = function (allActivities, options, callback) {
   currentPostIds =_.uniq(currentPostIds);
   currentPostIds = _.without(currentPostIds, null);
   var dateRange = {};
-  if (options.after && options.before) {
-    dateRange = { after: options.after, before: options.before }
-  } else if (options.after) {
-    dateRange = { after: options.after }
-  } else if (options.before) {
-    dateRange = { before: options.before }
+  if (options.afterDate && options.beforeDate) {
+    dateRange = { name: 'date', after: options.afterDate, before: options.beforeDate }
+  } else if (options.afterDate) {
+    dateRange = { name: 'date', after: options.afterDate }
+  } else if (options.beforeDate) {
+    dateRange = { name: 'date', before: options.beforeDate }
   }
 
   getRecommendationFor(options.user_id, dateRange, options, function (error, recommendedItemIds) {
@@ -126,7 +126,7 @@ var filterRecommendations = function (allActivities, options, callback) {
     if (recommendedPostIds.length<RECOMMENDATION_FILTER_THRESHOLD) {
       // Randomize the remaining not recommended activities
       notRecommendedPostIds = _.shuffle(notRecommendedPostIds);
-      // Merge the recommended activities using the not recommended ones
+      // Merge the recommended activities using the not recommended ones and drop the rest
       finalPostIds = _.concat(recommendedPostIds, _.dropRight(notRecommendedPostIds, notRecommendedPostIds.length-(RECOMMENDATION_FILTER_THRESHOLD-recommendedPostIds.length)));
     } else {
       finalPostIds = recommendedPostIds;

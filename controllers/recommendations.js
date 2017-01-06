@@ -14,7 +14,7 @@ var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID,
 
 var OVERALL_LIMIT=7;
 
-var DATE_OPTIONS = { after: moment().add(-6, 'months').toDate() };
+var DATE_OPTIONS = { name:"date", after: moment().add(-12, 'months').toISOString() };
 
 var setupOptions = function (req) {
   var options = {
@@ -37,7 +37,9 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
     });
   } else {
     finalIds = _.shuffle(recommendedItemIds);
-    finalIds = _.dropRight(finalIds, OVERALL_LIMIT);
+    if (finalIds.length>OVERALL_LIMIT) {
+      finalIds = _.dropRight(finalIds, OVERALL_LIMIT);
+    }
   }
 
   log.info("Recommendations domains status", { recommendedItemIds: recommendedItemIds });

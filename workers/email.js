@@ -1,5 +1,7 @@
 // https://gist.github.com/mojodna/1251812
 
+var DEBUG_EMAILS_TO_TEMP_FIlE = false;
+
 var EmailWorker = function () {};
 
 var log = require('../utils/logger');
@@ -106,7 +108,17 @@ EmailWorker.prototype.sendOne = function (emailLocals, callback) {
                 })
               } else {
                 log.warn('EmailWorker no SMTP server', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
-                seriesCallback();
+                if (DEBUG_EMAILS_TO_TEMP_FIlE) {
+                  var fs = require('fs');
+                  fs.writeFile("/tmp/testHtml.html", results.html, function(err) {
+                    if(err) {
+                      console.log(err);
+                    }
+                    seriesCallback();
+                  });
+                } else {
+                  seriesCallback();
+                }
               }
             }
           });
