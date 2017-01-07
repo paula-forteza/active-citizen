@@ -3,6 +3,8 @@ var async = require('async');
 var log = require('../../utils/logger');
 var _ = require('lodash');
 var moment = require('moment');
+var i18n = require('../../utils/i18n');
+var Backend = require('i18next-node-fs-backend');
 
 var sendPostNew = function (delayedNotification, callback) {
   console.log("sendPostNew");
@@ -46,11 +48,73 @@ var sendPointNew = function (delayedNotification, callback) {
   });
 };
 
+var writeHeader = function (email, emailUser, headerText) {
+  var email = "";
+  return email;
+};
+
+var writeDomainHeader = function (email, domain) {
+
+  return email;
+};
+
+var writeCommunityHeader = function (email, community) {
+
+  return email;
+};
+
+var writeGroupHeader = function (email, group) {
+
+  return email;
+};
+
+var writePostHeader = function (email, post) {
+
+  return email;
+};
+
+var writePointHeader = function (email, point) {
+
+  return email;
+};
+
+var writePointQualities = function (email, helpfulname, unhelpfulnames) {
+
+  return email;
+};
+
+var writeFooter = function (email, emailUser) {
+
+  return email;
+};
+
+var setLanguage = function (user, defaultLocaleObject, item, callback) {
+  var locale;
+
+  if (user.default_locale && user.default_locale != "") {
+    locale = user.default_locale;
+  } else if (defaultLocaleObject && defaultLocaleObject.default_locale && defaultLocaleObject.default_locale != "") {
+    locale = defaultLocaleObject.default_locale;
+  } else if (item.Community && item.Community.default_locale && item.Community.default_locale != "") {
+    locale = item.Community.default_locale;
+  } else if (item.Domain && item.Domain.default_locale && item.Domain.default_locale != "") {
+    locale = item.Domain.default_locale;
+  } else {
+    locale = 'en';
+  }
+  log.info("Process delayed notifications selected locale", {locale: locale});
+
+  i18n.changeLanguage(locale, function (err, t) {
+    callback(err);
+  });
+};
+
 var sendPointQuality = function (delayedNotification, callback) {
   console.log("SendPointQuality User email: "+delayedNotification.User.email);
 
-  var base = { email: delayedNotification.User.email, name: delayedNotification.User.name };
+  var emailUser = delayedNotification.User;
   var items = [];
+  var email;
 
   async.forEach(delayedNotification.AcNotifications, function (notificationWithId, seriesCallback) {
     models.AcNotification.find({
@@ -142,77 +206,89 @@ var sendPointQuality = function (delayedNotification, callback) {
       seriesCallback(error);
     });
   }, function (error) {
+    setLanguage(emailUser, null, items[0], function () {
+      email = writeHeader(emailUser, i18n.t('notifications.email.pointQualities'));
+      var domains = _.groupBy(items, 'domain_id');
+      _.forEach(domains, function (domainCommunities, domain) {
+        domain = domainCommunities[0].Domain;
+        console.log(domain.name);
 
-    var domains = _.groupBy(items, 'domain_id');
-    _.forEach(domains, function (domainCommunities, domain) {
-      domain = domainCommunities[0].Domain;
-      console.log(domain.name);
+        setLanguage(emailUser, domain, domainCommunities[0], function () {
+          email = writeDomainHeader(email, domain);
+          var communities = _.groupBy(domainCommunities, 'community_id');
+          _.forEach(communities, function (communityGroups, community) {
+            community = communityGroups[0].Community;
+            console.log(community.name);
 
-      var communities = _.groupBy(domainCommunities, 'community_id');
-      _.forEach(communities, function (communityGroups, community) {
-        community = communityGroups[0].Community;
-        console.log(community.name);
+            setLanguage(emailUser, community, domainCommunities[0], function () {
+              email = writeCommunityHeader(email, community);
+              var groups = _.groupBy(communityGroups, 'group_id');
+              _.forEach(groups, function (groupPosts, group) {
+                group = groupPosts[0].Group;
+                console.log(group.name);
+                email = writeGroupHeader(email, group);
+                var posts = _.groupBy(groupPosts, 'post_id');
+                _.forEach(posts, function (postPoints, post) {
+                  post = postPoints[0].Post;
+                  console.log(post.name);
+                  email = writePostHeader(email, post);
 
-        var groups = _.groupBy(communityGroups, 'group_id');
-        _.forEach(groups, function (groupPosts, group) {
-          group = groupPosts[0].Group;
+                  var points = _.groupBy(postPoints, 'point_id');
+                  _.forEach(points, function (pointsIn, point) {
+                    point = pointsIn[0].Point;
+                    console.log(point.content);
+                    email = writePointHeader(email, point);
 
-          console.log(group.name);
-
-          var posts = _.groupBy(groupPosts, 'post_id');
-          _.forEach(posts, function (postPoints, post) {
-            post = postPoints[0].Post;
-            console.log(post.name);
-
-            var points = _.groupBy(postPoints, 'point_id');
-            _.forEach(points, function (pointsIn, point) {
-              point = pointsIn[0].Point;
-              console.log(point.content);
-              var helpfulUserNames = [];
-              var unhelpfulUserNames = [];
-              var pointIdsCollected = [];
-              var orgPointIdsCollected = [];
-              var activityIdsCollected = [];
-              _.forEach(pointsIn, function (point) {
-                orgPointIdsCollected.push(point.point_id);
-                console.log("Notification type: "+point.notification_type);
-                _.forEach(point.AcActivities, function (activity) {
-                  if (activity.point_id==point.point_id) {
-                    if (activity.type=="activity.point.helpful.new") {
-                      helpfulUserNames.push(activity.User.name);
-                    } else if (activity.type=="activity.point.unhelpful.new") {
-                      unhelpfulUserNames.push(activity.User.name)
-                    } else {
-                      console.error("Unexpected activity type: "+activity.type);
+                    var helpfulUserNames = [];
+                    var unhelpfulUserNames = [];
+                    var pointIdsCollected = [];
+                    var orgPointIdsCollected = [];
+                    var activityIdsCollected = [];
+                    _.forEach(pointsIn, function (point) {
+                      orgPointIdsCollected.push(point.point_id);
+                      console.log("Notification type: "+point.notification_type);
+                      _.forEach(point.AcActivities, function (activity) {
+                        if (activity.point_id==point.point_id) {
+                          if (activity.type=="activity.point.helpful.new") {
+                            helpfulUserNames.push(activity.User.name);
+                          } else if (activity.type=="activity.point.unhelpful.new") {
+                            unhelpfulUserNames.push(activity.User.name)
+                          } else {
+                            console.error("Unexpected activity type: "+activity.type);
+                          }
+                          pointIdsCollected.push(activity.point_id);
+                          activityIdsCollected.push(activity.id);
+                        } else {
+                          console.error("Wrong point id for notificationId: "+point.notification_id);
+                        }
+                      });
+                    });
+                    helpfulUserNames = _.uniq(helpfulUserNames);
+                    unhelpfulUserNames = _.uniq(unhelpfulUserNames);
+                    if (helpfulUserNames.length>4) {
+                      var c = orgPointIdsCollected;
+                      var b = activityIdsCollected;
+                      var a = pointIdsCollected;
                     }
-                    pointIdsCollected.push(activity.point_id);
-                    activityIdsCollected.push(activity.id);
-                  } else {
-                    console.error("Wrong point id for notificationId: "+point.notification_id);
-                  }
-                });
-              });
-              helpfulUserNames = _.uniq(helpfulUserNames);
-              unhelpfulUserNames = _.uniq(unhelpfulUserNames);
-              if (helpfulUserNames.length>4) {
-                var c = orgPointIdsCollected;
-                var b = activityIdsCollected;
-                var a = pointIdsCollected;
-              }
-              console.log("Helpful: "+helpfulUserNames.join(','));
-              console.log("Not helpful: "+unhelpfulUserNames.join(','));
-            });
-            console.log("1");
-          });
-          console.log("2");
-        });
-        console.log("3");
-      });
-      console.log("4");
-    });
-    console.log("5");
+                    email = writePointQualities(email, point, helpfulUserNames, unhelpfulUserNames);
 
-    callback();
+                    console.log("Helpful: "+helpfulUserNames.join(','));
+                    console.log("Not helpful: "+unhelpfulUserNames.join(','));
+                  });
+                  console.log("1");
+                });
+                console.log("2");
+              });
+              console.log("3");
+            });
+          });
+          console.log("4");
+        });
+      });
+      console.log("5");
+      email = writeFooter(email, emailUser);
+      callback();
+    });
   });
 };
 
@@ -320,6 +396,33 @@ var getDelayedNotificationToProcess = function (frequency, callback) {
   }
 };
 
-async.eachSeries([1,2,3,4], function (frequency, seriesCallback) {
-  getDelayedNotificationToProcess(frequency, seriesCallback);
-});
+var path = require('path');
+var localesPath = path.resolve(__dirname, '../../locales');
+
+i18n
+  .use(Backend)
+  .init({
+    preload: ['en','is','hr','pl','no'],
+
+    fallbackLng:'en',
+
+    // this is the defaults
+    backend: {
+      // path where resources get loaded from
+      loadPath: localesPath+'/{{lng}}/translation.json',
+
+      // path to post missing resources
+      addPath: localesPath+'/{{lng}}/translation.missing.json',
+
+      // jsonIndent to use when storing json files
+      jsonIndent: 2
+    }
+  }, function (err, t) {
+    log.info("Have Loaded i18n", {err: err});
+
+    async.eachSeries([1,2,3,4], function (frequency, seriesCallback) {
+      getDelayedNotificationToProcess(frequency, seriesCallback);
+    });
+  });
+
+
