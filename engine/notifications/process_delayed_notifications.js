@@ -69,6 +69,9 @@ var writeGroupHeader = function (email, group) {
 };
 
 var writePostHeader = function (email, post) {
+  email += '<div style="display: flex;padding: 16px;border solid 1px;background-color: #FFF;color: #222;">';
+  email += '<div style="width:200px;"><img src="'+post.getImageFormatUrl(1)+'"/></div>';
+  email += '<div style="flex-grow:1"><div '+post.name+'</div>';
 
   return email;
 };
@@ -121,6 +124,9 @@ var sendPointQuality = function (delayedNotification, callback) {
       where: {
         id: notificationWithId.id
       },
+      order: [
+        [ models.AcActivity, models.Post, { model: models.Image, as: 'PostHeaderImages' } ,'updated_at', 'asc' ]
+      ],
       include: [
         {
           model: models.AcActivity, as: 'AcActivities',
@@ -135,7 +141,13 @@ var sendPointQuality = function (delayedNotification, callback) {
             },
             {
               model: models.Post,
-              required: false
+              required: false,
+              include: [
+                { model: models.Image,
+                  as: 'PostHeaderImages',
+                  required: false
+                }
+              ]
             },
             {
               model: models.Domain,

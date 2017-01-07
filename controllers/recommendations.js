@@ -50,6 +50,9 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
         $in: finalIds
       }
     },
+    order: [
+      [ { model: models.Image, as: 'PostHeaderImages' } ,'updated_at', 'asc' ]
+    ],
     include: [
       {
         // Category
