@@ -6,6 +6,8 @@ var log = require('../../utils/logger');
 var engine;
 var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
 
+var ACTIVE_CITIZEN_PIO_APP_ID = 1;
+
 if (process.env.PIOEngineUrl) {
   engine = new predictionio.Engine({url: process.env.PIOEngineUrl });
 }
@@ -66,7 +68,7 @@ var getPost = function (postId, callback) {
 };
 
 var createOrUpdateItem = function (postId, date, callback) {
-  client = getClient(1);
+  client = getClient(ACTIVE_CITIZEN_PIO_APP_ID);
   getPost(postId, function (post) {
     if (post) {
       var properties = {};
@@ -83,8 +85,9 @@ var createOrUpdateItem = function (postId, date, callback) {
           community: [ convertToString(post.Group.Community.id) ],
           group: [ convertToString(post.Group.id) ],
           groupAccess: [ convertToString(post.Group.access) ],
-          groupStatus: [ convertToString(post.Group.status) ],
           communityAccess: [ convertToString(post.Group.access) ],
+          groupStatus: [ convertToString(post.Group.status) ],
+          communityStatus: [ convertToString(post.Group.Community.status) ],
           status: [ post.status ],
           official_status: [ convertToString(post.official_status) ]
         });
@@ -100,8 +103,7 @@ var createOrUpdateItem = function (postId, date, callback) {
         entityId: post.id,
         properties: properties,
         date: date,
-        createdAt: post.created_at.toISOString(),
-        eventDate: post.created_at.toISOString()
+        eventTime: post.created_at.toISOString()
       }).then(function (result) {
         log.info('Events Manager createOrUpdateItem', {postId: post.id, result: result});
         callback();
@@ -117,7 +119,7 @@ var createOrUpdateItem = function (postId, date, callback) {
 };
 
 var createAction = function (targetEntityId, userId, date, action, callback) {
-  client = getClient(1);
+  client = getClient(ACTIVE_CITIZEN_PIO_APP_ID);
 
   getPost(targetEntityId, function (post) {
     if (post) {
@@ -126,7 +128,7 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
         uid: userId,
         targetEntityId: targetEntityId,
         date: date,
-        eventDate: date
+        eventTime: date
       }).then(function (result) {
         log.info('Events Manager createAction', {action: action, postId: targetEntityId, userId: userId, result: result});
         callback();
@@ -143,7 +145,7 @@ var createAction = function (targetEntityId, userId, date, action, callback) {
 };
 
 var createUser = function (user, callback) {
-  client = getClient(1);
+  client = getClient(ACTIVE_CITIZEN_PIO_APP_ID);
   client.createUser( {
     appId: 1,
     uid: user.id,
@@ -160,9 +162,6 @@ var createUser = function (user, callback) {
 var generateRecommendationEvent = function (activity, callback) {
   log.info('Events Manager generateRecommendationEvent', {type: activity.type, userId: activity.user_id });
   switch (activity.type) {
-    case "activity.user.new":
-      createUser(activity.User, callback);
-      break;
     case "activity.post.new":
       createOrUpdateItem(activity.Post.id, activity.Post.created_at.toISOString(), callback);
       break;
@@ -237,24 +236,24 @@ var getRecommendationFor = function (userId, dateRange, options, callback) {
     });
   }
 
-  /*if (!options.group_id && !options.community_id) {
+  if (!options.group_id && !options.community_id) {
     fields.push({
       name: 'groupStatus',
-      values: [ "active" ],
+      values: [ "active", "featured"],
       bias: -1
     });
     fields.push({
       name: 'communityStatus',
-      values: [ "active" ],
+      values: [ "active", "featured"],
       bias: -1
     });
   } else if (!options.group_id) {
     fields.push({
       name: 'groupStatus',
-      values: [ "active" ],
+      values: [ "active","featured"],
       bias: -1
     });
-  }*/
+  }
 
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange });
 
