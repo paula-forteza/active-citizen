@@ -1,7 +1,7 @@
 <% include ../header.text.ejs %>
 
 <% if (activity.type == 'activity.point.new') { %>
-<%= post.id == user.id ? t('notification.email.point.new') : t('notification.email.point.new_self') %>
+<%= post.id == user.id ? t('notification.email.pointNewSelf') : t('notification.email.pointNew') %>
 <%= post.name %>
 <%= point.content %>
 <% } %>

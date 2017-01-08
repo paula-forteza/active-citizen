@@ -5,6 +5,7 @@ var _ = require('lodash');
 var moment = require('moment');
 var i18n = require('../../utils/i18n');
 var Backend = require('i18next-node-fs-backend');
+var sendOneEmail = require('./emails_utils').sendOneEmail;
 
 var sendPostNew = function (delayedNotification, callback) {
   console.log("sendPostNew");
@@ -48,41 +49,65 @@ var sendPointNew = function (delayedNotification, callback) {
   });
 };
 
-var writeHeader = function (email, emailUser, headerText) {
-  var email = "";
+var formatNameArray = function (arr){
+  var outStr = "";
+  if (arr.length === 1) {
+    outStr = arr[0];
+  } else if (arr.length === 2) {
+    //joins all with "and" but no commas
+    //example: "bob and sam"
+    outStr = arr.join(' & ');
+  } else if (arr.length > 2) {
+    //joins all with commas, but last one gets ", and" (oxford comma!)
+    //example: "bob, joe, and sam"
+    outStr = arr.slice(0, -1).join(', ') + ', & ' + arr.slice(-1);
+  }
+  return outStr;
+};
+
+var writeHeader = function (emailUser, headerText) {
+  var email = '<div style="padding:8px">'+headerText+'</div>';
   return email;
 };
 
 var writeDomainHeader = function (email, domain) {
-
+  email += '<div style="display: flex;margin: 8px;padding: 8px;border solid 1px;background-color: #FFF;color: #222;">';
+  email += '<div style="max-width:200px;"><img src="'+domain.getImageFormatUrl(1)+'"/></div>';
+  email += '<div style="flex-grow:1"><div>'+domain.name+'</div></div>';
   return email;
 };
 
 var writeCommunityHeader = function (email, community) {
-
+  email += '<div style="display: flex;margin: 8px;padding: 8px;border solid 1px;background-color: #FFF;color: #222;">';
+  email += '<div style="max-width:200px;"><img src="'+community.getImageFormatUrl(1)+'"/></div>';
+  email += '<div style="flex-grow:1"><div>'+community.name+'</div></div>';
   return email;
 };
 
 var writeGroupHeader = function (email, group) {
-
+  email += '<div style="display: flex;margin: 8px;padding: 8px;border solid 1px;background-color: #FFF;color: #222;">';
+  email += '<div style="max-width:200px;"><img src="'+group.getImageFormatUrl(1)+'"/></div>';
+  email += '<div style="flex-grow:1"><div>'+group.name+'</div></div>';
   return email;
 };
 
 var writePostHeader = function (email, post) {
-  email += '<div style="display: flex;padding: 16px;border solid 1px;background-color: #FFF;color: #222;">';
-  email += '<div style="width:200px;"><img src="'+post.getImageFormatUrl(1)+'"/></div>';
-  email += '<div style="flex-grow:1"><div '+post.name+'</div>';
-
+  email += '<div style="padding:8px">'+post.name+'</div>';
   return email;
 };
 
 var writePointHeader = function (email, point) {
-
+  email += '<div style="padding:8px">'+point.content+'</div>';
   return email;
 };
 
-var writePointQualities = function (email, helpfulname, unhelpfulnames) {
-
+var writePointQualities = function (email, helpfulNames, unhelpfulNames) {
+  if (helpfulNames && helpfulNames.length>0) {
+    email += '<div style="padding:8px">'+i18n.t('notification.email.foundHelpful')+': '+formatNameArray(helpfulNames)+'</div>';
+  }
+  if (unhelpfulNames && unhelpfulNames.length>0) {
+    email += '<div style="padding:8px">'+i18n.t('notification.email.foundNotHelpful')+': '+formatNameArray(unhelpfulNames)+'</div>';
+  }
   return email;
 };
 
@@ -125,7 +150,10 @@ var sendPointQuality = function (delayedNotification, callback) {
         id: notificationWithId.id
       },
       order: [
-        [ models.AcActivity, models.Post, { model: models.Image, as: 'PostHeaderImages' } ,'updated_at', 'asc' ]
+        [ { model: models.AcActivity, as: 'AcActivities' }, models.Post, { model: models.Image, as: 'PostHeaderImages' } ,'updated_at', 'asc' ],
+        [ { model: models.AcActivity, as: 'AcActivities' }, models.Domain, { model: models.Image, as: 'DomainLogoImages' } ,'updated_at', 'asc' ],
+        [ { model: models.AcActivity, as: 'AcActivities' }, models.Community, { model: models.Image, as: 'CommunityLogoImages' } ,'updated_at', 'asc' ],
+        [ { model: models.AcActivity, as: 'AcActivities' }, models.Group, { model: models.Image, as: 'GroupLogoImages' } ,'updated_at', 'asc' ]
       ],
       include: [
         {
@@ -151,15 +179,36 @@ var sendPointQuality = function (delayedNotification, callback) {
             },
             {
               model: models.Domain,
-              required: true
+              required: true,
+              include: [
+                {
+                  model: models.Image,
+                  as: 'DomainLogoImages',
+                  required: false
+                }
+              ]
             },
             {
               model: models.Community,
-              required: true
+              required: true,
+              include: [
+                {
+                  model: models.Image,
+                  as: 'CommunityLogoImages',
+                  required: false
+                }
+              ]
             },
             {
               model: models.Group,
-              required: true
+              required: true,
+              include: [
+                {
+                  model: models.Image,
+                  as: 'GroupLogoImages',
+                  required: false
+                }
+              ]
             },
             {
               model: models.Point,
@@ -218,89 +267,107 @@ var sendPointQuality = function (delayedNotification, callback) {
       seriesCallback(error);
     });
   }, function (error) {
-    setLanguage(emailUser, null, items[0], function () {
-      email = writeHeader(emailUser, i18n.t('notifications.email.pointQualities'));
-      var domains = _.groupBy(items, 'domain_id');
-      _.forEach(domains, function (domainCommunities, domain) {
-        domain = domainCommunities[0].Domain;
-        console.log(domain.name);
+    if (items.length>0) {
+      setLanguage(emailUser, null, items[0], function () {
+        email = writeHeader(emailUser, i18n.t('notifications.email.pointQualities'));
+        var domains = _.groupBy(items, 'domain_id');
+        var firstDomain, firstCommunity;
+        _.forEach(domains, function (domainCommunities, domain) {
+          domain = domainCommunities[0].Domain;
+          if (!firstDomain) {
+            firstDomain = domain;
+            firstCommunity = domainCommunities[0].Community;
+          }
+          console.log(domain.name);
 
-        setLanguage(emailUser, domain, domainCommunities[0], function () {
-          email = writeDomainHeader(email, domain);
-          var communities = _.groupBy(domainCommunities, 'community_id');
-          _.forEach(communities, function (communityGroups, community) {
-            community = communityGroups[0].Community;
-            console.log(community.name);
+          setLanguage(emailUser, domain, domainCommunities[0], function () {
+            email = writeDomainHeader(email, domain);
+            var communities = _.groupBy(domainCommunities, 'community_id');
+            _.forEach(communities, function (communityGroups, community) {
+              community = communityGroups[0].Community;
+              console.log(community.name);
 
-            setLanguage(emailUser, community, domainCommunities[0], function () {
-              email = writeCommunityHeader(email, community);
-              var groups = _.groupBy(communityGroups, 'group_id');
-              _.forEach(groups, function (groupPosts, group) {
-                group = groupPosts[0].Group;
-                console.log(group.name);
-                email = writeGroupHeader(email, group);
-                var posts = _.groupBy(groupPosts, 'post_id');
-                _.forEach(posts, function (postPoints, post) {
-                  post = postPoints[0].Post;
-                  console.log(post.name);
-                  email = writePostHeader(email, post);
+              setLanguage(emailUser, community, domainCommunities[0], function () {
+                email = writeCommunityHeader(email, community);
+                var groups = _.groupBy(communityGroups, 'group_id');
+                _.forEach(groups, function (groupPosts, group) {
+                  group = groupPosts[0].Group;
+                  console.log(group.name);
+                  email = writeGroupHeader(email, group);
+                  var posts = _.groupBy(groupPosts, 'post_id');
+                  _.forEach(posts, function (postPoints, post) {
+                    post = postPoints[0].Post;
+                    console.log(post.name);
+                    email = writePostHeader(email, post);
 
-                  var points = _.groupBy(postPoints, 'point_id');
-                  _.forEach(points, function (pointsIn, point) {
-                    point = pointsIn[0].Point;
-                    console.log(point.content);
-                    email = writePointHeader(email, point);
+                    var points = _.groupBy(postPoints, 'point_id');
+                    _.forEach(points, function (pointsIn, point) {
+                      point = pointsIn[0].Point;
+                      console.log(point.content);
+                      email = writePointHeader(email, point);
 
-                    var helpfulUserNames = [];
-                    var unhelpfulUserNames = [];
-                    var pointIdsCollected = [];
-                    var orgPointIdsCollected = [];
-                    var activityIdsCollected = [];
-                    _.forEach(pointsIn, function (point) {
-                      orgPointIdsCollected.push(point.point_id);
-                      console.log("Notification type: "+point.notification_type);
-                      _.forEach(point.AcActivities, function (activity) {
-                        if (activity.point_id==point.point_id) {
-                          if (activity.type=="activity.point.helpful.new") {
-                            helpfulUserNames.push(activity.User.name);
-                          } else if (activity.type=="activity.point.unhelpful.new") {
-                            unhelpfulUserNames.push(activity.User.name)
+                      var helpfulUserNames = [];
+                      var unhelpfulUserNames = [];
+                      var pointIdsCollected = [];
+                      var orgPointIdsCollected = [];
+                      var activityIdsCollected = [];
+                      _.forEach(pointsIn, function (point) {
+                        orgPointIdsCollected.push(point.point_id);
+                        console.log("Notification type: "+point.notification_type);
+                        _.forEach(point.AcActivities, function (activity) {
+                          if (activity.point_id==point.point_id) {
+                            if (activity.type=="activity.point.helpful.new") {
+                              helpfulUserNames.push(activity.User.name);
+                            } else if (activity.type=="activity.point.unhelpful.new") {
+                              unhelpfulUserNames.push(activity.User.name)
+                            } else {
+                              console.error("Unexpected activity type: "+activity.type);
+                            }
+                            pointIdsCollected.push(activity.point_id);
+                            activityIdsCollected.push(activity.id);
                           } else {
-                            console.error("Unexpected activity type: "+activity.type);
+                            console.error("Wrong point id for notificationId: "+point.notification_id);
                           }
-                          pointIdsCollected.push(activity.point_id);
-                          activityIdsCollected.push(activity.id);
-                        } else {
-                          console.error("Wrong point id for notificationId: "+point.notification_id);
-                        }
+                        });
                       });
-                    });
-                    helpfulUserNames = _.uniq(helpfulUserNames);
-                    unhelpfulUserNames = _.uniq(unhelpfulUserNames);
-                    if (helpfulUserNames.length>4) {
-                      var c = orgPointIdsCollected;
-                      var b = activityIdsCollected;
-                      var a = pointIdsCollected;
-                    }
-                    email = writePointQualities(email, point, helpfulUserNames, unhelpfulUserNames);
+                      helpfulUserNames = _.uniq(helpfulUserNames);
+                      unhelpfulUserNames = _.uniq(unhelpfulUserNames);
+                      if (helpfulUserNames.length>4) {
+                        var c = orgPointIdsCollected;
+                        var b = activityIdsCollected;
+                        var a = pointIdsCollected;
+                      }
+                      email = writePointQualities(email, point, helpfulUserNames, unhelpfulUserNames);
 
-                    console.log("Helpful: "+helpfulUserNames.join(','));
-                    console.log("Not helpful: "+unhelpfulUserNames.join(','));
+                      console.log("Helpful: "+helpfulUserNames.join(','));
+                      console.log("Not helpful: "+unhelpfulUserNames.join(','));
+                    });
+                    console.log("1");
                   });
-                  console.log("1");
+                  console.log("2");
                 });
-                console.log("2");
+                console.log("3");
               });
-              console.log("3");
             });
+            console.log("4");
           });
-          console.log("4");
         });
+        console.log("5");
+        email = writeFooter(email, emailUser);
+        var emailLocals = {
+          subject: { translateToken: 'notifications.email.pointQualities' },
+          template: 'delayed_notification',
+          user: emailUser,
+          domain: firstDomain,
+          community: firstCommunity,
+          emailContents: email
+        };
+        sendOneEmail(emailLocals, callback);
       });
-      console.log("5");
-      email = writeFooter(email, emailUser);
+    } else {
+      console.error("No items");
       callback();
-    });
+    }
   });
 };
 

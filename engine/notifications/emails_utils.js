@@ -7,6 +7,7 @@ var nodemailer = require('nodemailer');
 var ejs = require('ejs');
 var i18n = require('../../utils/i18n');
 var airbrake = require('../../utils/airbrake');
+var fs = require('fs');
 
 var templatesDir = path.resolve(__dirname, '..', '..', 'email_templates', 'notifications');
 
@@ -191,12 +192,13 @@ var sendOneEmail = function (emailLocals, callback) {
           } else {
             log.warn('EmailWorker no SMTP server', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
             if (DEBUG_EMAILS_TO_TEMP_FIlE) {
-              var fs = require('fs');
-              fs.writeFile("/tmp/testHtml.html", results.html, function(err) {
-                if(err) {
-                  console.log(err);
-                }
-                seriesCallback();
+              fs.unlink("/tmp/testHtml.html", function (err) {
+                fs.writeFile("/tmp/testHtml.html", results.html, function(err) {
+                  if(err) {
+                    console.log(err);
+                  }
+                  seriesCallback();
+                });
               });
             } else {
               seriesCallback();
@@ -224,3 +226,4 @@ module.exports = {
   filterNotificationForDelivery: filterNotificationForDelivery,
   sendOneEmail: sendOneEmail
 };
+
