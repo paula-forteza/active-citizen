@@ -1,4 +1,4 @@
-var predictionio = require('./predictionio-driver');
+var predictionio = require('predictionio-driver');
 var models = require('../../../models');
 var _ = require('lodash');
 var async = require('async');
