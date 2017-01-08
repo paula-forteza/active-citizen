@@ -103,6 +103,11 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
     res.send(posts);
   }).catch(function(error) {
     log.error("Recommendation Error "+levelType, { err: error, id: req.params.id, userId:  req.user ? req.user.id : -1, errorStatus: 500 });
+    airbrake.notify(error, function(airbrakeErr, url) {
+      if (airbrakeErr) {
+        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+      }
+    });
     res.sendStatus(200);
   });
 };
