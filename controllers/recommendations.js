@@ -14,7 +14,7 @@ var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID,
 
 var OVERALL_LIMIT=7;
 
-var DATE_OPTIONS = { name:"date", after: moment().add(-12, 'months').toISOString() };
+var DATE_OPTIONS = { name:"date", after: moment().add(-1000, 'months').toISOString() };
 
 var setupOptions = function (req) {
   var options = {
