@@ -226,4 +226,3 @@ module.exports = {
   filterNotificationForDelivery: filterNotificationForDelivery,
   sendOneEmail: sendOneEmail
 };
-
