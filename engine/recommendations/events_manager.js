@@ -203,7 +203,7 @@ var generateRecommendationEvent = function (activity, callback) {
   }
 };
 
-var getRecommendationFor = function (userId, dateRange, options, callback) {
+var getRecommendationFor = function (userId, dateRange, options, callback, userLocale) {
   var fields = [];
 
   fields.push({
@@ -252,6 +252,14 @@ var getRecommendationFor = function (userId, dateRange, options, callback) {
       name: 'groupStatus',
       values: [ "active","featured"],
       bias: -1
+    });
+  }
+
+  if (false && userLocale) {
+    fields.push({
+      name: 'communityLocale',
+      values: [ userLocale ],
+      bias: 0.9 // High boost for the selected user locale
     });
   }
 

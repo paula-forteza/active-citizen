@@ -122,7 +122,7 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
 
   getRecommendationFor(options.user_id, DATE_OPTIONS, options, function (error, recommendedItemIds) {
     processRecommendations("domain", req, res, recommendedItemIds, error);
-  });
+  }, req.user ? req.user.default_locale : null);
 });
 
 router.get('/communities/:id', auth.can('view community'),  function(req, res) {
@@ -131,11 +131,11 @@ router.get('/communities/:id', auth.can('view community'),  function(req, res) {
   options = _.merge(options, {
     community_id: req.params.id,
     limit: OVERALL_LIMIT*2
-  });
+  }, req.user ? req.user.default_locale : null);
 
   getRecommendationFor(options.user_id, DATE_OPTIONS, options, function (error, recommendedItemIds) {
     processRecommendations("community", req, res, recommendedItemIds, error);
-  });
+  }, req.user ? req.user.default_locale : null);
 });
 
 router.get('/groups/:id', auth.can('view group'), function(req, res) {
@@ -148,7 +148,7 @@ router.get('/groups/:id', auth.can('view group'), function(req, res) {
 
   getRecommendationFor(options.user_id, DATE_OPTIONS, options, function (error, recommendedItemIds) {
     processRecommendations("group", req, res, recommendedItemIds, error);
-  });
+  }, req.user ? req.user.default_locale : null);
 });
 
 module.exports = router;
