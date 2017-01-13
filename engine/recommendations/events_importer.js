@@ -141,11 +141,13 @@ var updateAllPosts = function (done) {
       properties = _.merge(properties,
         {
           domain: [ convertToString(post.Group.Community.Domain.id) ],
-          domainLocale: [ post.Group.Domain.default_locale ],
+          domainLocale: [ post.Group.Community.Domain.default_locale ],
           community: [ convertToString(post.Group.Community.id) ],
           communityAccess: [ convertToString(post.Group.Community.access) ],
           communityStatus: [ convertToString(post.Group.Community.status) ],
-          communityLocale: [ post.Group.Community.default_locale ],
+          communityLocale: [ (post.Group.Community.default_locale && post.Group.Community.default_locale!='')  ?
+                               post.Group.Community.default_locale :
+                               post.Group.Community.Domain.default_locale ],
           group: [ convertToString(post.Group.id) ],
           groupAccess: [ convertToString(post.Group.access) ],
           groupStatus: [ convertToString(post.Group.status) ],
