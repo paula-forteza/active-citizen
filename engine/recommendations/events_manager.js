@@ -247,21 +247,28 @@ var getRecommendationFor = function (userId, dateRange, options, callback, userL
       values: [ "active", "featured"],
       bias: -1
     });
+    if (userLocale) {
+      fields.push({
+        name: 'communityLocale',
+        values: [ userLocale ],
+        bias: 0.9 // High boost for the selected user locale
+      });
+    }
   } else if (!options.group_id) {
     fields.push({
       name: 'groupStatus',
       values: [ "active","featured"],
       bias: -1
     });
+    if (userLocale) {
+      fields.push({
+        name: 'communityLocale',
+        values: [ userLocale ],
+        bias: 0.9 // High boost for the selected user locale
+      });
+    }
   }
 
-  if (false && userLocale) {
-    fields.push({
-      name: 'communityLocale',
-      values: [ userLocale ],
-      bias: 0.9 // High boost for the selected user locale
-    });
-  }
 
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange });
 
