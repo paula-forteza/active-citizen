@@ -57,7 +57,8 @@ var filterNotificationForDelivery = function (notification, user, template, subj
         template: template,
         user: user,
         domain: notification.AcActivities[0].Domain,
-        group: (notification.AcActivities[0].Point.Group && notification.AcActivities[0].Point.Group.name!="hidden_public_group_for_domain_level_points") ? notification.AcActivities[0].Point.Group : null,
+        group: (notification.AcActivities[0].Point && notification.AcActivities[0].Point.Group && notification.AcActivities[0].Point.Group.name!="hidden_public_group_for_domain_level_points") ?
+          notification.AcActivities[0].Point.Group : notification.AcActivities[0].Group,
         community: notification.AcActivities[0].Community,
         activity: notification.AcActivities[0],
         post: notification.AcActivities[0].Post,
