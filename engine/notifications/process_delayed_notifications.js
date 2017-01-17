@@ -66,8 +66,7 @@ var formatNameArray = function (arr){
 };
 
 var writeHeader = function (emailUser, headerText) {
-  var email = '<div style="padding:8px">'+headerText+'</div>';
-  return email;
+  return '<h1>'+headerText+'</h1><table style="padding:8px">';
 };
 
 var writeDomainHeader = function (email, domain) {
@@ -112,7 +111,7 @@ var writePointQualities = function (email, helpfulNames, unhelpfulNames) {
 };
 
 var writeFooter = function (email, emailUser) {
-
+  email += '</table>'
   return email;
 };
 
