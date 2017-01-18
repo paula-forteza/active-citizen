@@ -144,13 +144,13 @@ var updateAllPosts = function (done) {
           domainLocale: [ post.Group.Community.Domain.default_locale ],
           community: [ convertToString(post.Group.Community.id) ],
           communityAccess: [ convertToString(post.Group.Community.access) ],
-          communityStatus: [ convertToString(post.Group.Community.status) ],
+          communityStatus: [ post.Group.Community.status ],
           communityLocale: [ (post.Group.Community.default_locale && post.Group.Community.default_locale!='')  ?
                                post.Group.Community.default_locale :
                                post.Group.Community.Domain.default_locale ],
           group: [ convertToString(post.Group.id) ],
           groupAccess: [ convertToString(post.Group.access) ],
-          groupStatus: [ convertToString(post.Group.status) ],
+          groupStatus: [ post.Group.status ],
           status: [ post.deleted ? 'deleted' : post.status ],
           official_status: [ convertToString(post.official_status) ]
         });
