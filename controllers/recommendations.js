@@ -73,7 +73,8 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
         where: {
           status: {
             $in: ['active','featured']
-          }
+          },
+          access: models.Group.ACCESS_PUBLIC
         },
         include: [
           {
