@@ -31,9 +31,8 @@ var getActivities = function (req, res, options, callback) {
 
   if (options.noBulkOperations) {
     where =_.merge(where, {
-      sub_status: {
-        $ne: 'bulkOperation'
-      }
+      //TODO: Fix should exclude bulkOperation
+      sub_type: null
     })
   }
 
