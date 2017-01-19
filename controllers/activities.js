@@ -29,6 +29,14 @@ var getActivities = function (req, res, options, callback) {
 
   var where = _.merge(getCommonWhereOptions(options), { type: { $in: defaultKeyActivities }});
 
+  if (options.noBulkOperations) {
+    where =_.merge(where, {
+      sub_status: {
+        $ne: 'bulkOperation'
+      }
+    })
+  }
+
   models.AcActivity.findAll({
     where: where,
     order: [
@@ -53,7 +61,8 @@ var getActivities = function (req, res, options, callback) {
 
 router.get('/domains/:id', auth.can('view domain'), function(req, res) {
   var options = {
-    domain_id: req.params.id
+    domain_id: req.params.id,
+    noBulkOperations: true
   };
   getActivities(req, res, options, function (error) {
     if (error) {
@@ -65,7 +74,8 @@ router.get('/domains/:id', auth.can('view domain'), function(req, res) {
 
 router.get('/communities/:id', auth.can('view community'), function(req, res) {
   var options = {
-    community_id: req.params.id
+    community_id: req.params.id,
+    noBulkOperations: true
   };
   getActivities(req, res, options, function (error) {
     if (error) {
