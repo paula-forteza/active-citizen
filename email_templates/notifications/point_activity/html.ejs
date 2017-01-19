@@ -33,13 +33,13 @@
 <% if (!post && point.Post) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/post/"+point.Post.id+"/news/"+activity.id) %>
 <% } %>
-<% if (!point.Post && point.Group) { %>
+<% if (!post && !point.Post && point.Group) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/group/"+point.Group.id+"/news/"+activity.id) %>
 <% } %>
-<% if (!point.Post && !point.Group && point.community) { %>
+<% if (!post && !point.Post && !point.Group && point.community) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/community/"+point.Community.id+"/news/"+activity.id) %>
 <% } %>
-<% if (!point.Post && !point.Group && !point.community) { %>
+<% if (!post && !point.Post && !point.Group && !point.community) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/domain/"+point.Domain.id+"/news/"+activity.id) %>
 <% } %>
 
