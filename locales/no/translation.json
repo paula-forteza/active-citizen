@@ -1,0 +1,37 @@
+{
+  "notification": {
+    "post": {
+      "statusChangeSubject": "Innleggstatus er endret"
+    },
+    "email": {
+      "comment": "Kommentar",
+      "newsStory": "Nyhet",
+      "postReport": "Innlegg rapportert for brudd på vilkårene",
+      "pointReport": "Argument rapportert for brudd på vilkårene",
+      "user_invite": "Invitasjon til å delta",
+      "user_invite_1": "Du har blitt invitert til å delta i ...",
+      "user_invite_2": "Klikk på linken eller lime den inn i nettleserens adressefelt for å godta invitasjonen",
+      "user_invite_3": "Du ble invitert av",
+      "postEndorsementNew": "ditt innlegg har støtte",
+      "postNew": "Nytt innlegg",
+      "postNewsSelf": "Ditt nye innlegg",
+      "postEndorsementSelf": "Anbefaling for ditt innlegg",
+      "postEndorsement": "Anbefaling for et innlegg",
+      "postOppositionSelf": "Motstanden mot ditt innlegg",
+      "postOpposition": "Motstanden mot innlegget",
+      "pointNewSelf": "Nytt argument for ditt innlegg",
+      "pointNew": "Nytt argument",
+      "pointUnhelpfulSelf": "Argument merket 'ikke nyttig' for mitt innlegg",
+      "pointUnhelpful": "Argument merket 'ikke nyttig'",
+      "pointHelpfulSelf": "Argument merket 'nyttig' for mitt innlegg",
+      "pointHelpful": "Argument merket 'nyttig'",
+      "newPointOnMyPoint": "Nytt argument",
+      "password_recovery": "Opprett et nytt passord",
+      "password_changed": "Passordet ditt har blitt endret",
+      "dear": "Hei",
+      "reset_password_1": "Her er linken for å endre passordet ditt.",
+      "reset_password_2": "Hvis du ikke har bedt om dette så kan du se bort fra denne e-posten.",
+      "reset_password_3": "Passordet ditt vil ikke endres før du åpner linken ovenfor og opprette et nytt."
+    }
+  }
+}

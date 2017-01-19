@@ -16,7 +16,7 @@ var localesPath = path.resolve(__dirname, '../locales');
 i18n
   .use(Backend)
   .init({
-    preload: ['en','is','hr','pl'],
+    preload: ['en','is','hr','pl','no'],
 
     fallbackLng:'en',
 
