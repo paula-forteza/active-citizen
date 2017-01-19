@@ -69,6 +69,12 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
       // Group
       {
         model: models.Group,
+        required: true,
+        where: {
+          status: {
+            $in: ['active','featured']
+          }
+        },
         include: [
           {
             model: models.Category,
