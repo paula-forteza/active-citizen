@@ -1,7 +1,7 @@
 ![Active Citizen Logo](https://s3.amazonaws.com/yrpri-direct-asset/ac_yp_flyer_2.png)
 
-# Active Citizen 1.1
-*4.11.2016*
+# Active Citizen 1.2
+*20.1.2017*
 
 This is the first public developer release of Active Citizen. It is an open source library, API and UI for activity
 streams and notifications using machine learning to recommend content to users.
@@ -13,6 +13,7 @@ Active Citizen is by most parts a Javascript library using
 ## Current features
 - Activity stream engine based on the W3C Activity Stream standards specification
 - Notification engine with support for grouped notifications (fe. for "likes") and delayed notification (for hourly, daily, weekly or monthly emails)
+- PredictionIO integration for recommending ideas to users
 - Basic Tensorflow AI integration for classifying post categories
 
 ## Integration with Your Priorities
@@ -20,17 +21,10 @@ The next version of Your Priorities, our citizen participation app, features int
 real life example of Active Citizen use. It is also open source and available here now https://github.com/rbjarnason/your-priorities-app
 
 ## Work for next release
-*end of May 2016*
-
-- Integrate PredictionIO for recommending posts to users
+*end of May 2017*
 - Integrate PredictionIO for recommending groups to users
 - Integrate Tensorflow for classifying categories and point sentiment
 - Add more notification types
-
-## Documentation
-*end of July 2016*
-
-We have a milestone for creating documentation, tutorials and examples in July.
 
 ## Seed funding from EU's CHEST
 Active Citizen is seed funded by EU's FP7 through the CHEST, collective enhanced environment for social tasks. http://www.chest-project.eu/
