@@ -272,22 +272,26 @@ var getRecommendationFor = function (userId, dateRange, options, callback, userL
 
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange });
 
-  engine.sendQuery({
-    user: userId,
-    num: options.limit || 400,
-    fields: fields,
-    dateRange: dateRange
-  }).then(function (results) {
-    if (results) {
-      log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
-      var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
-      callback(null,resultMap);
-    } else {
-      callback("Not results for recommendations");
-    }
-  }).catch(function (error) {
-    callback(error);
-  });
+  if (engine) {
+    engine.sendQuery({
+      user: userId,
+      num: options.limit || 400,
+      fields: fields,
+      dateRange: dateRange
+    }).then(function (results) {
+      if (results) {
+        log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
+        var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
+        callback(null,resultMap);
+      } else {
+        callback("Not results for recommendations");
+      }
+    }).catch(function (error) {
+      callback(error);
+    });
+  } else {
+    callback("Engine not avilable");
+  }
 };
 
 isItemRecommended = function (itemId, userId, dateRange, options, callback) {
