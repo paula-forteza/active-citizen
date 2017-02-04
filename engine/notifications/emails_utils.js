@@ -70,14 +70,13 @@ var filterNotificationForDelivery = function (notification, user, template, subj
         where: {
           user_id: user.id,
           method: method,
-          frequency: frequency,
-          type: notification.type
+          frequency: frequency
         },
         defaults: {
           user_id: user.id,
           method: method,
           frequency: frequency,
-          type: notification.type
+          type: notification.from_notification_setting
         }
       }).spread(function(delayedNotification, created) {
         if (created) {

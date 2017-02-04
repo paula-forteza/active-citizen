@@ -497,8 +497,8 @@ i18n
     }
   }, function (err, t) {
     log.info("Have Loaded i18n", {err: err});
-
-    async.eachSeries([1,2,3,4], function (frequency, seriesCallback) {
+    var frequencies = [1,2,3,4];
+    async.eachSeries(frequencies, function (frequency, seriesCallback) {
       getDelayedNotificationToProcess(frequency, seriesCallback);
     });
   });

@@ -19,6 +19,41 @@ var generateNotificationsForNewPoint = function (activity, uniqueUserIds, callba
   }
   async.series([
     function(seriesCallback){
+      // Notifications for my posts
+      var userWhere = {};
+
+      userWhere["notifications_settings.my_posts.method"] = {
+        $gt: 0
+      };
+
+      if (activity.post_id) {
+        models.Post.find({
+          where: {
+            id: activity.post_id
+          },
+          include: [
+            {
+              model: models.User,
+              attributes: ['id','notifications_settings','email'],
+              where: userWhere,
+              required: true
+            }
+          ]
+        }).then(function (post) {
+          if (post) {
+            addNotificationsForUsers(activity, [post.User], notificationType, 'my_posts', uniqueUserIds, seriesCallback);
+          } else {
+            seriesCallback();
+          }
+        }).catch(function (error) {
+          seriesCallback(error);
+        });
+      } else {
+        // No post associated with this point
+        seriesCallback();
+      }
+    },
+    function(seriesCallback){
       // Notifications for my points
       var userWhere = {};
 
