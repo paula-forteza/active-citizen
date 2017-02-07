@@ -155,19 +155,65 @@ var processNewPoints = function (email, groupItems) {
     return item.type == 'notification.point.new';
   });
   _.each(newPointItems, function (item) {
-    if (item.type=='notification.point.new') {
-      if (!addedHeader) {
-        writeNewPointsHeader(email);
-        addedHeader = true;
-      }
-      writePoint(email, item);
+    if (!addedHeader) {
+      writeNewPointsHeader(email);
+      addedHeader = true;
     }
+    writePoint(email, item);
+  });
+};
+
+var processPostVotes = function (email, groupItems) {
+  var addedHeader = false;
+  var newEndorsementItems = _.filter(groupItems, function (item) {
+    return item.type == 'notification.post.endorsement';
+  });
+  newEndorsementItems = _.uniqBy(newEndorsementItems, function (item) {
+    return item.post_id
+  });
+  _.each(newEndorsementItems, function (item) {
+    if (!addedHeader) {
+      writeNewPostVotesHeader(email);
+      addedHeader = true;
+    }
+    writeVotedPost(email, item);
   });
 };
 
 
-var sendPointQuality = function (delayedNotification, callback) {
-  console.log("SendPointQuality User email: "+delayedNotification.User.email);
+var processPointVotes = function (email, groupItems) {
+  var addedHeader = false;
+  var newPointVotes = _.filter(groupItems, function (item) {
+    return item.type == 'notification.point.quality';
+  });
+  newPointVotes = _.uniqBy(newPointVotes, function (item) {
+    return item.point_id
+  });
+  _.each(newPointVotes, function (item) {
+    if (!addedHeader) {
+      writeNewPointVotesHeader(email);
+      addedHeader = true;
+    }
+    writeVotedPoint(email, item);
+  });
+};
+
+var processNewNewsStories = function (email, groupItems) {
+  var addedHeader = false;
+  var newNewsStories = _.filter(groupItems, function (item) {
+    return item.type == 'notification.point.newsStory';
+  });
+  _.each(newNewsStories, function (item) {
+    if (!addedHeader) {
+      writeNewNewsStoryHeader(email);
+      addedHeader = true;
+    }
+    writeNewsStory(email, item);
+  });
+};
+
+var sendNotificationEmail = function (delayedNotification, callback) {
+  console.log("sendNotificationEmail User email: "+delayedNotification.User.email);
 
   var emailUser = delayedNotification.User;
   var notifications = [];
