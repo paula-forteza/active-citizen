@@ -6,7 +6,10 @@ var EmailTemplate = require('email-templates').EmailTemplate;
 var nodemailer = require('nodemailer');
 var ejs = require('ejs');
 var i18n = require('../../utils/i18n');
-var airbrake = require('../../utils/airbrake');
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../../utils/airbrake');
+}
 var fs = require('fs');
 
 var templatesDir = path.resolve(__dirname, '..', '..', 'email_templates', 'notifications');
@@ -210,12 +213,14 @@ var sendOneEmail = function (emailLocals, callback) {
   ], function (error) {
     if (error) {
       log.error("EmailWorker Error", {err: error});
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-        }
-        callback(error);
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+          }
+          callback(error);
+        });
+      }
     } else {
       callback();
     }

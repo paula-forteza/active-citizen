@@ -5,7 +5,11 @@ var log = require('../utils/logger');
 var queue = require('./queue');
 var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
-var airbrake = require('../utils/airbrake');
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../utils/airbrake');
+}
 
 var GenerateNewsFeedFromNotifications = require('../engine/news_feeds/generate_from_notifications.js');
 var NotificationNewsFeedWorker = function () {};
@@ -119,12 +123,14 @@ NotificationNewsFeedWorker.prototype.process = function (notificationJson, callb
   function(error) {
     if (error) {
       log.error("NotificationNewsFeedWorker Error", {err: error});
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr });
-        }
-        callback(error);
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr });
+          }
+          callback(error);
+        });
+      }
     } else {
     }
   });

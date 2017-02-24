@@ -10,7 +10,10 @@ var _ = require('lodash');
 var moment = require('moment');
 
 var getRecommendationFor = require('../engine/recommendations/events_manager').getRecommendationFor;
-var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
+}
 
 var OVERALL_LIMIT=7;
 
@@ -30,11 +33,13 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
   if (error) {
     finalIds = [];
     log.error("Recommendation Error "+levelType, { err: error, id: req.params.id, userId:  req.user ? req.user.id : -1, errorStatus:  500 });
-    airbrake.notify(error, function(airbrakeErr, url) {
-      if (airbrakeErr) {
-        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-      }
-    });
+    if(airbrake) {
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+        }
+      });
+    }
   } else {
     finalIds = _.shuffle(recommendedItemIds);
     if (finalIds.length>OVERALL_LIMIT) {
@@ -110,11 +115,13 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
     res.send(posts);
   }).catch(function(error) {
     log.error("Recommendation Error "+levelType, { err: error, id: req.params.id, userId:  req.user ? req.user.id : -1, errorStatus: 500 });
-    airbrake.notify(error, function(airbrakeErr, url) {
-      if (airbrakeErr) {
-        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-      }
-    });
+    if(airbrake) {
+      airbrake.notify(error, function(airbrakeErr, url) {
+        if (airbrakeErr) {
+          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+        }
+      });
+    }
     res.sendStatus(200);
   });
 };

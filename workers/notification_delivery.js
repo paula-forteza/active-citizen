@@ -7,7 +7,11 @@ var i18n = require('../utils/i18n');
 var toJson = require('../utils/to_json');
 var deliverPostNotification = require('../engine/notifications/post_delivery.js');
 var deliverPointNotification = require('../engine/notifications/point_delivery.js');
-var airbrake = require('../utils/airbrake');
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../utils/airbrake');
+}
 
 var NotificationDeliveryWorker = function () {};
 
@@ -299,13 +303,14 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
           log.error("NotificationDeliveryWorker Error", {err: error, stack: error.stack.split("\n") });
         else
           log.error("NotificationDeliveryWorker Error", {err: error });
-
-        airbrake.notify(error, function(airbrakeErr, url) {
-          if (airbrakeErr) {
-            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr });
-          }
-          callback(error);
-        });
+        if(airbrake) {
+          airbrake.notify(error, function(airbrakeErr, url) {
+            if (airbrakeErr) {
+              log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr });
+            }
+            callback(error);
+          });
+        }
       } else {
         callback();
       }

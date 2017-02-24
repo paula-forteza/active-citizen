@@ -4,7 +4,11 @@ var log = require('../utils/logger');
 var email = require('./email');
 var activity = require('./activity');
 var toJson = require('../utils/to_json');
-var airbrake = require('../utils/airbrake');
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../utils/airbrake');
+}
 
 // make sure we use the Heroku Redis To Go URL
 // (put REDISTOGO_URL=redis://localhost:6379 in .env for local testing)
@@ -23,11 +27,13 @@ queue.on('job enqueue', function(id, type){
   log.info('Job Completed', { id: id });
 }).on( 'error', function( err ) {
   log.error('Job Error', { err: err } );
-  airbrake.notify(err, function(airbrakeErr, url) {
-    if (airbrakeErr) {
-      log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-    }
-  });
+  if(airbrake) {
+    airbrake.notify(err, function(airbrakeErr, url) {
+      if (airbrakeErr) {
+        log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+      }
+    });
+  }
 });
 
 queue.watchStuckJobs(1000);

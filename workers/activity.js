@@ -4,7 +4,11 @@ var models = require("../../models");
 var log = require('../utils/logger');
 var toJson = require('../utils/to_json');
 var async = require('async');
-var airbrake = require('../utils/airbrake');
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../utils/airbrake');
+}
 
 var generatePostNotification = require('../engine/notifications/generate_post_notifications.js');
 var generatePointNotification = require('../engine/notifications/generate_point_notifications.js');
@@ -156,12 +160,14 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
   ], function (error) {
     if (error) {
       log.error("Processing Activity Error", {err: error});
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-        }
-        callback(error);
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+          }
+          callback(error);
+        });
+      }
     } else {
       log.info('Processing Activity and Recommendation Completed', {type: activity.type});
       callback();
