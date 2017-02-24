@@ -5,7 +5,11 @@ var async = require('async');
 var log = require('../../utils/logger');
 var _ = require('lodash');
 var toJson = require('../../utils/to_json');
-var airbrake = require('../../utils/airbrake');
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../../utils/airbrake');
+}
 
 var isItemRecommended = require('../recommendations/events_manager').isItemRecommended;
 var getNewsFeedDate = require('./news_feeds_utils').getNewsFeedDate;
@@ -252,11 +256,13 @@ module.exports = function (notification, user, callback) {
   ], function (error) {
     if (error) {
       log.error("Generate News Feed Notifications Error", { err: error });
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
-        }
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', user: toJson(req.user), err: airbrakeErr, errorStatus: 500 });
+          }
+        });
+      }
     }
     callback(error);
   });

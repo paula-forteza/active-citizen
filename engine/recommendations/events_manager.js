@@ -4,7 +4,12 @@ var _ = require('lodash');
 var async = require('async');
 var log = require('../../utils/logger');
 var engine;
-var airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
+
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
+}
+
 
 var ACTIVE_CITIZEN_PIO_APP_ID = 1;
 
@@ -298,11 +303,13 @@ isItemRecommended = function (itemId, userId, dateRange, options, callback) {
   getRecommendationFor(userId, dateRange, options, function (error, items) {
     if (error) {
       log.error("Recommendation Events Manager Error", { itemId: itemId, userId: userId, err: error });
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-        }
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+          }
+        });
+      }
       callback(_.includes([], itemId.toString()));
     } else {
       log.info('Events Manager isItemRecommended', { itemId: itemId, userId: userId, items: items});

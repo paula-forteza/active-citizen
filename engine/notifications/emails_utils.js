@@ -6,7 +6,10 @@ var EmailTemplate = require('email-templates').EmailTemplate;
 var nodemailer = require('nodemailer');
 var ejs = require('ejs');
 var i18n = require('../../utils/i18n');
-var airbrake = require('../../utils/airbrake');
+var airbrake = null;
+if(process.env.AIRBRAKE_PROJECT_ID) {
+  airbrake = require('../../utils/airbrake');
+}
 var fs = require('fs');
 
 var templatesDir = path.resolve(__dirname, '..', '..', 'email_templates', 'notifications');
@@ -20,13 +23,40 @@ var i18nFilter = function(text) {
   return i18n.t(text);
 };
 
-var transport = nodemailer.createTransport({
-  service: 'sendgrid',
-  auth: {
-    user: process.env.SENDGRID_USERNAME,
-    pass: process.env.SENDGRID_PASSWORD
-  }
-});
+var transport = null;
+
+if( process.env.SENDGRID_USERNAME ) {
+  transport = nodemailer.createTransport({
+    service: 'sendgrid',
+    auth: {
+      user: process.env.SENDGRID_USERNAME,
+      pass: process.env.SENDGRID_PASSWORD
+    }
+  });
+} else if( process.env.SMTP_USERNAME ) {
+  var smtpConfig = {
+    host: process.env.SMTP_SERVER,
+    port: process.env.SMTP_PORT,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+      user: process.env.SMTP_USERNAME,
+      pass: process.env.SMTP_PASSWORD
+    }
+  };
+
+  transport = nodemailer.createTransport(smtpTransport(smtpConfig));
+
+  console.log('SMTP Configured');
+
+  transport.verify(function(error, success) {
+    if (error) {
+      console.warn('ERROR');
+      console.warn(error);
+    } else {
+      console.log('Server is ready to take our messages');
+    }
+  });
+}  
 
 var translateSubject = function (subjectHash) {
   var subject = i18n.t(subjectHash.translateToken);
@@ -172,7 +202,7 @@ var sendOneEmail = function (emailLocals, callback) {
         } else {
           var translatedSubject = translateSubject(emailLocals.subject);
 
-          if (process.env.SENDGRID_USERNAME) {
+          if (transport) {
             transport.sendMail({
               from: fromEmail, // emailLocals.community.admin_email,
               to: emailLocals.user.email,
@@ -190,7 +220,7 @@ var sendOneEmail = function (emailLocals, callback) {
               }
             })
           } else {
-            log.warn('EmailWorker no SMTP server', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
+            log.warn('EmailWorker no email configured.', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
             if (DEBUG_EMAILS_TO_TEMP_FIlE) {
               fs.unlink("/tmp/testHtml.html", function (err) {
                 fs.writeFile("/tmp/testHtml.html", results.html, function(err) {
@@ -210,12 +240,14 @@ var sendOneEmail = function (emailLocals, callback) {
   ], function (error) {
     if (error) {
       log.error("EmailWorker Error", {err: error});
-      airbrake.notify(error, function(airbrakeErr, url) {
-        if (airbrakeErr) {
-          log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
-        }
-        callback(error);
-      });
+      if(airbrake) {
+        airbrake.notify(error, function(airbrakeErr, url) {
+          if (airbrakeErr) {
+            log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
+          }
+          callback(error);
+        });
+      }
     } else {
       callback();
     }
