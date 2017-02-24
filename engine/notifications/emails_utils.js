@@ -4,6 +4,7 @@ var async = require('async');
 var path = require('path');
 var EmailTemplate = require('email-templates').EmailTemplate;
 var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 var ejs = require('ejs');
 var i18n = require('../../utils/i18n');
 var airbrake = null;
