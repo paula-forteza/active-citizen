@@ -11,7 +11,7 @@
 <% } %>
 <div style="padding-top: 8px">
   <% if (activity.type == 'activity.post.new') { %>
-    <h2><%= t('notification.email.thisNewIdea') %> "<%= post.name %>" <%= t('notification.email.hasBeenPosted')%></h2>
+    <h2><%= t('notification.email.thisNewIdea') %> "<%=post.name %>" <%= t('notification.email.hasBeenPosted')%></h2>
   <% } else { %>
     <h2><%= post.name %></h2>
   <% } %>
