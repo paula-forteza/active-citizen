@@ -1,13 +1,18 @@
 <% include ../header.html.ejs %>
 
-<h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-top: 8px;"> <%= t('notification.email.comment') %></h1>
+<h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 14pt;padding-bottom: 8px;"> <%= t('notification.email.comment') %></h1>
 <% if (post) { %>
   <h2><%= post.name %></h2>
 <% } %>
 <p>
     <%= point.content %>
 </p>
-<br>
+<% if (point.User) { %>
+<p>
+    <%= t('notification.email.writtenByUser') %> <%= point.User.name %>
+</p>
+<% } %>
+<%= t('notification.email.youCanViewItHere') %>:
 <% if (point.Post) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/post/"+point.Post.id+"/news/"+activity.id) %>
 <% } %>
@@ -20,4 +25,5 @@
 <% if (!point.Post && !point.Group && !point.community) { %>
 <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/domain/"+point.Domain.id+"/news/"+activity.id) %>
 <% } %>
+
 <% include ../footer.html.ejs %>

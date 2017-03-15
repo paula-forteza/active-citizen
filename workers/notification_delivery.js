@@ -82,6 +82,11 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
                       model: models.Group,
                       required: false,
                       attributes: ['id','name']
+                    },
+                    {
+                      model: models.User,
+                      required: false,
+                      attributes: ['id','name']
                     }
                   ]
                 }

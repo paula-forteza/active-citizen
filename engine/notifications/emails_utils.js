@@ -161,11 +161,13 @@ var sendOneEmail = function (emailLocals, callback) {
       }
 
       if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
-        fromEmail = 'betrireykjavik@ibuar.is';
+        fromEmail = 'Betri Reykjavík <betrireykjavik@ibuar.is>';
       } else if (emailLocals.domain.domain_name.indexOf('betraisland.is') > -1) {
-        fromEmail = 'betraisland@ibuar.is';
+        fromEmail = 'Betra Ísland <betraisland@ibuar.is>';
+      } else if (emailLocals.domain.domain_name.indexOf('forbrukerradet.no') > -1) {
+        fromEmail = 'Mine idéer Forbrukerrådet <mineideer@forbrukerradet.no>';
       } else {
-        fromEmail = "admin@yrpri.org";
+        fromEmail = 'Your Priorities <admin@yrpri.org>';
       }
 
       emailLocals.headerImageUrl = "";
@@ -223,8 +225,9 @@ var sendOneEmail = function (emailLocals, callback) {
           } else {
             log.warn('EmailWorker no email configured.', { subject: translatedSubject, userId: emailLocals.user.id, resultsHtml: results.html , resultsText: results.text });
             if (DEBUG_EMAILS_TO_TEMP_FIlE) {
-              fs.unlink("/tmp/testHtml.html", function (err) {
-                fs.writeFile("/tmp/testHtml.html", results.html, function(err) {
+              var fileName = "/tmp/testHtml_"+parseInt(Math.random() * (423432432432 - 1232) + 1232)+".html";
+              fs.unlink(fileName, function (err) {
+                fs.writeFile(fileName, results.html, function(err) {
                   if(err) {
                     console.log(err);
                   }

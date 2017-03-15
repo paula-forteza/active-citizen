@@ -285,7 +285,7 @@ var getRecommendationFor = function (userId, dateRange, options, callback, userL
       dateRange: dateRange
     }).then(function (results) {
       if (results) {
-        log.info('Events Manager getRecommendationFor', { userId: userId, results: results});
+        log.info('Events Manager getRecommendationFor', { userId: userId });
         var resultMap =  _.map(results.itemScores, function(item) { return item.item; });
         callback(null,resultMap);
       } else {
@@ -312,7 +312,7 @@ isItemRecommended = function (itemId, userId, dateRange, options, callback) {
       }
       callback(_.includes([], itemId.toString()));
     } else {
-      log.info('Events Manager isItemRecommended', { itemId: itemId, userId: userId, items: items});
+      log.info('Events Manager isItemRecommended', { itemId: itemId, userId: userId });
       callback(_.includes(items, itemId.toString()));
     }
   });
