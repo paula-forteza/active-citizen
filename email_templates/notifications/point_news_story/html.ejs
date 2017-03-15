@@ -26,5 +26,6 @@
 <% if (!point.Post && !point.Group && !point.community) { %>
   <%- linkTo("https://"+community.hostname+"."+domain.domain_name+"/domain/"+point.Domain.id+"/news/"+activity.id) %>
 <% } %>
+<br>
 
 <% include ../footer.html.ejs %>
