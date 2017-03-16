@@ -14,7 +14,7 @@
 <% } %>
 
 <% if (post) { %>
-  <div style="padding-top: 8px"> <%= t('notification.email.newPointedAddedToThisIdea') %>: <b><%= post.name %></b> </div>
+  <div style="padding-top: 8px"> <%= t('notification.email.newPointedAddedToThisIdea') %>:<br><b><%= post.name %></b> </div>
 <% } %>
 <p>
   <%= point.content %>
