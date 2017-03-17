@@ -1,3 +1,5 @@
+var DEBUG_EMAILS_TO_TEMP_FIlE = false;
+
 var log = require('../../utils/logger');
 var toJson = require('../../utils/to_json');
 var async = require('async');
@@ -14,8 +16,6 @@ if(process.env.AIRBRAKE_PROJECT_ID) {
 var fs = require('fs');
 
 var templatesDir = path.resolve(__dirname, '..', '..', 'email_templates', 'notifications');
-
-var DEBUG_EMAILS_TO_TEMP_FIlE = false;
 
 var queue = require('../../workers/queue');
 var models = require("../../../models");
