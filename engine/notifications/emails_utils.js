@@ -10,9 +10,11 @@ var smtpTransport = require('nodemailer-smtp-transport');
 var ejs = require('ejs');
 var i18n = require('../../utils/i18n');
 var airbrake = null;
+
 if(process.env.AIRBRAKE_PROJECT_ID) {
   airbrake = require('../../utils/airbrake');
 }
+
 var fs = require('fs');
 
 var templatesDir = path.resolve(__dirname, '..', '..', 'email_templates', 'notifications');
@@ -26,7 +28,7 @@ var i18nFilter = function(text) {
 
 var transport = null;
 
-if( process.env.SENDGRID_USERNAME ) {
+if (process.env.SENDGRID_USERNAME) {
   transport = nodemailer.createTransport({
     service: 'sendgrid',
     auth: {
