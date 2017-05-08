@@ -119,6 +119,37 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
 
+      anonymousNotificationSettings: {
+        my_posts: {
+          method: 0,
+          frequency: 2
+        },
+        my_posts_endorsements: {
+          method: 0,
+          frequency: 2
+        },
+        my_points: {
+          method: 0,
+          frequency: 2
+        },
+        my_points_endorsements: {
+          method: 0,
+          frequency: 2
+        },
+        all_community: {
+          method: 0,
+          frequency: 3
+        },
+        all_group: {
+          method: 0,
+          frequency: 3
+        },
+        newsletter: {
+          method: 0,
+          frequency: 4
+        }
+      },
+
       ENDORSEMENT_GROUPING_TTL: 6 * 60 * 60 * 1000, // milliseconds
 
       associate: function(models) {
