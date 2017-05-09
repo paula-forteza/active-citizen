@@ -141,7 +141,7 @@ var getNotifications = function (req, res, options, callback) {
   });
 };
 
-router.get('/', auth.isAuthenticatedNoAnonymousCheck, function(req, res) {
+router.get('/', auth.isLoggedInNoAnonymousCheck, function(req, res) {
   var options = {};
   getNotifications(req, res, options, function (error) {
     if (error) {
@@ -151,7 +151,7 @@ router.get('/', auth.isAuthenticatedNoAnonymousCheck, function(req, res) {
   });
 });
 
-router.put('/markAllViewed', auth.isLoggedIn, function(req, res) {
+router.put('/markAllViewed', auth.isLoggedInNoAnonymousCheck, function(req, res) {
   models.AcNotification.update({
     viewed: true
   }, {
@@ -166,7 +166,7 @@ router.put('/markAllViewed', auth.isLoggedIn, function(req, res) {
   });
 });
 
-router.put('/setIdsViewed', auth.isLoggedIn, function(req, res) {
+router.put('/setIdsViewed', auth.isLoggedInNoAnonymousCheck, function(req, res) {
   var viewedIds = req.body.viewedIds;
   var unViewedCount;
   async.series([
