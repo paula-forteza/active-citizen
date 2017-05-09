@@ -141,7 +141,7 @@ var getNotifications = function (req, res, options, callback) {
   });
 };
 
-router.get('/', auth.isLoggedIn, function(req, res) {
+router.get('/', auth.isAuthenticatedNoAnonymousCheck, function(req, res) {
   var options = {};
   getNotifications(req, res, options, function (error) {
     if (error) {
