@@ -1,15 +1,15 @@
 <% include ../header.html.ejs %>
 
-<% if (activity.type == 'activity.point.new') { %>
+<% if (post && activity.type == 'activity.point.new') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 16pt;padding-top: 8px;"><%= post.user_id == user.id ? t('notification.email.pointNewSelf') : t('notification.email.pointNew') %></h1>
 <% } %>
-<% if (activity.type == 'activity.point.unhelpful') { %>
+<% if (post && activity.type == 'activity.point.unhelpful') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 16pt;padding-top: 8px;"><%= post.user_id == user.id ? t('notification.email.pointUnhelpfulSelf') : t('notification.email.pointUnhelpful') %></h1>
 <% } %>
-<% if (activity.type == 'activity.point.helpful') { %>
+<% if (post && activity.type == 'activity.point.helpful') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 16pt;padding-top: 8px;"><%= post.user_id == user.id ? t('notification.email.pointHelpfulSelf') : t('notification.email.pointHelpful') %></h1>
 <% } %>
-<% if (activity.type == 'activity.report.content') { %>
+<% if (post && activity.type == 'activity.report.content') { %>
   <h1 style="font-weight: 600;line-height: 1.1em;margin: 0;font-size: 16pt;padding-top: 8px;"><%= t('notification.email.pointReport') %></h1>
 <% } %>
 
