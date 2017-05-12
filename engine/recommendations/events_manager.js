@@ -117,7 +117,7 @@ var createOrUpdateItem = function (postId, date, callback) {
         callback();
       });
     } else {
-      log.info('Events Manager createOrUpdateItem warning', {postId: post.id, err: "Could not find post" });
+      log.error('Events Manager createOrUpdateItem error could not find post', {postId: postId, err: "Could not find post" });
       callback();
     }
   })
