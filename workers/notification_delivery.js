@@ -219,17 +219,23 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             seriesCallback();
             break;
           case "notification.password.changed":
-            queue.create('send-one-email', {
-              subject: { translateToken: 'email.password_changed' },
-              template: 'password_changed',
-              user: user,
-              domain: domain,
-              community: community,
-              token: notification.activity.object.token
-            }).priority('critical').removeOnComplete(true).save();
-            log.info('NotificationDeliveryWorker notification.password.changed Completed', { type: notification.type, user: user.simple() });
-            seriesCallback();
-            break;
+            if (notification.activity && notification.activity.object && notification.activity.object.token) {
+              queue.create('send-one-email', {
+                subject: { translateToken: 'email.password_changed' },
+                template: 'password_changed',
+                user: user,
+                domain: domain,
+                community: community,
+                token: notification.activity.object.token
+              }).priority('critical').removeOnComplete(true).save();
+              log.info('NotificationDeliveryWorker notification.password.changed Completed', { type: notification.type, user: user.simple() });
+              seriesCallback();
+              break;
+            } else {
+              log.error('NotificationDeliveryWorker notification.password.changed cant find token!', { type: notification.type, user: user.simple() });
+              seriesCallback();
+              break;
+            }
           case "notification.post.status.change":
             if (notification.AcActivities[0].object && notification.AcActivities[0].object.bulkStatusUpdate) {
               log.info('Processing notification.status.change Not Sent Due To Bulk Status Update', { type: notification.type, user: user.simple() });
