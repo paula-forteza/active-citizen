@@ -230,12 +230,11 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
               }).priority('critical').removeOnComplete(true).save();
               log.info('NotificationDeliveryWorker notification.password.changed Completed', { type: notification.type, user: user.simple() });
               seriesCallback();
-              break;
             } else {
               log.error('NotificationDeliveryWorker notification.password.changed cant find token!', { type: notification.type, user: user.simple() });
               seriesCallback();
-              break;
             }
+            break;
           case "notification.post.status.change":
             if (notification.AcActivities[0].object && notification.AcActivities[0].object.bulkStatusUpdate) {
               log.info('Processing notification.status.change Not Sent Due To Bulk Status Update', { type: notification.type, user: user.simple() });
