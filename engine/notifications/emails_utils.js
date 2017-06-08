@@ -168,6 +168,8 @@ var sendOneEmail = function (emailLocals, callback) {
         fromEmail = 'Betra Ísland <betraisland@ibuar.is>';
       } else if (emailLocals.domain.domain_name.indexOf('forbrukerradet.no') > -1) {
         fromEmail = 'Mine idéer Forbrukerrådet <mineideer@forbrukerradet.no>';
+      } else if (emailLocals.domain.domain_name.indexOf('brainstorm-app.com') > -1) {
+        fromEmail = 'Brainstorm <admin@brainstorm-app.com>';
       } else {
         fromEmail = 'Your Priorities <admin@yrpri.org>';
       }
