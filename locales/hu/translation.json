@@ -1,0 +1,53 @@
+{
+  "notification": {
+    "post": {
+      "statusChangeSubject": "A bejegyzés állapota megváltozott"
+    },
+    "email": {
+      "newPointedAddedToThisIdea": "Új érv érkezett az ötlethez",
+      "newPointedAddedToIdea": "Új érv érkezett az ötletedhez",
+      "thisNewIdea": "Ez az új ötlet",
+      "hasBeenPosted": "Posztolva",
+      "thePointToIdea": "Ez az érv az ötlethez",
+      "yourPointToIdea": "A te érved az ötlethez",
+      "hasBeenMarkedUp": "Hasznosnak jelölve",
+      "hasBeenMarkedDown": "Nem hasznosnak jelölve",
+      "writtenByUser": "Szerző:",
+      "hasBeenReported": "szabálytalanság miatt jelentve",
+      "withKindRegards": "Szeretettel",
+      "youCanViewItHere": "Itt nézheted meg",
+      "theIdea": "Az ötlet",
+      "yourIdea": "A te ötleted",
+      "hasBeenVotedUp": "mellette szavazat érkezett",
+      "hasBeenVotedDown": "ellene szavazat érkezett",
+      "comment": "Hozzászólás",
+      "newsStory": "Hírek",
+      "postReport": "Ötlet szabálytalanság miatt jelentve",
+      "pointReport": "Érv szabálytalanság miatt jelentve",
+      "user_invite": "Meghívás részvételre",
+      "user_invite_1": "Meghívtak, hogy vegyél részt a...",
+      "user_invite_2": "Kattints a linkre vagy illeszd be a böngészőbe a meghívás elfogadásához",
+      "user_invite_3": "Meghívott téged",
+      "postEndorsementNew": "Támogatják az ötletedet",
+      "postNew": "Új ötlet",
+      "postNewsSelf": "A te új ötleted ",
+      "postEndorsementSelf": "Hozzájárulás az ötletedhez",
+      "postEndorsement": "Hozzájárulás egy ötlethez",
+      "postOppositionSelf": "Ötleted ellenzése",
+      "postOpposition": "Ötlet ellenzése",
+      "pointNewSelf": "Új érv az ötletedhez",
+      "pointNew": "Új érv",
+      "pointUnhelpfulSelf": "Érv az ötletemhez nem hasznosnak nyilvánítva",
+      "pointUnhelpful": "Érv nem hasznosnak nyilvánítva",
+      "pointHelpfulSelf": "Érv az ötletemhez hasznosnak nyilvánítva",
+      "pointHelpful": "Érv hasznosnak nyilvánítva",
+      "newPointOnMyPoint": "Új érv",
+      "password_recovery": "Új jelszó létrehozása",
+      "password_changed": "A jelszavad megváltozott",
+      "dear": "Szia",
+      "reset_password_1": "Itt egy link a jelszó megváltoztatásához",
+      "reset_password_2": "Amennyiben nem kérted, ne foglalkozz ezzel az emaillel.",
+      "reset_password_3": "A jelszó nem változik, amíg nem nyitod meg a fenti linket, és nem hoz létre egy újat."
+    }
+  }
+}
