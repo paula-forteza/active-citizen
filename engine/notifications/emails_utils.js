@@ -170,6 +170,8 @@ var sendOneEmail = function (emailLocals, callback) {
         fromEmail = 'Mine idéer Forbrukerrådet <mineideer@forbrukerradet.no>';
       } else if (emailLocals.domain.domain_name.indexOf('e-dem.nl') > -1) {
         fromEmail = 'admin@yrpr.e-dem.nl';
+      } else if (emailLocals.domain.domain_name.indexOf('idea-synergy.com') > -1) {
+        fromEmail = 'hello@idea-synergy.com';
       } else {
         fromEmail = 'Your Priorities <admin@yrpri.org>';
       }
