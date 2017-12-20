@@ -36,15 +36,15 @@ if (process.env.SENDGRID_USERNAME) {
       pass: process.env.SENDGRID_PASSWORD
     }
   });
-} else if( process.env.SMTP_USERNAME ) {
+} else if (process.env.SMTP_SERVER) {
   var smtpConfig = {
     host: process.env.SMTP_SERVER,
     port: process.env.SMTP_PORT,
     secure: false, // upgrade later with STARTTLS
-    auth: {
+    auth: process.env.SMTP_USERNAME ? {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD
-    }
+    } : null
   };
 
   transport = nodemailer.createTransport(smtpTransport(smtpConfig));
@@ -59,7 +59,7 @@ if (process.env.SENDGRID_USERNAME) {
       console.log('Server is ready to take our messages');
     }
   });
-}  
+}
 
 var translateSubject = function (subjectHash) {
   var subject = i18n.t(subjectHash.translateToken);
