@@ -44,7 +44,10 @@ if (process.env.SENDGRID_USERNAME) {
     auth: process.env.SMTP_USERNAME ? {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD
-    } : null
+    } : null,
+    tls: {
+      rejectUnauthorized: !process.env.SMTP_ACCEPT_INVALID_CERT
+    }
   };
 
   transport = nodemailer.createTransport(smtpTransport(smtpConfig));
