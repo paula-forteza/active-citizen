@@ -162,7 +162,9 @@ var sendOneEmail = function (emailLocals, callback) {
       emailLocals['linkTo'] = linkTo;
 
       if (!emailLocals['community']) {
-        emailLocals['community'] = {hostname: 'www'}
+        emailLocals['community'] = {
+          hostname: process.env.DEFAULT_HOSTNAME ? process.env.DEFAULT_HOSTNAME : 'www'
+        }
       }
 
       if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
