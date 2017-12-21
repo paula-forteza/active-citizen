@@ -175,6 +175,8 @@ var sendOneEmail = function (emailLocals, callback) {
         fromEmail = 'admin@yrpr.e-dem.nl';
       } else if (emailLocals.domain.domain_name.indexOf('idea-synergy.com') > -1) {
         fromEmail = 'hello@idea-synergy.com';
+      } else if (process.env.EMAIL_FROM) {
+        fromEmail = process.env.EMAIL_FROM;
       } else {
         fromEmail = 'Your Priorities <admin@yrpri.org>';
       }
