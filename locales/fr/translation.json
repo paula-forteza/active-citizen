@@ -1,0 +1,53 @@
+{
+  "notification": {
+    "post": {
+      "statusChangeSubject": "Statut de la contribution modifié"
+    },
+    "email": {
+      "newPointedAddedToThisIdea": "Une nouvelle remarque a été ajoutée à cette idée",
+      "newPointedAddedToIdea": "Une nouvelle remarque a été ajoutée à votre idée",
+      "thisNewIdea": "Cette nouvelle idée",
+      "hasBeenPosted": "a été envoyé",
+      "thePointToIdea": "Cette remarque sur l'idée",
+      "yourPointToIdea": "Votre remarque sur l'idée",
+      "hasBeenMarkedUp": "a été marquée comme utile",
+      "hasBeenMarkedDown": "a été marquée comme inutile",
+      "writtenByUser": "Écrit par l'utilisateur nommé",
+      "hasBeenReported": "A été signalé comme violant les conditions générales d'utilisation",
+      "withKindRegards": "Cordialement",
+      "youCanViewItHere": "Vous pouvez le voir ici",
+      "theIdea": "L'idée",
+      "yourIdea": "Votre idée",
+      "hasBeenVotedUp": "a reçu un vote favorable",
+      "hasBeenVotedDown": "a reçu un vote défavorable",
+      "comment": "Commentaire",
+      "newsStory": "Nouvelle histoire",
+      "postReport": "Idée signalée comme violant les conditions générales d'utilisation",
+      "pointReport": "Remarque signalée comme violant les conditions générales d'utilisation",
+      "user_invite": "Invitation à participer",
+      "user_invite_1": "Vous avez été invité à participer à",
+      "user_invite_2": "Pour accepter l'invitation, cliquez sur le lien ou collez-le dans la barre d'adresse du navigateur",
+      "user_invite_3": "Vous avez été invité par",
+      "postEndorsementNew": "Votre idée est soutenue",
+      "postNew": "Nouvelle idée",
+      "postNewsSelf": "Votre nouvelle idée",
+      "postEndorsementSelf": "Soutien à votre idée",
+      "postEndorsement": "Soutien à une idée",
+      "postOppositionSelf": "Opposition à votre idée",
+      "postOpposition": "Opposition à une idée",
+      "pointNewSelf": "Nouvelle remarque sur votre idée",
+      "pointNew": "Nouvelle remarque",
+      "pointUnhelpfulSelf": "Remarque sur mon idée marquée comme inutile",
+      "pointUnhelpful": "Remarque marquée comme inutile",
+      "pointHelpfulSelf": "Remarque sur mon idée marquée comme inutile",
+      "pointHelpful": "Remarque marquée comme utile",
+      "newPointOnMyPoint": "Nouvelle remarque",
+      "password_recovery": "Créer un nouveau mot de passe",
+      "password_changed": "Votre mot de passe a été modifié",
+      "dear": "Salut",
+      "reset_password_1": "Voici le lien pour changer votre mot de passe.",
+      "reset_password_2": "Si vous ne l'avez pas demandé, veuillez ignorer ce courriel.",
+      "reset_password_3": "Votre mot de passe ne sera pas modifié tant que vous n'aurez pas accédé au lien ci-dessous et créé un nouveau mot de passe."
+    }
+  }
+}
