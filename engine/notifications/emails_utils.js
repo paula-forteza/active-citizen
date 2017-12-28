@@ -36,14 +36,17 @@ if (process.env.SENDGRID_USERNAME) {
       pass: process.env.SENDGRID_PASSWORD
     }
   });
-} else if( process.env.SMTP_USERNAME ) {
+} else if (process.env.SMTP_SERVER) {
   var smtpConfig = {
     host: process.env.SMTP_SERVER,
     port: process.env.SMTP_PORT,
     secure: false, // upgrade later with STARTTLS
-    auth: {
+    auth: process.env.SMTP_USERNAME ? {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD
+    } : null,
+    tls: {
+      rejectUnauthorized: !process.env.SMTP_ACCEPT_INVALID_CERT
     }
   };
 
@@ -59,7 +62,7 @@ if (process.env.SENDGRID_USERNAME) {
       console.log('Server is ready to take our messages');
     }
   });
-}  
+}
 
 var translateSubject = function (subjectHash) {
   var subject = i18n.t(subjectHash.translateToken);
@@ -159,7 +162,9 @@ var sendOneEmail = function (emailLocals, callback) {
       emailLocals['linkTo'] = linkTo;
 
       if (!emailLocals['community']) {
-        emailLocals['community'] = {hostname: 'www'}
+        emailLocals['community'] = {
+          hostname: process.env.DEFAULT_HOSTNAME ? process.env.DEFAULT_HOSTNAME : 'www'
+        }
       }
 
       if (emailLocals.domain.domain_name.indexOf('betrireykjavik.is') > -1) {
@@ -172,6 +177,8 @@ var sendOneEmail = function (emailLocals, callback) {
         fromEmail = 'admin@yrpr.e-dem.nl';
       } else if (emailLocals.domain.domain_name.indexOf('idea-synergy.com') > -1) {
         fromEmail = 'hello@idea-synergy.com';
+      } else if (process.env.EMAIL_FROM) {
+        fromEmail = process.env.EMAIL_FROM;
       } else {
         fromEmail = 'Your Priorities <admin@yrpri.org>';
       }
