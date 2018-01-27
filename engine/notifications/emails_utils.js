@@ -154,6 +154,15 @@ var sendOneEmail = function (emailLocals, callback) {
     },
 
     function (seriesCallback) {
+      if (emailLocals.user && emailLocals.user.email) {
+        seriesCallback();
+      } else {
+        log.error("EmailWorker Can't find email for users", {emailLocals: emailLocals});
+        seriesCallback("Can't find user email");
+      }
+    },
+
+    function (seriesCallback) {
       log.info("EmailWorker Started Setup", {});
 
       template = new EmailTemplate(path.join(templatesDir, emailLocals.template));
