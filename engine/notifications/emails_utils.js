@@ -185,7 +185,7 @@ var sendOneEmail = function (emailLocals, callback) {
       } else if (emailLocals.domain.domain_name.indexOf('e-dem.nl') > -1) {
         fromEmail = 'admin@yrpr.e-dem.nl';
       } else if (emailLocals.domain.domain_name.indexOf('idea-synergy.com') > -1) {
-        fromEmail = 'customerservice@idea-synergy.com';
+        fromEmail = 'ideasynergy@idea-synergy.com';
       } else if (process.env.EMAIL_FROM) {
         fromEmail = process.env.EMAIL_FROM;
       } else {
