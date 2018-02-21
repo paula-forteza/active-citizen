@@ -172,7 +172,7 @@ var sendOneEmail = function (emailLocals, callback) {
 
       if (!emailLocals['community']) {
         emailLocals['community'] = {
-          hostname: process.env.DEFAULT_HOSTNAME ? process.env.DEFAULT_HOSTNAME : 'www'
+          hostname: process.env.DEFAULT_HOSTNAME ? process.env.DEFAULT_HOSTNAME : 'app'
         }
       }
 
