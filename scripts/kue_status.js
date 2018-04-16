@@ -19,10 +19,16 @@ var queue = kue.createQueue({
   "socket_keepalive" : true
 });
 
+queue.watchStuckJobs(1000);
+
 queue.activeCount(console.log);
 queue.inactiveCount(console.log);
 queue.failedCount(console.log);
 queue.delayedCount(console.log);
 queue.completeCount(console.log);
+
+setTimeout(function () {
+  process.exit();
+}, 5000);
 
 module.exports = queue;
