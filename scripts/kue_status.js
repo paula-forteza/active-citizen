@@ -21,10 +21,15 @@ var queue = kue.createQueue({
 
 queue.watchStuckJobs(1000);
 
+console.log("active");
 queue.activeCount(console.log);
+console.log("inactiveCount");
 queue.inactiveCount(console.log);
+console.log("failedCount");
 queue.failedCount(console.log);
+console.log("delayedCount");
 queue.delayedCount(console.log);
+console.log("completeCount");
 queue.completeCount(console.log);
 
 setTimeout(function () {
