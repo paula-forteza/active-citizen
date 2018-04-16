@@ -21,6 +21,8 @@ var queue = kue.createQueue({
   "socket_keepalive" : true
 });
 
+queue.watchStuckJobs(6000);
+
 queue.on('job enqueue', function(id, type){
   log.info('Job Enqueue', { id: id, type: type });
 }).on('job complete', function(id, result){
@@ -35,8 +37,6 @@ queue.on('job enqueue', function(id, type){
     });
   }
 });
-
-queue.watchStuckJobs(1000);
 
 if (process.env.NODE_ENV === 'development' || process.env.FORCE_KUE_UI) {
   kue.app.listen(3000).on('error', function (error) {
