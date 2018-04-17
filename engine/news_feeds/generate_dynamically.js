@@ -117,12 +117,7 @@ var filterRecommendations = function (allActivities, options, callback) {
           if (airbrakeErr) {
             log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
           }
-          callback(error);
-          return;
         });
-      } else {
-        callback(error);
-        return;
       }
     }
 
