@@ -10,7 +10,6 @@ if(process.env.AIRBRAKE_PROJECT_ID) {
   airbrake = require('airbrake').createClient(process.env.AIRBRAKE_PROJECT_ID, process.env.AIRBRAKE_API_KEY);
 }
 
-
 var ACTIVE_CITIZEN_PIO_APP_ID = 1;
 
 if (process.env.PIOEngineUrl) {
@@ -273,8 +272,7 @@ var getRecommendationFor = function (userId, dateRange, options, callback, userL
       });
     }
   }
-
-
+  
   log.info('Events Manager getRecommendationFor', { fields: fields, dateRange: dateRange });
 
   if (engine) {
