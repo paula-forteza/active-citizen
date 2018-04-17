@@ -167,6 +167,8 @@ ActivityWorker.prototype.process = function (activityJson, callback) {
           }
           callback(error);
         });
+      } else {
+        callback(error);
       }
     } else {
       log.info('Processing Activity and Recommendation Completed', {type: activity.type});

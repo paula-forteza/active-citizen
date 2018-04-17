@@ -320,6 +320,8 @@ NotificationDeliveryWorker.prototype.process = function (notificationJson, callb
             }
             callback(error);
           });
+        } else {
+          callback(error);
         }
       } else {
         callback();

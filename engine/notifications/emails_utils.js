@@ -273,6 +273,8 @@ var sendOneEmail = function (emailLocals, callback) {
           }
           callback(error);
         });
+      } else {
+        callback(error);
       }
     } else {
       callback();

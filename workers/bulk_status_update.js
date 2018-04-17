@@ -442,6 +442,8 @@ BulkStatusUpdateWorker.prototype.process = function (bulkStatusUpdateInfo, callb
           }
           callback(error);
         });
+      } else {
+        callback(error);
       }
     } else {
       log.info('Processing BulkStatusUpdateWorker Started', { type: notification.type, user: user ? user.simple() : null });

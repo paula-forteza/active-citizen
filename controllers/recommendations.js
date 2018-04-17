@@ -120,7 +120,10 @@ var processRecommendations = function (levelType, req, res, recommendedItemIds, 
         if (airbrakeErr) {
           log.error("AirBrake Error", { context: 'airbrake', err: airbrakeErr, errorStatus: 500 });
         }
+        res.sendStatus(500);
       });
+    } else {
+      res.sendStatus(500);
     }
     res.sendStatus(200);
   });
